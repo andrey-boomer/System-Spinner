@@ -3,11 +3,12 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		7F35E5912B847CEB0032163E /* ActivityKit in Frameworks */ = {isa = PBXBuildFile; productRef = 7F35E5902B847CEB0032163E /* ActivityKit */; };
+		7F3ECBA72B8486100024DCF9 /* ActivityKit in Frameworks */ = {isa = PBXBuildFile; productRef = 7F3ECBA62B8486100024DCF9 /* ActivityKit */; };
 		7FB908C42B67B9FD00E9EE24 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7FB908BC2B67B9FC00E9EE24 /* Main.storyboard */; };
 		7FB908C62B67B9FD00E9EE24 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB908BE2B67B9FD00E9EE24 /* AppDelegate.swift */; };
 		7FB908C92B67B9FD00E9EE24 /* UsageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB908C12B67B9FD00E9EE24 /* UsageViewController.swift */; };
@@ -32,6 +33,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7F3ECBA72B8486100024DCF9 /* ActivityKit in Frameworks */,
 				7F35E5912B847CEB0032163E /* ActivityKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -88,6 +90,7 @@
 			name = "System Spinner";
 			packageProductDependencies = (
 				7F35E5902B847CEB0032163E /* ActivityKit */,
+				7F3ECBA62B8486100024DCF9 /* ActivityKit */,
 			);
 			productName = "System Spinner";
 			productReference = 7FB908A72B67B9A400E9EE24 /* System Spinner.app */;
@@ -119,7 +122,7 @@
 			);
 			mainGroup = 7FB9089E2B67B9A400E9EE24;
 			packageReferences = (
-				7F35E58F2B847CEB0032163E /* XCLocalSwiftPackageReference "ActivityKit" */,
+				7F3ECBA52B8486100024DCF9 /* XCRemoteSwiftPackageReference "ActivityKit" */,
 			);
 			productRefGroup = 7FB908A82B67B9A400E9EE24 /* Products */;
 			projectDirPath = "";
@@ -362,16 +365,25 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCLocalSwiftPackageReference section */
-		7F35E58F2B847CEB0032163E /* XCLocalSwiftPackageReference "ActivityKit" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ActivityKit;
+/* Begin XCRemoteSwiftPackageReference section */
+		7F3ECBA52B8486100024DCF9 /* XCRemoteSwiftPackageReference "ActivityKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Kyome22/ActivityKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.2.0;
+			};
 		};
-/* End XCLocalSwiftPackageReference section */
+/* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		7F35E5902B847CEB0032163E /* ActivityKit */ = {
 			isa = XCSwiftPackageProductDependency;
+			productName = ActivityKit;
+		};
+		7F3ECBA62B8486100024DCF9 /* ActivityKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7F3ECBA52B8486100024DCF9 /* XCRemoteSwiftPackageReference "ActivityKit" */;
 			productName = ActivityKit;
 		};
 /* End XCSwiftPackageProductDependency section */
