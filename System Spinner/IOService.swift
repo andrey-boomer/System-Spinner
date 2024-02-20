@@ -31,7 +31,7 @@ class IOServiceData {
             "POWER": ["PSTR", "PDTR", "PPBR"]
         ],
         "M1": [
-            "CPU": ["TC0P", "Tp09", "Tp0T", "Tp01", "Tp05", "Tp0D", "Tp0H", "Tp0L", "Tp0P", "Tp0X", "Tp0b"],
+            "CPU": ["TC0P", "Tp09", "Tp0T", "Tp01", "Tp05", "Tp0D", "Tp0H", "Tp0L", "Tp0P", "Tp0X", "Tp0b", "Tg0H"],
             "GPU": ["Tg05", "Tg0D", "Tg0L" ,"Tg0T"],
             ],
         "M2": [
@@ -130,7 +130,7 @@ class IOServiceData {
         } else if String(cString: nameChars).contains("M2") {
             return "M2"
         }  else {
-            return "M3"
+            return "M1"
         }
     }
 
@@ -150,12 +150,6 @@ class IOServiceData {
         fanSpeedKeys = (SensorsList["DEFAULT"]?["FAN SPEED"])!
         systemPowerKeys = (SensorsList["DEFAULT"]?["POWER"])!
         
-        if Double(try! read("FNum")) == 0.0 {
-            // if macbook air is not present fan :)
-            fanSpeedKeys = []
-            isFanPresent = false
-        }
-        
         // let load apple sillicon models castom values
         for cpuModel in SensorsList {
             if cpuModel.key ==  getCpuModel() {
@@ -173,6 +167,12 @@ class IOServiceData {
                     }
                }
             }
+        }
+        
+        if Double(try! read("FNum")) == 0.0 {
+            // if macbook air is not present fan :)
+            fanSpeedKeys = []
+            isFanPresent = false
         }
         
         self.update()
