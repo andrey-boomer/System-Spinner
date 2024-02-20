@@ -1,9 +1,6 @@
 //
 //  AppDelegate.swift
 //  System Spinner
-//
-//  Created by Андрей Лысиков on 22.01.2024.
-//
 
 import Cocoa
 import Foundation

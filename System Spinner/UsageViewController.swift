@@ -1,9 +1,6 @@
 //
 //  UsageViewController.swift
 //  System Spinner
-//
-//  Created by Андрей Лысиков on 23.01.2024.
-//
 
 import Cocoa
 
