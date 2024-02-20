@@ -2,11 +2,16 @@
 
 System Spinner provides macOS system information in status bar.
 
-- CPU usage
-- Memory performance
+## Features
+
+- Show CPU usage
+- Memory statistics performance
 - Network connection
 - CMS Information for Cpu Temp and Fan
 
-Written in Swift 5.
-Based on https://github.com/Kyome22/menubar_runcat
-Dependence is https://github.com/Kyome22/ActivityKit
+## Tech
+
+Written in Swift 5. Build only for Apple Silicon
+
+Based on [menubar_runcat](https://github.com/Kyome22/menubar_runcat)
+Dependence on [ActivityKit](https://github.com/Kyome22/ActivityKit) package
