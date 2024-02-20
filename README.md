@@ -11,7 +11,8 @@ System Spinner provides macOS system information in status bar.
 
 ## Tech
 
-Written in Swift 5. Build only for Apple Silicon
+Written in Swift 5. Build only for Apple Silicon.
+- Based on [menubar_runcat](https://github.com/Kyome22/menubar_runcat)
+- Dependence on [ActivityKit](https://github.com/Kyome22/ActivityKit)
 
-Based on [menubar_runcat](https://github.com/Kyome22/menubar_runcat)
-Dependence on [ActivityKit](https://github.com/Kyome22/ActivityKit) package
+You can download app from [releases](https://github.com/andrey-boomer/System-Spinner/releases)
