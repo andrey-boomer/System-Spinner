@@ -114,10 +114,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func changeUpdateSpeedClick(sender: NSMenuItem) {
         stopRunning()
         
-        for updateItem in statusItemMenu.items {
-            print(updateItem)
-            if updateItem.title == String(updateInterval) + " s" {
-                updateItem.state = .off
+        for menuItem in statusItem.menu!.items { // set all submenu state off
+            if menuItem.hasSubmenu && menuItem.title == sender.parent?.title {
+                for subMenuItem in menuItem.submenu!.items {
+                    subMenuItem.state = .off
+                }
             }
         }
         
