@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "activitykit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Kyome22/ActivityKit",
+      "state" : {
+        "revision" : "322347ae723364fd14dde6f7152f809d7c2871bc",
+        "version" : "2.2.0"
+      }
+    }
+  ],
+  "version" : 2
+}
