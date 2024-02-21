@@ -19,6 +19,8 @@
 /* Begin PBXFileReference section */
 		7F35E5922B847EBC0032163E /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		7F35E5932B847F230032163E /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		7F383C842B86804D0058721D /* preview.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = preview.jpg; sourceTree = "<group>"; };
+		7F383C852B8681DC0058721D /* preview_menu.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = preview_menu.jpg; sourceTree = "<group>"; };
 		7FB908A72B67B9A400E9EE24 /* System Spinner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "System Spinner.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7FB908B32B67B9A500E9EE24 /* System_Spinner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = System_Spinner.entitlements; sourceTree = "<group>"; };
 		7FB908BC2B67B9FC00E9EE24 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
@@ -44,6 +46,8 @@
 		7FB9089E2B67B9A400E9EE24 = {
 			isa = PBXGroup;
 			children = (
+				7F383C842B86804D0058721D /* preview.jpg */,
+				7F383C852B8681DC0058721D /* preview_menu.jpg */,
 				7F35E5922B847EBC0032163E /* LICENSE */,
 				7F35E5932B847F230032163E /* README.md */,
 				7FB908A92B67B9A400E9EE24 /* System Spinner */,
