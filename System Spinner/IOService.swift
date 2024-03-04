@@ -53,7 +53,7 @@ class IOServiceData {
     public var fan2Speed: Int = 0
     public var systemPower: Int = 0
     
-    struct AppleSMCVers { // 6 bytes
+    private struct AppleSMCVers { // 6 bytes
         var major: UInt8 = 0
         var minor: UInt8 = 0
         var build: UInt8 = 0
@@ -61,7 +61,7 @@ class IOServiceData {
         var release: UInt16 = 0
     }
 
-    struct AppleSMCLimit { // 16 bytes
+    private struct AppleSMCLimit { // 16 bytes
         var version: UInt16 = 0
         var length: UInt16 = 0
         var cpu: UInt32 = 0
@@ -69,7 +69,7 @@ class IOServiceData {
         var mem: UInt32 = 0
     }
 
-    struct AppleSMCInfo { // 9+3=12 bytes
+    private struct AppleSMCInfo { // 9+3=12 bytes
         var size: UInt32 = 0
         var type = AppleSMC4Chars()
         var attribute: UInt8 = 0
@@ -78,7 +78,7 @@ class IOServiceData {
         var unused3: UInt8 = 0
     }
 
-    struct AppleSMCBytes { // 32 bytes
+    private struct AppleSMCBytes { // 32 bytes
         var bytes: (UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8,
                     UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8,
                     UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8,
@@ -90,7 +90,7 @@ class IOServiceData {
         case string(String)
     }
 
-    struct AppleSMC4Chars {  // 4 bytes
+    private struct AppleSMC4Chars {  // 4 bytes
         var chars: (UInt8, UInt8, UInt8, UInt8) = (0,0,0,0)
         init() {
         }
@@ -107,7 +107,7 @@ class IOServiceData {
         }
     }
 
-    struct AppleSMCKey {
+    private struct AppleSMCKey {
         var key = AppleSMC4Chars()
         var vers = AppleSMCVers()
         var limit = AppleSMCLimit()
@@ -169,7 +169,7 @@ class IOServiceData {
             }
         }
         
-        if Double(try! read("FNum")) == 0.0 {
+        if read("FNum") == 0 {
             // if macbook air is not present fan :)
             fanSpeedKeys = []
             isFanPresent = false
@@ -203,30 +203,30 @@ class IOServiceData {
         input.bytes = output.bytes
     }
     
-    public func read(_ key: String) throws -> Float {
+    private func read(_ key: String) -> Int {
         var input = AppleSMCKey()
-        input.key = try AppleSMC4Chars(key)
+        input.key = try! AppleSMC4Chars(key)
         input.info.size = 4
-        input.info.type = try AppleSMC4Chars("flt ")
-        try readKey(&input)
+        input.info.type = try! AppleSMC4Chars("flt ")
+        try! readKey(&input)
         var ret: Float = 0.0
         memmove(&ret, &input.bytes, 4)
         if debug { print( now, "read \(key): \(ret)") }
-        return ret
+        return Int(ret)
     }
     
     public func update () {
         // get SMC data
-        cpuTemp = try! cpuTempKeys.reduce(0,{ result, sensor in max(result, Int(try self.read(sensor)))})
-        gpuTemp = try! gpuTempKeys.reduce(0,{ result, sensor in max(result, Int(try self.read(sensor)))})
+        cpuTemp = cpuTempKeys.reduce(0,{ result, sensor in max(result, self.read(sensor))})
+        gpuTemp = gpuTempKeys.reduce(0,{ result, sensor in max(result, self.read(sensor))})
 
         if fanSpeedKeys.count > 0 {
-            fanTemp = try! fanTempKeys.reduce(0,{ result, sensor in max(result, Int(try self.read(sensor)))})
-            fanSpeed = try! fanSpeedKeys.reduce(0,{ result, sensor in max(result, Int(try self.read(sensor)))})
-            fan1Speed = Int(try! self.read(fanSpeedKeys[0]))
-            fan2Speed = Int(try! self.read(fanSpeedKeys[1]))
+            fanTemp = fanTempKeys.reduce(0,{ result, sensor in max(result, self.read(sensor))})
+            fanSpeed = fanSpeedKeys.reduce(0,{ result, sensor in max(result, self.read(sensor))})
+            fan1Speed = self.read(fanSpeedKeys[0])
+            fan2Speed = self.read(fanSpeedKeys[1])
         }
         
-        systemPower = try! systemPowerKeys.reduce(0,{ result, sensor in max(result, Int(try self.read(sensor)))})
+        systemPower = systemPowerKeys.reduce(0,{ result, sensor in max(result, self.read(sensor))})
     }
 }
