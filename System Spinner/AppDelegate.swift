@@ -67,7 +67,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         RunLoop.main.add(spinnerTimer!, forMode: .common)
     }
     
-    func changeSpinner(setName: String) {
+    private func changeSpinner(setName: String) {
         stopRunning()
         spinnerActive = setName
         
@@ -83,16 +83,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         startRunning()
     }
     
-    @objc func stopRunningNotify(_ notification: NSNotification) {
+    @objc private func stopRunningNotify(_ notification: NSNotification) {
         closePopoverMenu(sender: self)
         stopRunning()
     }
     
-    @objc func startRunningNotify(_ notification: NSNotification) {
+    @objc private func startRunningNotify(_ notification: NSNotification) {
         startRunning()
     }
     
-    @objc func togglePopover(sender: NSStatusItem) {
+    @objc private func togglePopover(sender: NSStatusItem) {
         let event = NSApp.currentEvent!
         if event.type == NSEvent.EventType.leftMouseUp {
             if popover.isShown {
@@ -107,11 +107,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
-    @objc func changeSpinnerClick(sender: NSMenuItem) {
+    @objc private func changeSpinnerClick(sender: NSMenuItem) {
         changeSpinner(setName: sender.title)
     }
     
-    @objc func changeUpdateSpeedClick(sender: NSMenuItem) {
+    @objc private func changeUpdateSpeedClick(sender: NSMenuItem) {
         stopRunning()
         
         for menuItem in statusItem.menu!.items { // set all submenu state off
@@ -127,7 +127,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         startRunning()
     }
     
-    func changeRemap() {
+    private func changeRemap() {
         let task = Process()
         task.launchPath = "/usr/bin/env"
         
@@ -142,7 +142,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         task.waitUntilExit()
     }
     
-    @objc func openAnalystApp(sender: NSMenuItem) {
+    @objc private func openAnalystApp(sender: NSMenuItem) {
         let url = NSURL(fileURLWithPath: "/System/Applications/Utilities/Activity Monitor.app", isDirectory: true) as URL
         
         let configuration = NSWorkspace.OpenConfiguration()
@@ -152,7 +152,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                                            completionHandler: nil)
     }
 
-    @objc func changeRemapClick(sender: NSMenuItem) {
+    @objc private func changeRemapClick(sender: NSMenuItem) {
         if keyRemap {
             sender.state = .off
             keyRemap = false
@@ -163,7 +163,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         changeRemap()
     }
     
-   @objc func changeStatusMenuClick(sender: NSMenuItem) {
+   @objc private func changeStatusMenuClick(sender: NSMenuItem) {
         if enableStatusText {
             sender.state = .off
             enableStatusText = false
@@ -173,13 +173,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
-    func showPopover(sender: Any?) {
+    private func showPopover(sender: Any?) {
       if let button = statusItem.button {
         popover.show(relativeTo: button.bounds, of: button, preferredEdge: NSRectEdge.minY)
       }
     }
 
-    func closePopoverMenu(sender: Any?) {
+    private func closePopoverMenu(sender: Any?) {
         statusItem.menu = nil
         if popover.isShown {
             popover.performClose(sender)
