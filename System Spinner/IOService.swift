@@ -45,13 +45,13 @@ class IOServiceData {
     ]
     
     // data for translate
-    public var cpuTemp: Int = 0
-    public var gpuTemp: Int = 0
-    public var fanTemp: Int = 0
-    public var fanSpeed: Int = 0
-    public var fan1Speed: Int = 0
-    public var fan2Speed: Int = 0
-    public var systemPower: Int = 0
+    public var cpuTemp: Float = 0
+    public var gpuTemp: Float = 0
+    public var fanTemp: Float = 0
+    public var fanSpeed: Float = 0
+    public var fan1Speed: Float = 0
+    public var fan2Speed: Float = 0
+    public var systemPower: Float = 0
     
     private struct AppleSMCVers { // 6 bytes
         var major: UInt8 = 0
@@ -144,35 +144,29 @@ class IOServiceData {
         IOObjectRelease(service)
         
         // let set default values
-        cpuTempKeys = (SensorsList["DEFAULT"]?["CPU"])!
-        gpuTempKeys = (SensorsList["DEFAULT"]?["GPU"])!
-        fanTempKeys = (SensorsList["DEFAULT"]?["FAN"])!
-        fanSpeedKeys = (SensorsList["DEFAULT"]?["FAN SPEED"])!
-        systemPowerKeys = (SensorsList["DEFAULT"]?["POWER"])!
+        cpuTempKeys = checkNulValues(sourceArray: (SensorsList["DEFAULT"]?["CPU"])!)
+        gpuTempKeys = checkNulValues(sourceArray: (SensorsList["DEFAULT"]?["GPU"])!)
+        fanTempKeys = checkNulValues(sourceArray: (SensorsList["DEFAULT"]?["FAN"])!)
+        fanSpeedKeys = checkNulValues(sourceArray: (SensorsList["DEFAULT"]?["FAN SPEED"])!)
+        systemPowerKeys = checkNulValues(sourceArray: (SensorsList["DEFAULT"]?["POWER"])!)
         
-        // let load apple sillicon models castom values
+        // let load apple sillicon models custom values
         for cpuModel in SensorsList {
             if cpuModel.key ==  getCpuModel() {
                 for sensors in cpuModel.value {
                     if sensors.key == "CPU" {
-                        cpuTempKeys = sensors.value
+                        cpuTempKeys = checkNulValues(sourceArray: sensors.value)
                     } else if sensors.key == "GPU" {
-                        gpuTempKeys = sensors.value
+                        gpuTempKeys = checkNulValues(sourceArray: sensors.value)
                     } else if sensors.key == "FAN" {
-                        fanTempKeys = sensors.value
+                        fanTempKeys = checkNulValues(sourceArray: sensors.value)
                     } else if sensors.key == "FAN SPEED" {
-                        fanSpeedKeys = sensors.value
+                        fanSpeedKeys = checkNulValues(sourceArray: sensors.value)
                     } else if sensors.key == "POWER" {
-                        systemPowerKeys = sensors.value
+                        systemPowerKeys = checkNulValues(sourceArray: sensors.value)
                     }
                }
             }
-        }
-        
-        if read("FNum") == 0 {
-            // if macbook air is not present fan :)
-            fanSpeedKeys = []
-            isFanPresent = false
         }
         
         self.update()
@@ -180,6 +174,18 @@ class IOServiceData {
     
     deinit {
         IOServiceClose(con)
+    }
+    
+    private func checkNulValues(sourceArray: [String]) -> [String] {
+        var resultArray = sourceArray
+        
+        // clear nullable values
+        for value in sourceArray {
+            if read(value) == 0.0 {
+                resultArray.remove(at: resultArray.firstIndex(of: value)!)
+            }
+        }
+        return resultArray
     }
     
     private func callStructMethod(_ input: inout AppleSMCKey, _ output: inout AppleSMCKey) throws {
@@ -203,7 +209,7 @@ class IOServiceData {
         input.bytes = output.bytes
     }
     
-    private func read(_ key: String) -> Int {
+    private func read(_ key: String) -> Float {
         var input = AppleSMCKey()
         input.key = try! AppleSMC4Chars(key)
         input.info.size = 4
@@ -212,7 +218,7 @@ class IOServiceData {
         var ret: Float = 0.0
         memmove(&ret, &input.bytes, 4)
         if debug { print( now, "read \(key): \(ret)") }
-        return Int(ret)
+        return ceil(ret * 10) / 10.0
     }
     
     public func update () {
