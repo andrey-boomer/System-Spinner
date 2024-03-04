@@ -5,7 +5,6 @@
 import Foundation
 
 class IOServiceData {
-    public var isFanPresent: Bool = true
     private var con: io_connect_t = 0
     private var debug = false
     private var cpuTempKeys: [String] = []

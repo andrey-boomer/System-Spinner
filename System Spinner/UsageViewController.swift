@@ -65,11 +65,7 @@ class UsageViewController: NSViewController {
         powerComp.stringValue = "System power " + String(ioService.systemPower) + " watt"
         
         // Fan data
-        if ioService.isFanPresent {
-            fanLabel.stringValue =  "fan " + String(ioService.fan1Speed) + " | " + String(ioService.fan2Speed) + " rpm"
-        } else {
-            fanLabel.stringValue =  "no fan found"
-        }
+        fanLabel.stringValue =  "fan " + String(ioService.fan1Speed) + " | " + String(ioService.fan2Speed) + " rpm"
         
         // memory data
         memPercentage.stringValue = "Memory Usage " + String(appDelegate.ActivityData.memoryPerformance.percentage) + "%"
