@@ -8,12 +8,22 @@ System Spinner provides macOS system information in status bar. Minimal, small a
 - Memory statistics performance
 - Network connection
 - CMS Information for Cpu Temp and Fan
-
+- 
+## Screenshots
 ![spinner](spinner.jpg)
+
+<details>
+  
 ![menu](main_menu.jpg)
+
+
 ![main_window](main_window.jpg)
+
+
 ![spin_menu](spin_menu.jpg)
 
+</details>
+  
 ## Tech
 
 Written in Swift 5. Universal build.
