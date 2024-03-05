@@ -1,6 +1,9 @@
 //
 //  UsageViewController.swift
 //  System Spinner
+//
+//  Copyright 2024 Andrey Lysikov
+//  SPDX-License-Identifier: Apache-2.0
 
 import Foundation
 
@@ -16,9 +19,6 @@ class IOServiceData {
     private let KERNEL_INDEX_SMC: UInt32 = 2
     private let SMC_CMD_READ_BYTES: UInt8 = 5
     private let SMC_CMD_READ_KEYINFO: UInt8 = 9
-    private var now: String {
-        dateFormatter.string(from: Date())
-     }
     
     private let SensorsList: [String: [String:[String]]]  = [
         // imported from https://github.com/exelban/stats/blob/df1a0a8bacb9a9a6c23afa3c5faaabae2fc15890/Modules/Sensors/values.swift
@@ -88,7 +88,7 @@ class IOServiceData {
         case iokit(kern_return_t)
         case string(String)
     }
-
+    
     private struct AppleSMC4Chars {  // 4 bytes
         var chars: (UInt8, UInt8, UInt8, UInt8) = (0,0,0,0)
         init() {
@@ -146,7 +146,7 @@ class IOServiceData {
         cpuTempKeys = checkNulValues(sourceArray: (SensorsList["DEFAULT"]?["CPU"])!)
         gpuTempKeys = checkNulValues(sourceArray: (SensorsList["DEFAULT"]?["GPU"])!)
         fanTempKeys = checkNulValues(sourceArray: (SensorsList["DEFAULT"]?["FAN"])!)
-        fanSpeedKeys = checkNulValues(sourceArray: (SensorsList["DEFAULT"]?["FAN SPEED"])!)
+        fanSpeedKeys = sourceArray: (SensorsList["DEFAULT"]?["FAN SPEED"])!
         systemPowerKeys = checkNulValues(sourceArray: (SensorsList["DEFAULT"]?["POWER"])!)
         
         // let load apple sillicon models custom values
@@ -160,7 +160,7 @@ class IOServiceData {
                     } else if sensors.key == "FAN" {
                         fanTempKeys = checkNulValues(sourceArray: sensors.value)
                     } else if sensors.key == "FAN SPEED" {
-                        fanSpeedKeys = checkNulValues(sourceArray: sensors.value)
+                        fanSpeedKeys = sourceArray: sensors.value
                     } else if sensors.key == "POWER" {
                         systemPowerKeys = checkNulValues(sourceArray: sensors.value)
                     }
@@ -216,7 +216,7 @@ class IOServiceData {
         try! readKey(&input)
         var ret: Float = 0.0
         memmove(&ret, &input.bytes, 4)
-        if debug { print( now, "read \(key): \(ret)") }
+        if debug { print( dateFormatter.string(from: Date()), "read \(key): \(ret)") }
         return ceil(ret * 10) / 10.0
     }
     
