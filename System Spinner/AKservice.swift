@@ -17,7 +17,6 @@ class AKservice {
     private let hostVmInfo64Count = UInt32(exactly: MemoryLayout<vm_statistics64_data_t>.size / MemoryLayout<integer_t>.size)!
     private let hostBasicInfoCount = UInt32(exactly: MemoryLayout<host_basic_info_data_t>.size / MemoryLayout<integer_t>.size)!
     private var loadPrevious = host_cpu_load_info()
-    private var previousIp: String = "xx.x.x.xx"
     private var previousUpload: Int64 = 0
     private var previousDownload: Int64 = 0
 
@@ -32,7 +31,7 @@ class AKservice {
     public var memApp: Double = 0.0
     public var memWired: Double = 0.0
     public var memCompressed: Double = 0.0
-    public var netIp: String = "xx.x.x.xx"
+    public var netIp: String = "no ip found"
     public var netIn = netPacketData(value: 0.0, unit: "KB/s")
     public var netOut = netPacketData(value: 0.0, unit: "KB/s")
     
@@ -77,7 +76,7 @@ class AKservice {
         return Double(data.max_mem) / 1073741824
     }
     
-    private var getDefaultNetworkDevice: String? {
+    private func getDefaultNetworkDevice() -> String {
         let processName = ProcessInfo.processInfo.processName as CFString
         let dynamicStore = SCDynamicStoreCreate(kCFAllocatorDefault, processName, nil, nil)
         let ipv4Key = SCDynamicStoreKeyCreateNetworkGlobalEntity(kCFAllocatorDefault,
@@ -85,7 +84,9 @@ class AKservice {
                                                                  kSCEntNetIPv4)
         guard let list = SCDynamicStoreCopyValue(dynamicStore, ipv4Key) as? [CFString: Any],
               let interface = list[kSCDynamicStorePropNetPrimaryInterface] as? String
-        else { return nil }
+        else {
+            return ""
+        }
         return interface
     }
     
@@ -165,34 +166,40 @@ class AKservice {
         memCompressed = round(In: compressed)
                               
         // Update NET Data
-        let netId = getDefaultNetworkDevice!
-        var ifaddr: UnsafeMutablePointer<ifaddrs>? = nil
-        getifaddrs(&ifaddr)
-
-        var pointer = ifaddr
-        var upload: Int64 = 0
-        var download: Int64 = 0
-        while pointer != nil {
-            defer { pointer = pointer?.pointee.ifa_next }
-            if let info = getBytesInfo(netId, pointer!) {
-                upload += info.up
-                download += info.down
-            }
-            if let ip = getIPAddress(netId, pointer!) {
-                if previousIp != ip {
-                    previousUpload = 0
-                    previousDownload = 0
+        let netId = getDefaultNetworkDevice()
+        if netId.isEmpty {
+            netIp = "no ip found"
+            netIn = netPacketData(value: 0.0, unit: "KB/s")
+            netOut = netPacketData(value: 0.0, unit: "KB/s")
+        } else {
+            var ifaddr: UnsafeMutablePointer<ifaddrs>? = nil
+            getifaddrs(&ifaddr)
+            
+            var pointer = ifaddr
+            var upload: Int64 = 0
+            var download: Int64 = 0
+            while pointer != nil {
+                defer { pointer = pointer?.pointee.ifa_next }
+                if let info = getBytesInfo(netId, pointer!) {
+                    upload += info.up
+                    download += info.down
                 }
-                previousIp = ip
+                if let ip = getIPAddress(netId, pointer!) {
+                    if netIp != ip {
+                        previousUpload = 0
+                        previousDownload = 0
+                    }
+                    netIp = ip
+                }
             }
+            freeifaddrs(ifaddr)
+            if previousUpload != 0 && previousDownload != 0 {
+                netIn = convert(byte: Double(upload - previousUpload) / Interval)
+                netOut = convert(byte: Double(download - previousDownload) / Interval)
+            }
+            previousUpload = upload
+            previousDownload = download
         }
-        freeifaddrs(ifaddr)
-        if previousUpload != 0 && previousDownload != 0 {
-            netIn = convert(byte: Double(upload - previousUpload) / Interval)
-            netOut = convert(byte: Double(download - previousDownload) / Interval)
-        }
-        previousUpload = upload
-        previousDownload = download
     }
     
 }
