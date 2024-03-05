@@ -7,8 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		7F35E5912B847CEB0032163E /* ActivityKit in Frameworks */ = {isa = PBXBuildFile; productRef = 7F35E5902B847CEB0032163E /* ActivityKit */; };
-		7F3ECBA72B8486100024DCF9 /* ActivityKit in Frameworks */ = {isa = PBXBuildFile; productRef = 7F3ECBA62B8486100024DCF9 /* ActivityKit */; };
+		7F8124E92B96DC8600B05107 /* AKservice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8124E82B96DC8600B05107 /* AKservice.swift */; };
 		7FB908C42B67B9FD00E9EE24 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7FB908BC2B67B9FC00E9EE24 /* Main.storyboard */; };
 		7FB908C62B67B9FD00E9EE24 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB908BE2B67B9FD00E9EE24 /* AppDelegate.swift */; };
 		7FB908C92B67B9FD00E9EE24 /* UsageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB908C12B67B9FD00E9EE24 /* UsageViewController.swift */; };
@@ -21,6 +20,7 @@
 		7F35E5932B847F230032163E /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		7F383C842B86804D0058721D /* preview.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = preview.jpg; sourceTree = "<group>"; };
 		7F383C852B8681DC0058721D /* preview_menu.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = preview_menu.jpg; sourceTree = "<group>"; };
+		7F8124E82B96DC8600B05107 /* AKservice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AKservice.swift; sourceTree = "<group>"; };
 		7FB908A72B67B9A400E9EE24 /* System Spinner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "System Spinner.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7FB908B32B67B9A500E9EE24 /* System_Spinner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = System_Spinner.entitlements; sourceTree = "<group>"; };
 		7FB908BC2B67B9FC00E9EE24 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
@@ -35,8 +35,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7F3ECBA72B8486100024DCF9 /* ActivityKit in Frameworks */,
-				7F35E5912B847CEB0032163E /* ActivityKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -68,6 +66,7 @@
 			children = (
 				7FB908CA2B67BA7400E9EE24 /* Assets.xcassets */,
 				7FB908BE2B67B9FD00E9EE24 /* AppDelegate.swift */,
+				7F8124E82B96DC8600B05107 /* AKservice.swift */,
 				7FFC0C542B7B6845002F9990 /* IOService.swift */,
 				7FB908BC2B67B9FC00E9EE24 /* Main.storyboard */,
 				7FB908C12B67B9FD00E9EE24 /* UsageViewController.swift */,
@@ -93,8 +92,6 @@
 			);
 			name = "System Spinner";
 			packageProductDependencies = (
-				7F35E5902B847CEB0032163E /* ActivityKit */,
-				7F3ECBA62B8486100024DCF9 /* ActivityKit */,
 			);
 			productName = "System Spinner";
 			productReference = 7FB908A72B67B9A400E9EE24 /* System Spinner.app */;
@@ -126,7 +123,6 @@
 			);
 			mainGroup = 7FB9089E2B67B9A400E9EE24;
 			packageReferences = (
-				7F3ECBA52B8486100024DCF9 /* XCRemoteSwiftPackageReference "ActivityKit" */,
 			);
 			productRefGroup = 7FB908A82B67B9A400E9EE24 /* Products */;
 			projectDirPath = "";
@@ -157,6 +153,7 @@
 				7FFC0C552B7B6845002F9990 /* IOService.swift in Sources */,
 				7FB908C62B67B9FD00E9EE24 /* AppDelegate.swift in Sources */,
 				7FB908C92B67B9FD00E9EE24 /* UsageViewController.swift in Sources */,
+				7F8124E92B96DC8600B05107 /* AKservice.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -305,7 +302,6 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 2.5.2;
-				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "linet.online.System-Spinner";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -338,7 +334,6 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 2.5.2;
-				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "linet.online.System-Spinner";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -368,29 +363,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		7F3ECBA52B8486100024DCF9 /* XCRemoteSwiftPackageReference "ActivityKit" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Kyome22/ActivityKit";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.2.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		7F35E5902B847CEB0032163E /* ActivityKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = ActivityKit;
-		};
-		7F3ECBA62B8486100024DCF9 /* ActivityKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 7F3ECBA52B8486100024DCF9 /* XCRemoteSwiftPackageReference "ActivityKit" */;
-			productName = ActivityKit;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 7FB9089F2B67B9A400E9EE24 /* Project object */;
 }
