@@ -1,10 +1,12 @@
 //
 //  AppDelegate.swift
 //  System Spinner
+//
+//  Copyright 2024 Andrey Lysikov
+//  SPDX-License-Identifier: Apache-2.0
 
 import Cocoa
 import Foundation
-import ActivityKit
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -14,7 +16,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }()
     
     public let popover = NSPopover()
-    public let ActivityData = ActivityObserver()
+    public let ActivityData = AKservice()
     public var updateInterval: Double = 1.0
     private var keyRemap: Bool = false
     private var enableStatusText: Bool = false
@@ -41,7 +43,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     private func updateUsage() {
-        ActivityData.update(interval: updateInterval)
+        ActivityData.update(Interval: updateInterval)
         curFrame =  curFrame + 1
         if curFrame > Int(spinners[spinnerActive]!) - 1 {
             curFrame = 0
@@ -49,12 +51,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem.button?.image = frames[curFrame]
         
         if enableStatusText {
-            statusItem.button?.title =  String(Int(ActivityData.cpuUsage.percentage)) + "% "
+            statusItem.button?.title =  String(Int(ActivityData.cpuPercentage)) + "% "
         } else {
             statusItem.button?.title = ""
         }
         
-        let interval = 0.25 / max(1.0, min(100.0, ActivityData.cpuUsage.percentage / Double(spinners[spinnerActive]!)))
+        let interval = 0.25 / max(1.0, min(100.0, ActivityData.cpuPercentage / Double(spinners[spinnerActive]!)))
         spinnerTimer?.invalidate()
         spinnerTimer = Timer(timeInterval: interval, repeats: true, block: { [weak self] _ in
             self!.curFrame =  self!.curFrame + 1

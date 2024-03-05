@@ -59,10 +59,10 @@ class UsageViewController: NSViewController {
         ioService.update()
         
         // CPU data
-        cpuLabel.stringValue = "CPU Usage " + String(appDelegate.ActivityData.cpuUsage.percentage) + "%"
-        cpuLevel.doubleValue = appDelegate.ActivityData.cpuUsage.percentage / 5
+        cpuLabel.stringValue = "CPU Usage " + String(appDelegate.ActivityData.cpuPercentage) + "%"
+        cpuLevel.doubleValue = appDelegate.ActivityData.cpuPercentage / 5
         cpuTempLabel.stringValue = "CPU Temp " + String(ioService.cpuTemp)  + " °С"
-        tempLevel.doubleValue = Double(ioService.cpuTemp / 5)
+        tempLevel.doubleValue = ioService.cpuTemp / 5
         
         // power data
         powerComp.stringValue = "System power " + String(ioService.systemPower) + " watt"
@@ -71,22 +71,22 @@ class UsageViewController: NSViewController {
         fanLabel.stringValue =  "fan " + String(ioService.fan1Speed) + " | " + String(ioService.fan2Speed) + " rpm"
         
         // memory data
-        memPercentage.stringValue = "Memory Usage " + String(appDelegate.ActivityData.memoryPerformance.percentage) + "%"
-        memLevel.doubleValue = appDelegate.ActivityData.memoryPerformance.percentage / 10
+        memPercentage.stringValue = "Memory Usage " + String(appDelegate.ActivityData.memPercentage) + "%"
+        memLevel.doubleValue = appDelegate.ActivityData.memPercentage / 10
         
-        memPressure.stringValue = "Pressure " + String(appDelegate.ActivityData.memoryPerformance.pressure) + "%"
-        pressureLevel.doubleValue = appDelegate.ActivityData.memoryPerformance.pressure / 10
+        memPressure.stringValue = "Pressure " + String(appDelegate.ActivityData.memPressure) + "%"
+        pressureLevel.doubleValue = appDelegate.ActivityData.memPressure / 10
         
-        memApp.stringValue = String(Int(appDelegate.ActivityData.memoryPerformance.app)) + "% (App)"
-        memAppBar.doubleValue = appDelegate.ActivityData.memoryPerformance.app
+        memApp.stringValue = String(Int(appDelegate.ActivityData.memApp)) + "% (App)"
+        memAppBar.doubleValue = appDelegate.ActivityData.memApp
         
-        memWired.stringValue = String(Int(appDelegate.ActivityData.memoryPerformance.wired)) + "% (Wrd)"
-        memWiredBar.doubleValue = appDelegate.ActivityData.memoryPerformance.wired
+        memWired.stringValue = String(Int(appDelegate.ActivityData.memWired)) + "% (Wrd)"
+        memWiredBar.doubleValue = appDelegate.ActivityData.memWired
         
-        memComp.stringValue = String(Int(appDelegate.ActivityData.memoryPerformance.compressed)) + "% (Zip)"
-        memCompBar.doubleValue = appDelegate.ActivityData.memoryPerformance.compressed
+        memComp.stringValue = String(Int(appDelegate.ActivityData.memCompressed)) + "% (Zip)"
+        memCompBar.doubleValue = appDelegate.ActivityData.memCompressed
         
-        netLabel.stringValue = "↓ " + String(appDelegate.ActivityData.networkConnection.download.value) + appDelegate.ActivityData.networkConnection.download.unit + " | ↑ " + String(appDelegate.ActivityData.networkConnection.upload.value) + appDelegate.ActivityData.networkConnection.upload.unit
+        netLabel.stringValue = "↓ " + String(appDelegate.ActivityData.netIn.value) + appDelegate.ActivityData.netIn.unit + " | ↑ " + String(appDelegate.ActivityData.netOut.value) + appDelegate.ActivityData.netOut.unit
         
     }
 }

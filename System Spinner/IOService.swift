@@ -9,7 +9,6 @@ import Foundation
 
 class IOServiceData {
     private var con: io_connect_t = 0
-    private var debug = false
     private var cpuTempKeys: [String] = []
     private var gpuTempKeys: [String] = []
     private var fanTempKeys: [String] = []
@@ -44,13 +43,13 @@ class IOServiceData {
     ]
     
     // data for translate
-    public var cpuTemp: Float = 0
-    public var gpuTemp: Float = 0
-    public var fanTemp: Float = 0
-    public var fanSpeed: Float = 0
-    public var fan1Speed: Float = 0
-    public var fan2Speed: Float = 0
-    public var systemPower: Float = 0
+    public var cpuTemp: Double = 0.0
+    public var gpuTemp: Double = 0.0
+    public var fanTemp: Double = 0.0
+    public var fanSpeed: Int = 0
+    public var fan1Speed: Int = 0
+    public var fan2Speed: Int = 0
+    public var systemPower: Double = 0.0
     
     private struct AppleSMCVers { // 6 bytes
         var major: UInt8 = 0
@@ -133,8 +132,7 @@ class IOServiceData {
         }
     }
 
-    init(_ debug: Bool = false) {
-        self.debug = debug
+    init() {
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         let mainport: mach_port_t = 0
         let serviceDir = IOServiceMatching("AppleSMC")
@@ -208,7 +206,7 @@ class IOServiceData {
         input.bytes = output.bytes
     }
     
-    private func read(_ key: String) -> Float {
+    private func read(_ key: String) -> Double {
         var input = AppleSMCKey()
         input.key = try! AppleSMC4Chars(key)
         input.info.size = 4
@@ -216,8 +214,7 @@ class IOServiceData {
         try! readKey(&input)
         var ret: Float = 0.0
         memmove(&ret, &input.bytes, 4)
-        if debug { print( dateFormatter.string(from: Date()), "read \(key): \(ret)") }
-        return ceil(ret * 10) / 10.0
+        return Double(String(format: "%0.1f",ret)) ?? 0.0
     }
     
     public func update () {
@@ -227,9 +224,9 @@ class IOServiceData {
 
         if fanSpeedKeys.count > 0 {
             fanTemp = fanTempKeys.reduce(0,{ result, sensor in max(result, self.read(sensor))})
-            fanSpeed = fanSpeedKeys.reduce(0,{ result, sensor in max(result, self.read(sensor))})
-            fan1Speed = self.read(fanSpeedKeys[0])
-            fan2Speed = self.read(fanSpeedKeys[1])
+            fanSpeed = Int(fanSpeedKeys.reduce(0,{ result, sensor in max(result, self.read(sensor))}))
+            fan1Speed = Int(self.read(fanSpeedKeys[0]))
+            fan2Speed = Int(self.read(fanSpeedKeys[1]))
         }
         
         systemPower = systemPowerKeys.reduce(0,{ result, sensor in max(result, self.read(sensor))})
