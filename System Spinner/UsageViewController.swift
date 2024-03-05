@@ -1,6 +1,9 @@
 //
 //  UsageViewController.swift
 //  System Spinner
+//
+//  Copyright 2024 Andrey Lysikov
+//  SPDX-License-Identifier: Apache-2.0
 
 import Cocoa
 
