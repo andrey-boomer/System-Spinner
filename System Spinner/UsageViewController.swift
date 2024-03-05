@@ -86,7 +86,7 @@ class UsageViewController: NSViewController {
         memComp.stringValue = String(Int(appDelegate.ActivityData.memCompressed)) + "% (Zip)"
         memCompBar.doubleValue = appDelegate.ActivityData.memCompressed
         
-        netLabel.stringValue = "↓ " + String(appDelegate.ActivityData.netIn.value) + appDelegate.ActivityData.netIn.unit + " | ↑ " + String(appDelegate.ActivityData.netOut.value) + appDelegate.ActivityData.netOut.unit
+        netLabel.stringValue = appDelegate.ActivityData.netIp + "\n↓ " + String(appDelegate.ActivityData.netIn.value) + appDelegate.ActivityData.netIn.unit + " | ↑ " + String(appDelegate.ActivityData.netOut.value) + appDelegate.ActivityData.netOut.unit
         
     }
 }
