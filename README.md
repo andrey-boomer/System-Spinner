@@ -14,7 +14,7 @@ System Spinner provides macOS system information in status bar. Minimal, small a
 
 ## Tech
 
-Written in Swift 5. Build only for Apple Silicon.
+Written in Swift 5. Universal build.
 - Based on [menubar_runcat](https://github.com/Kyome22/menubar_runcat)
 - Based on [stats](https://github.com/exelban/stats)
 - Based on [ActivityKit](https://github.com/Kyome22/ActivityKit)
