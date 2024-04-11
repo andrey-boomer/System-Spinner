@@ -39,7 +39,7 @@ class UsageViewController: NSViewController {
     
     override func viewDidLoad() {
         // check, do is run on M1 chip? (CMS is not present for than model)
-        if ioService.cpuCurrentModel == "M1" {
+        if ioService.isM1Air {
             // hide cpu power and fan data
             cpuTempStack.removeFromSuperview()
         }
@@ -59,7 +59,7 @@ class UsageViewController: NSViewController {
         dataTimer?.fire()
         
         // check, do is run on M1 chip? (CMS is not present for than model)
-        if ioService.cpuCurrentModel == "M1" {
+        if ioService.isM1Air {
             self.preferredContentSize = NSMakeSize(self.view.frame.size.width, 256);
         }
         super.viewDidAppear()
@@ -73,7 +73,7 @@ class UsageViewController: NSViewController {
         cpuLevel.doubleValue = appDelegate.ActivityData.cpuPercentage / 5
         
         // check, do is run on M1 chip? (CMS is not present for than model)
-        if ioService.cpuCurrentModel != "M1" {
+        if !ioService.isM1Air {
             // temp data
             cpuTempLabel.stringValue = "CPU Temp " + String(ioService.cpuTemp)  + " °С"
             tempLevel.doubleValue = ioService.cpuTemp / 5
