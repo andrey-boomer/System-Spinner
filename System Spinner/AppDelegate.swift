@@ -177,7 +177,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     private func showPopover(sender: Any?) {
       if let button = statusItem.button {
-        popover.show(relativeTo: button.bounds, of: button, preferredEdge: NSRectEdge.minY)
+          popover.show(relativeTo: button.bounds, of: button, preferredEdge: NSRectEdge.minY)
       }
     }
 
@@ -212,9 +212,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             button.imagePosition = .imageLeading
             button.font = NSFont.monospacedSystemFont(ofSize: 12, weight: .medium)
         }
-    
+
         popover.contentViewController = UsageViewController.freshController()
-        
         NSEvent.addGlobalMonitorForEvents(matching: NSEvent.EventTypeMask.leftMouseDown, handler: { [self](event: NSEvent) in
             closePopoverMenu(sender: self)
         })

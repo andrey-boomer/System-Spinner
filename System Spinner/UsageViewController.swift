@@ -14,6 +14,7 @@ class UsageViewController: NSViewController {
     private var dataTimer: Timer? = nil
     private let ioService = IOServiceData()
     
+    @IBOutlet var cpuTempStack: NSStackView!
     @IBOutlet var cpuLabel: NSTextField!
     @IBOutlet var cpuTempLabel: NSTextField!
     @IBOutlet var fanLabel: NSTextField!
@@ -34,10 +35,14 @@ class UsageViewController: NSViewController {
     @IBOutlet var memWiredBar: NSProgressIndicator!
     @IBOutlet var memCompBar: NSProgressIndicator!
     
-    
     @IBOutlet var netLabel: NSTextField!
     
     override func viewDidLoad() {
+        // check, do is run on M1 chip? (CMS is not present for than model)
+        if ioService.cpuCurrentModel == "M1" {
+            // hide cpu power and fan data
+            cpuTempStack.removeFromSuperview()
+        }
         super.viewDidLoad()
     }
     
@@ -52,6 +57,11 @@ class UsageViewController: NSViewController {
         })
         RunLoop.main.add(dataTimer!, forMode: .common)
         dataTimer?.fire()
+        
+        // check, do is run on M1 chip? (CMS is not present for than model)
+        if ioService.cpuCurrentModel == "M1" {
+            self.preferredContentSize = NSMakeSize(self.view.frame.size.width, 256);
+        }
         super.viewDidAppear()
     }
     
@@ -61,14 +71,19 @@ class UsageViewController: NSViewController {
         // CPU data
         cpuLabel.stringValue = "CPU Usage " + String(appDelegate.ActivityData.cpuPercentage) + "%"
         cpuLevel.doubleValue = appDelegate.ActivityData.cpuPercentage / 5
-        cpuTempLabel.stringValue = "CPU Temp " + String(ioService.cpuTemp)  + " °С"
-        tempLevel.doubleValue = ioService.cpuTemp / 5
         
-        // power data
-        powerComp.stringValue = "System power " + String(ioService.systemPower) + " watt"
-        
-        // Fan data
-        fanLabel.stringValue =  "fan " + String(ioService.fan1Speed) + " | " + String(ioService.fan2Speed) + " rpm"
+        // check, do is run on M1 chip? (CMS is not present for than model)
+        if ioService.cpuCurrentModel != "M1" {
+            // temp data
+            cpuTempLabel.stringValue = "CPU Temp " + String(ioService.cpuTemp)  + " °С"
+            tempLevel.doubleValue = ioService.cpuTemp / 5
+            
+            // power data
+            powerComp.stringValue = "System power " + String(ioService.systemPower) + " watt"
+            
+            // Fan data
+            fanLabel.stringValue =  "fan " + String(ioService.fan1Speed) + " | " + String(ioService.fan2Speed) + " rpm"
+        }
         
         // memory data
         memPercentage.stringValue = "Memory Usage " + String(appDelegate.ActivityData.memPercentage) + "%"

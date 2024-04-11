@@ -18,6 +18,7 @@ class IOServiceData {
     private let KERNEL_INDEX_SMC: UInt32 = 2
     private let SMC_CMD_READ_BYTES: UInt8 = 5
     private let SMC_CMD_READ_KEYINFO: UInt8 = 9
+    public var cpuCurrentModel: String = "INTEL"
     
     private let SensorsList: [String: [String:[String]]]  = [
         // imported from https://github.com/exelban/stats/blob/df1a0a8bacb9a9a6c23afa3c5faaabae2fc15890/Modules/Sensors/values.swift
@@ -29,8 +30,8 @@ class IOServiceData {
             "POWER": ["PSTR", "PDTR", "PPBR"]
         ],
         "M1": [
-            "CPU": ["TC0P", "Tp09", "Tp0T", "Tp01", "Tp05", "Tp0D", "Tp0H", "Tp0L", "Tp0P", "Tp0X", "Tp0b", "Tg0H"],
-            "GPU": ["Tg05", "Tg0D", "Tg0L" ,"Tg0T"],
+            "CPU": [],
+            "GPU": [],
             ],
         "M2": [
             "CPU": ["TC0P", "Tp0A", "Tp0D", "Tp0E", "Tp01", "Tp02", "Tp05", "Tp06", "Tp09"],
@@ -122,14 +123,17 @@ class IOServiceData {
         sysctlbyname("machdep.cpu.brand_string", nil, &sizeOfName, nil, 0)
         var nameChars = [CChar](repeating: 0, count: sizeOfName)
         sysctlbyname("machdep.cpu.brand_string", &nameChars, &sizeOfName, nil, 0)
-        
+      
         if String(cString: nameChars).contains("M3") {
             return "M3"
         } else if String(cString: nameChars).contains("M2") {
             return "M2"
-        }  else {
+        } else if String(cString: nameChars).contains("M1") {
             return "M1"
+        }  else {
+            return "INTEL"
         }
+       
     }
 
     init() {
@@ -150,6 +154,7 @@ class IOServiceData {
         // let load apple sillicon models custom values
         for cpuModel in SensorsList {
             if cpuModel.key ==  getCpuModel() {
+                self.cpuCurrentModel = cpuModel.key
                 for sensors in cpuModel.value {
                     if sensors.key == "CPU" {
                         cpuTempKeys = checkNulValues(sourceArray: sensors.value)
