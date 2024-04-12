@@ -18,7 +18,8 @@ class IOServiceData {
     private let KERNEL_INDEX_SMC: UInt32 = 2
     private let SMC_CMD_READ_BYTES: UInt8 = 5
     private let SMC_CMD_READ_KEYINFO: UInt8 = 9
-    public var isM1Air: Bool = false
+    public var isAir: Bool = false
+    public var presentSMC: Bool = true
     
     private let SensorsList: [String: [String:[String]]]  = [
         // imported from https://github.com/exelban/stats/blob/df1a0a8bacb9a9a6c23afa3c5faaabae2fc15890/Modules/Sensors/values.swift
@@ -118,18 +119,68 @@ class IOServiceData {
         var bytes = AppleSMCBytes()
     }
     
+    private func process(path: String, arguments: [String]) -> String? {
+        let task = Process()
+        task.launchPath = path
+        task.arguments = arguments
+        
+        let outputPipe = Pipe()
+        defer {
+            outputPipe.fileHandleForReading.closeFile()
+        }
+        task.standardOutput = outputPipe
+        
+        do {
+            try task.run()
+        } catch {
+            return nil
+        }
+        
+        let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
+        let output = String(decoding: outputData, as: UTF8.self)
+        
+        if output.isEmpty {
+            return nil
+        }
+        
+        return output
+    }
+    
+    private func getMacModel() -> String? {
+        guard let res = process(path: "/usr/sbin/system_profiler", arguments: ["SPHardwareDataType", "-json"]) else {
+            return nil
+        }
+             
+        do {
+             if let json = try JSONSerialization.jsonObject(with: Data(res.utf8), options: []) as? [String: Any],
+                let obj = json["SPHardwareDataType"] as? [[String: Any]], !obj.isEmpty, let val = obj.first,
+                let name = val["machine_name"] as? String {
+                    return name
+             }
+        } catch {
+             return nil
+        }
+        return nil
+    }
+    
     private func getCpuModel() -> String {
         var sizeOfName = 0
         sysctlbyname("machdep.cpu.brand_string", nil, &sizeOfName, nil, 0)
         var nameChars = [CChar](repeating: 0, count: sizeOfName)
         sysctlbyname("machdep.cpu.brand_string", &nameChars, &sizeOfName, nil, 0)
-        if String(cString: nameChars).contains("M3") {
+        
+        if getMacModel()!.uppercased().contains("AIR") {
+            isAir = true
+        }
+        
+        if String(cString: nameChars).uppercased().contains("M3") {
             return "M3"
-        } else if String(cString: nameChars).contains("M2") {
+        } else if String(cString: nameChars).uppercased().contains("M2") {
             return "M2"
-        } else if String(cString: nameChars).contains("M1") {
-            if String(cString: nameChars).contains("Air") {
-                isM1Air = true
+        } else if String(cString: nameChars).uppercased().contains("M1") {
+            // m1 air is not present SMC :(
+            if isAir {
+                presentSMC = false
             }
             return "M1"
         }  else {

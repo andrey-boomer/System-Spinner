@@ -14,6 +14,7 @@ class UsageViewController: NSViewController {
     private var dataTimer: Timer? = nil
     private let ioService = IOServiceData()
     
+    @IBOutlet var fanStack: NSStackView!
     @IBOutlet var cpuTempStack: NSStackView!
     @IBOutlet var cpuLabel: NSTextField!
     @IBOutlet var cpuTempLabel: NSTextField!
@@ -38,11 +39,16 @@ class UsageViewController: NSViewController {
     @IBOutlet var netLabel: NSTextField!
     
     override func viewDidLoad() {
-        // check, do is run on M1 chip? (CMS is not present for than model)
-        if ioService.isM1Air {
-            // hide cpu power and fan data
+        // Air is not present fan
+        if ioService.isAir {
+            fanStack.removeFromSuperview()
+        }
+        
+        // if no SMC, remove CPU temp data
+        if !ioService.presentSMC {
             cpuTempStack.removeFromSuperview()
         }
+        
         super.viewDidLoad()
     }
     
@@ -58,9 +64,12 @@ class UsageViewController: NSViewController {
         RunLoop.main.add(dataTimer!, forMode: .common)
         dataTimer?.fire()
         
-        // check, do is run on M1 chip? (CMS is not present for than model)
-        if ioService.isM1Air {
-            self.preferredContentSize = NSMakeSize(self.view.frame.size.width, 256);
+        // ViewController is not auto resize at this time, so resize form
+        if ioService.isAir {
+            self.preferredContentSize = NSMakeSize(self.view.frame.size.width, 330);
+        }
+        if !ioService.presentSMC {
+            self.preferredContentSize = NSMakeSize(self.view.frame.size.width, 275);
         }
         super.viewDidAppear()
     }
@@ -71,18 +80,23 @@ class UsageViewController: NSViewController {
         // CPU data
         cpuLabel.stringValue = "CPU Usage " + String(appDelegate.ActivityData.cpuPercentage) + "%"
         cpuLevel.doubleValue = appDelegate.ActivityData.cpuPercentage / 5
+        // power data
+        powerComp.stringValue = "System power " + String(ioService.systemPower) + " watt"
         
-        // check, do is run on M1 chip? (CMS is not present for than model)
-        if !ioService.isM1Air {
+        // Air is not present fan
+        if !ioService.isAir {
+            if ioService.fanSpeed == 0 {
+                fanLabel.stringValue =  "fan is stoped"
+            } else {
+                fanLabel.stringValue =  "fan " + String(ioService.fan1Speed) + " | " + String(ioService.fan2Speed) + " rpm"
+            }
+        }
+        
+        // if presentSMC
+        if ioService.presentSMC {
             // temp data
             cpuTempLabel.stringValue = "CPU Temp " + String(ioService.cpuTemp)  + " °С"
             tempLevel.doubleValue = ioService.cpuTemp / 5
-            
-            // power data
-            powerComp.stringValue = "System power " + String(ioService.systemPower) + " watt"
-            
-            // Fan data
-            fanLabel.stringValue =  "fan " + String(ioService.fan1Speed) + " | " + String(ioService.fan2Speed) + " rpm"
         }
         
         // memory data
