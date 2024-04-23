@@ -28,6 +28,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var curFrame: Int = 0
     private var cpuTimer: Timer? = nil
     private var spinnerTimer: Timer? = nil
+    private var sHelper = Helper()
     
     private func startRunning() {
         cpuTimer = Timer(timeInterval: updateInterval, repeats: true, block: { [weak self] _ in
@@ -113,6 +114,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         changeSpinner(setName: sender.title)
     }
     
+    @objc private func analitycstApp(sender: NSMenuItem) {
+        sHelper.openAnalitycstApp()
+    }
+        
     @objc private func changeUpdateSpeedClick(sender: NSMenuItem) {
         stopRunning()
         
@@ -129,31 +134,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         startRunning()
     }
     
-    private func changeRemap() {
-        let task = Process()
-        task.launchPath = "/usr/bin/env"
-        
-        if keyRemap {
-            task.arguments = ["hidutil", "property", "--set", "{\"UserKeyMapping\":[{\"HIDKeyboardModifierMappingSrc\": 0xC000000CF,\"HIDKeyboardModifierMappingDst\": 0xFF00000009},{\"HIDKeyboardModifierMappingSrc\": 0x10000009B,\"HIDKeyboardModifierMappingDst\": 0xFF00000008}]}"]
-            
+    @objc private func changeLaunchAtLogin(sender: NSMenuItem) {
+        if sHelper.isAutoLaunch {
+            sender.state = .off
+            sHelper.isAutoLaunch = false
         } else {
-            task.arguments = ["hidutil", "property", "--set", "{\"UserKeyMapping\":[{\"HIDKeyboardModifierMappingSrc\": 0xFF00000009,\"HIDKeyboardModifierMappingDst\": 0xC000000CF},{\"HIDKeyboardModifierMappingSrc\": 0xFF00000008,\"HIDKeyboardModifierMappingDst\": 0x10000009B}]}"]
-            
+            sender.state = .on
+            sHelper.isAutoLaunch = true
         }
-        task.launch()
-        task.waitUntilExit()
     }
     
-    @objc private func openAnalystApp(sender: NSMenuItem) {
-        let url = NSURL(fileURLWithPath: "/System/Applications/Utilities/Activity Monitor.app", isDirectory: true) as URL
-        
-        let configuration = NSWorkspace.OpenConfiguration()
-        configuration.arguments = ["/bin"]
-        NSWorkspace.shared.openApplication(at: url,
-                                           configuration: configuration,
-                                           completionHandler: nil)
-    }
-
     @objc private func changeRemapClick(sender: NSMenuItem) {
         if keyRemap {
             sender.state = .off
@@ -162,7 +152,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             sender.state = .on
             keyRemap = true
         }
-        changeRemap()
+        sHelper.remapKeysBacklight(toggle: keyRemap)
     }
     
    @objc private func changeStatusMenuClick(sender: NSMenuItem) {
@@ -226,14 +216,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItemMenu = NSMenu()
         
         // open Analytics
-        statusItemMenu.addItem(NSMenuItem(title: "Activity Monitor", action: #selector(openAnalystApp(sender:)), keyEquivalent: ""))
+        statusItemMenu.addItem(NSMenuItem(title: "Activity Monitor", action: #selector(analitycstApp(sender:)), keyEquivalent: ""))
         
         // Remap Menu
         let remapItem = NSMenuItem(title: "Keyboard backlight (F5/F6)", action: #selector(changeRemapClick(sender:)), keyEquivalent: "")
         if keyRemap {
             remapItem.state = .on
         }
-        changeRemap()
+        sHelper.remapKeysBacklight(toggle: keyRemap)
         statusItemMenu.addItem(remapItem)
         
         // Text status in Menu
@@ -242,6 +232,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             statusItem.state = .on
         }
         statusItemMenu.addItem(statusItem)
+        
+        // launch At Login
+        let launchAtLoginItem = NSMenuItem(title: "Enable Autostart", action: #selector(changeLaunchAtLogin(sender:)), keyEquivalent: "")
+        if sHelper.isAutoLaunch {
+            launchAtLoginItem.state = .on
+        }
+        statusItemMenu.addItem(launchAtLoginItem)
         
         statusItemMenu.addItem(NSMenuItem.separator())
         
@@ -278,6 +275,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItemMenu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: ""))
         
         changeSpinner(setName: spinnerActive)
+        
+        // let look new version?
+        if sHelper.checkNewVersion() {
+            let anAlert = NSAlert()
+             anAlert.messageText = "Update Available"
+             anAlert.informativeText = "An update System Spinner is available. Would you like to update?"
+             anAlert.alertStyle = .warning
+             anAlert.addButton(withTitle: "Update")
+             anAlert.addButton(withTitle: "Not now")
+             if anAlert.runModal() == .alertFirstButtonReturn {
+                 let url = URL(string: "https://github.com/andrey-boomer/System-Spinner/releases/latest")!
+                 if NSWorkspace.shared.open(url) {
+                     NSApplication.shared.terminate(nil)
+                 }
+             }
+        }
     }
     
     func applicationWillTerminate(_ aNotification: Notification) {

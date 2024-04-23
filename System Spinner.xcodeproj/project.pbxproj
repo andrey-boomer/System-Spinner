@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7F80E7972BD815270006AD44 /* Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F80E7962BD815270006AD44 /* Helper.swift */; };
 		7F8124E92B96DC8600B05107 /* AKservice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8124E82B96DC8600B05107 /* AKservice.swift */; };
 		7FB908C42B67B9FD00E9EE24 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7FB908BC2B67B9FC00E9EE24 /* Main.storyboard */; };
 		7FB908C62B67B9FD00E9EE24 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB908BE2B67B9FD00E9EE24 /* AppDelegate.swift */; };
@@ -18,6 +19,7 @@
 /* Begin PBXFileReference section */
 		7F35E5922B847EBC0032163E /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		7F35E5932B847F230032163E /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		7F80E7962BD815270006AD44 /* Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helper.swift; sourceTree = "<group>"; };
 		7F8124E82B96DC8600B05107 /* AKservice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AKservice.swift; sourceTree = "<group>"; };
 		7F8124EA2B97088B00B05107 /* spin_menu.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = spin_menu.jpg; sourceTree = "<group>"; };
 		7F8124EB2B97088B00B05107 /* main_menu.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = main_menu.jpg; sourceTree = "<group>"; };
@@ -72,6 +74,7 @@
 				7FB908BE2B67B9FD00E9EE24 /* AppDelegate.swift */,
 				7F8124E82B96DC8600B05107 /* AKservice.swift */,
 				7FFC0C542B7B6845002F9990 /* IOService.swift */,
+				7F80E7962BD815270006AD44 /* Helper.swift */,
 				7FB908BC2B67B9FC00E9EE24 /* Main.storyboard */,
 				7FB908C12B67B9FD00E9EE24 /* UsageViewController.swift */,
 				7FB908B32B67B9A500E9EE24 /* System_Spinner.entitlements */,
@@ -156,6 +159,7 @@
 			files = (
 				7FFC0C552B7B6845002F9990 /* IOService.swift in Sources */,
 				7FB908C62B67B9FD00E9EE24 /* AppDelegate.swift in Sources */,
+				7F80E7972BD815270006AD44 /* Helper.swift in Sources */,
 				7FB908C92B67B9FD00E9EE24 /* UsageViewController.swift in Sources */,
 				7F8124E92B96DC8600B05107 /* AKservice.swift in Sources */,
 			);
@@ -309,7 +313,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 2.6.6;
+				MARKETING_VERSION = 2.7.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "linet.online.System-Spinner";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -342,7 +346,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 2.6.6;
+				MARKETING_VERSION = 2.7.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "linet.online.System-Spinner";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
