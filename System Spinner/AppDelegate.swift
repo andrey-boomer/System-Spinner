@@ -86,6 +86,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         startRunning()
     }
     
+    @objc private func aboutWindow(sender: NSStatusItem) {
+        let appCurrentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
+        let anAbout = NSAlert()
+        anAbout.messageText = "System Spinner " + appCurrentVersion!
+        anAbout.informativeText = "System Spinner provides macOS system information in status bar. Minimal, small and light"
+        anAbout.alertStyle = .informational
+        anAbout.addButton(withTitle: "Go to App site")
+        anAbout.addButton(withTitle: "Close")
+        if anAbout.runModal() == .alertFirstButtonReturn {
+            NSWorkspace.shared.open(URL(string: sHelper.appAboutUrl)!)
+        }
+    }
+    
     @objc private func stopRunningNotify(_ notification: NSNotification) {
         closePopoverMenu(sender: self)
         stopRunning()
@@ -272,25 +285,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItemMenu.setSubmenu(spinnersSubMenu, for: spinnersMenu)
         
         statusItemMenu.addItem(NSMenuItem.separator())
+        statusItemMenu.addItem(NSMenuItem(title: "About", action: #selector(aboutWindow(sender:)), keyEquivalent: ""))
         statusItemMenu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: ""))
         
         changeSpinner(setName: spinnerActive)
-        
-        // let look new version?
-        if sHelper.checkNewVersion() {
-            let anAlert = NSAlert()
-             anAlert.messageText = "Update Available"
-             anAlert.informativeText = "An update System Spinner is available. Would you like to update?"
-             anAlert.alertStyle = .warning
-             anAlert.addButton(withTitle: "Update")
-             anAlert.addButton(withTitle: "Not now")
-             if anAlert.runModal() == .alertFirstButtonReturn {
-                 let url = URL(string: "https://github.com/andrey-boomer/System-Spinner/releases/latest")!
-                 if NSWorkspace.shared.open(url) {
-                     NSApplication.shared.terminate(nil)
-                 }
-             }
-        }
     }
     
     func applicationWillTerminate(_ aNotification: Notification) {

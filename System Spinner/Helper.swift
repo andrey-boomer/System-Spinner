@@ -8,8 +8,15 @@
 import Foundation
 import ServiceManagement
 import AppKit
+import UserNotifications
 
-class Helper {
+class Helper: NSObject, UNUserNotificationCenterDelegate {
+    
+    // Autoupdate links
+    public let appApiUrl = "https://api.github.com/repos/andrey-boomer/System-Spinner/releases/latest"
+    public let appLastestUrl = "https://github.com/andrey-boomer/System-Spinner/releases/latest"
+    public let appAboutUrl = "https://github.com/andrey-boomer/System-Spinner"
+    private var versionTimer: Timer? = nil
     
     public var isAutoLaunch: Bool {
             get { SMAppService.mainApp.status == .enabled }
@@ -56,8 +63,33 @@ class Helper {
         task.waitUntilExit()
     }
     
+    func sendSystemNotification(title: String, body: String = "", action: String) {
+        let content = UNMutableNotificationContent()
+        let notificationCenter = UNUserNotificationCenter.current()
+        let downloadAction = UNNotificationAction(identifier: action, title: action, options: .init(rawValue: 0))
+        let category = UNNotificationCategory(identifier: "ACTION", actions: [downloadAction], intentIdentifiers: [], hiddenPreviewsBodyPlaceholder: "", options: .customDismissAction)
+
+        content.title = title
+        content.body = body
+        content.categoryIdentifier = "ACTION"
+        notificationCenter.setNotificationCategories([category])
+        notificationCenter.removeAllPendingNotificationRequests()
+        notificationCenter.requestAuthorization(options: [.alert,.sound]) { (granted, error) in
+            if !granted {
+                print("Notifications is not allowed")
+            }
+        }
+        notificationCenter.add(UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil))
+    }
+   
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        if  response.actionIdentifier == "Download" {
+                NSWorkspace.shared.open(URL(string: appLastestUrl)!)
+        }
+        completionHandler()
+    }
+    
     public func checkNewVersion() -> Bool {
-        let url = URL(string: "https://api.github.com/repos/andrey-boomer/System-Spinner/releases/latest")!
         let appCurrentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
         let sem = DispatchSemaphore.init(value: 0)
         var hasUpdate = false
@@ -68,7 +100,7 @@ class Helper {
             let name: String
         }
         
-        let task = URLSession.shared.dataTask(with: url) { data, response, error in
+        let task = URLSession.shared.dataTask(with:  URL(string: appApiUrl)!) { data, response, error in
               guard
                   error == nil,
                   let data = data
@@ -91,7 +123,21 @@ class Helper {
           task.resume()
         sem.wait()
         return hasUpdate
-        
     }
     
+    override init() {
+        
+        super.init()
+        
+        UNUserNotificationCenter.current().delegate = self
+        
+        // lets check new version every lay
+        versionTimer = Timer(timeInterval: 86400.0, repeats: true, block: { [weak self] _ in
+            if self!.checkNewVersion() {
+                self!.sendSystemNotification(title: "System Spinner Updated!", body: "An new version is available. Would you like to update?", action: "Download")
+            }
+        })
+        RunLoop.main.add(versionTimer!, forMode: .common)
+        versionTimer?.fire()
+    }
 }
