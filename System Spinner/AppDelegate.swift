@@ -44,7 +44,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     private func updateUsage() {
-        ActivityData.update(Interval: updateInterval)
+        ActivityData.updateCpuOnly()
         curFrame =  curFrame + 1
         if curFrame > Int(spinners[spinnerActive]!) - 1 {
             curFrame = 0

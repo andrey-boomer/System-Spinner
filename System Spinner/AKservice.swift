@@ -9,6 +9,7 @@
 
 import Foundation
 import Darwin
+import Cocoa
 import SystemConfiguration
 
 class AKservice {
@@ -25,7 +26,28 @@ class AKservice {
         public var unit: String
     }
     
+    public struct topProcess: Codable {
+        public var pid: Int
+        public var name: String
+        public var usage: Double
+        
+        public var icon: NSImage {
+            get {
+                if let app = NSRunningApplication(processIdentifier: pid_t(self.pid)), let icon = app.icon {
+                    return icon
+                }
+                return NSWorkspace.shared.icon(forFile: "/bin/bash")
+            }
+        }
+    }
+    
     public var cpuPercentage: Double = 0.0
+    public var cpuUser: Double = 0.0
+    public var cpuSystem: Double = 0.0
+    public var cpuIdle: Double = 0.0
+    public var cpuNiceD: Double = 0.0
+    public var cpuProcess: [topProcess] = []
+    
     public var memPercentage: Double = 0.0
     public var memPressure: Double = 0.0
     public var memApp: Double = 0.0
@@ -34,24 +56,66 @@ class AKservice {
     public var netIp: String = "no ip found"
     public var netIn = netPacketData(value: 0.0, unit: "KB/s")
     public var netOut = netPacketData(value: 0.0, unit: "KB/s")
-    
-    init() {
         
-    }
-    
     private func round(In: Double) -> Double {
         return Double(ceil(In * 10) / 10.0)
     }
     
     private func hostCPULoadInfo() -> host_cpu_load_info {
-        var size: mach_msg_type_number_t = loadInfoCount
-        let hostInfo = host_cpu_load_info_t.allocate(capacity: 1)
-        let _ = hostInfo.withMemoryRebound(to: integer_t.self, capacity: Int(size)) { (pointer) -> kern_return_t in
-            return host_statistics(mach_host_self(), HOST_CPU_LOAD_INFO, pointer, &size)
+        var info = host_cpu_load_info_data_t()
+        var count = mach_msg_type_number_t(MemoryLayout<host_cpu_load_info>.stride / MemoryLayout<integer_t>.stride)
+        
+        let kerr: kern_return_t = withUnsafeMutablePointer(to: &info, {
+          host_statistics(mach_host_self(), HOST_CPU_LOAD_INFO, $0.withMemoryRebound(to: integer_t.self, capacity: 1, { $0 }), &count)
+        })
+        
+        guard kerr == KERN_SUCCESS else {
+          return host_cpu_load_info()
         }
-        let data = hostInfo.move()
-        hostInfo.deallocate()
-        return data
+        
+        return info
+    }
+    
+    private func cpuTopProcess() -> [topProcess] {
+        let numberOfProcesses = 8
+        
+        let task = Process()
+        task.launchPath = "/bin/ps"
+        task.arguments = ["-Aceo pid,pcpu,comm", "-r"]
+        
+        let outputPipe = Pipe()
+        task.standardOutput = outputPipe
+        
+        task.launch()
+      
+        let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
+        let output = String(decoding: outputData, as: UTF8.self)
+        task.waitUntilExit()
+        
+        var index = 0
+        var processes: [topProcess] = []
+        output.enumerateLines { (line, stop) -> Void in
+            if index != 0 {
+                let str = line.trimmingCharacters(in: .whitespaces)
+                let pidFind = str.findAndCrop(pattern: "^\\d+")
+                let usageFind = pidFind.remain.findAndCrop(pattern: "^[0-9,.]+ ")
+                let command = usageFind.remain.trimmingCharacters(in: .whitespaces)
+                let pid = Int(pidFind.cropped) ?? 0
+                let usage = Double(usageFind.cropped.replacingOccurrences(of: ",", with: ".")) ?? 0
+                
+                var name: String = command
+                if let app = NSRunningApplication(processIdentifier: pid_t(pid)), let n = app.localizedName {
+                    name = n
+                }
+                
+                processes.append(topProcess(pid: pid, name: name, usage: usage))
+            }
+            
+            if index == numberOfProcesses { stop = true }
+            index += 1
+        }
+        
+        return processes
     }
     
     private var vmStatistics64: vm_statistics64 {
@@ -133,18 +197,24 @@ class AKservice {
         }
     }
     
-    public func update(Interval: Double) {
- 
-        // Update CPU Data
+    public func updateCpuOnly() {
         let load = hostCPULoadInfo()
-        let userDiff    = Double(load.cpu_ticks.0 - loadPrevious.cpu_ticks.0)
-        let systemDiff  = Double(load.cpu_ticks.1 - loadPrevious.cpu_ticks.1)
-        let idleDiff    = Double(load.cpu_ticks.2 - loadPrevious.cpu_ticks.2)
-        let niceDiff    = Double(load.cpu_ticks.3 - loadPrevious.cpu_ticks.3)
-        let totalTicks  = systemDiff + userDiff + idleDiff + niceDiff
-        loadPrevious    = load
-        cpuPercentage = round(In: min(99.9, ((100.0 * systemDiff / totalTicks) + (100.0 * userDiff / totalTicks))))
+        cpuUser = Double(load.cpu_ticks.0 - loadPrevious.cpu_ticks.0)
+        cpuSystem = Double(load.cpu_ticks.1 - loadPrevious.cpu_ticks.1)
+        cpuIdle = Double(load.cpu_ticks.2 - loadPrevious.cpu_ticks.2)
+        cpuNiceD =  Double(load.cpu_ticks.3 - loadPrevious.cpu_ticks.3)
         
+        let totalTicks  = cpuUser + cpuSystem + cpuIdle + cpuNiceD
+        
+        loadPrevious    = load
+        cpuPercentage = round(In: min(99.9, ((100.0 * cpuSystem / totalTicks) + (100.0 * cpuUser / totalTicks))))
+    }
+    
+    public func updateAll() {
+        
+        // Update CPU Data
+        updateCpuOnly()
+              
         // Update MEM Data
         let maxMem = maxMemory
         let memLoad = vmStatistics64
@@ -194,12 +264,35 @@ class AKservice {
             }
             freeifaddrs(ifaddr)
             if previousUpload != 0 && previousDownload != 0 {
-                netIn = convert(byte: Double(upload - previousUpload) / Interval)
-                netOut = convert(byte: Double(download - previousDownload) / Interval)
+                netIn = convert(byte: Double(upload - previousUpload))
+                netOut = convert(byte: Double(download - previousDownload))
             }
             previousUpload = upload
             previousDownload = download
         }
+        
+        cpuProcess = cpuTopProcess()
     }
     
+}
+
+extension String: LocalizedError {
+    public func findAndCrop(pattern: String) -> (cropped: String, remain: String) {
+        do {
+            let regex = try NSRegularExpression(pattern: pattern)
+            let range = NSRange(self.startIndex..., in: self)
+            
+            if let match = regex.firstMatch(in: self, options: [], range: range) {
+                if let range = Range(match.range, in: self) {
+                    let cropped = String(self[range]).trimmingCharacters(in: .whitespaces)
+                    let remaining = self.replacingOccurrences(of: cropped, with: "", options: .regularExpression).trimmingCharacters(in: .whitespaces)
+                    return (cropped, remaining)
+                }
+            }
+        } catch {
+            print("Error creating regex: \(error.localizedDescription)")
+        }
+        
+        return ("", self)
+    }
 }
