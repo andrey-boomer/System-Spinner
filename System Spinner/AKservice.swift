@@ -17,6 +17,7 @@ class AKservice {
     private let loadInfoCount = UInt32(exactly: MemoryLayout<host_cpu_load_info_data_t>.size / MemoryLayout<integer_t>.size)!
     private let hostVmInfo64Count = UInt32(exactly: MemoryLayout<vm_statistics64_data_t>.size / MemoryLayout<integer_t>.size)!
     private let hostBasicInfoCount = UInt32(exactly: MemoryLayout<host_basic_info_data_t>.size / MemoryLayout<integer_t>.size)!
+    private var loadPreviousHist: [Double] = []
     private var loadPrevious = host_cpu_load_info()
     private var previousUpload: Int64 = 0
     private var previousDownload: Int64 = 0
@@ -197,8 +198,11 @@ class AKservice {
         
         let totalTicks  = cpuUser + cpuSystem + cpuIdle + cpuNiceD
         
-        loadPrevious    = load
-        cpuPercentage = round(In: min(99.9, ((100.0 * cpuSystem / totalTicks) + (100.0 * cpuUser / totalTicks))))
+        let cpuLast = round(In: min(99.9, ((100.0 * cpuSystem / totalTicks) + (100.0 * cpuUser / totalTicks))))
+        loadPreviousHist.append(cpuLast)
+        cpuPercentage = round(In: loadPreviousHist.reduce(0, +) / Double(loadPreviousHist.count))
+        if loadPreviousHist.count > 15 { loadPreviousHist.removeFirst() }
+        loadPrevious  = load
     }
     
     public func updateAll() {
