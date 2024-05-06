@@ -130,14 +130,12 @@ class IOServiceData {
         }
         task.standardOutput = outputPipe
         
-        do {
-            try task.run()
-        } catch {
-            return nil
-        }
+        task.launch()
         
         let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
         let output = String(decoding: outputData, as: UTF8.self)
+        
+        task.waitUntilExit()
         
         if output.isEmpty {
             return nil
