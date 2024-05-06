@@ -32,6 +32,7 @@ class AKservice {
         public var name: String
         public var cpu: Double
         public var mem: Double
+        public var realmem: String
         
         public var icon: NSImage {
             get {
@@ -101,9 +102,10 @@ class AKservice {
                 let command = usageFindMem.remain.trimmingCharacters(in: .whitespaces)
                 let usagePCPU = Double(usageFindCpu.cropped.replacingOccurrences(of: ",", with: ".")) ?? 0
                 let usagePMEM = Double(usageFindMem.cropped.replacingOccurrences(of: ",", with: ".")) ?? 0
+                let strMem = String(self.round(In: (self.maxMemory * 10.24 * usagePMEM))) + " MB"
                 
                 if let pid = Int(pidFind.cropped), command != "WindowServer" {
-                    processes.append(topProcess(pid: pid, name: command, cpu: usagePCPU, mem: usagePMEM))
+                    processes.append(topProcess(pid: pid, name: command, cpu: usagePCPU, mem: usagePMEM, realmem: strMem))
                 }
         }
         
@@ -265,6 +267,10 @@ class AKservice {
             previousUpload = upload
             previousDownload = download
         }
+    }
+    
+    init() {
+        updateAll()
     }
     
 }
