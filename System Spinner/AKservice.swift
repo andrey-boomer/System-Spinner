@@ -102,7 +102,7 @@ class AKservice {
                 let usagePCPU = Double(usageFindCpu.cropped.replacingOccurrences(of: ",", with: ".")) ?? 0
                 let usagePMEM = Double(usageFindMem.cropped.replacingOccurrences(of: ",", with: ".")) ?? 0
                 
-                if let pid = Int(pidFind.cropped) {
+                if let pid = Int(pidFind.cropped), command != "WindowServer" {
                     processes.append(topProcess(pid: pid, name: command, cpu: usagePCPU, mem: usagePMEM))
                 }
         }
