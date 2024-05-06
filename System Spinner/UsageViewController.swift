@@ -37,7 +37,7 @@ class UsageViewController: NSViewController {
     @IBOutlet var memCompBar: NSProgressIndicator!
     
     @IBOutlet var netLabel: NSTextField!
-    
+        
     override func viewDidLoad() {
         // Air is not present fan
         if ioService.isAir {
@@ -76,6 +76,7 @@ class UsageViewController: NSViewController {
     
     private func updateData() {
         ioService.update()
+        appDelegate.ActivityData.updateAll()
         
         // CPU data
         cpuLabel.stringValue = "CPU Usage " + String(appDelegate.ActivityData.cpuPercentage) + "%"
