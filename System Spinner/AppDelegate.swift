@@ -106,10 +106,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     @objc private func startRunningNotify(_ notification: NSNotification) {
         startRunning()
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            self.sHelper.hasNewVersion()
-         }
+        sHelper.hasNewVersion()
     }
     
     @objc private func togglePopover(sender: NSStatusItem) {

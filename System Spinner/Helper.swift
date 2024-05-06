@@ -126,9 +126,11 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
     }
     
     public func hasNewVersion() {
-        if checkNewVersion() {
-           sendSystemNotification(title: "New System Spinner has released!", body: "An new version is available. Would you like to update?", action: "Download")
-        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            if self.checkNewVersion() {
+                self.sendSystemNotification(title: "New System Spinner has released!", body: "An new version is available. Would you like to update?", action: "Download")
+            }
+         }
     }
     
     override init() {
