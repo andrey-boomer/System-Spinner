@@ -29,8 +29,8 @@ class AKservice {
     public struct topProcess: Codable {
         public var pid: Int
         public var name: String
-        public var usageCpu: Double
-        public var usageMem: Double
+        public var cpu: Double
+        public var mem: Double
         
         public var icon: NSImage {
             get {
@@ -102,7 +102,7 @@ class AKservice {
                 let usagePMEM = Double(usageFindMem.cropped.replacingOccurrences(of: ",", with: ".")) ?? 0
                 
                 if let pid = Int(pidFind.cropped) {
-                    processes.append(topProcess(pid: pid, name: command, usageCpu: usagePCPU, usageMem: usagePMEM))
+                    processes.append(topProcess(pid: pid, name: command, cpu: usagePCPU, mem: usagePMEM))
                 }
         }
         
@@ -283,5 +283,13 @@ extension String: LocalizedError {
         }
         
         return ("", self)
+    }
+}
+
+extension Sequence {
+    func sorted<T: Comparable>(by keyPath: KeyPath<Element, T>) -> [Element] {
+        sorted { a, b in
+            a[keyPath: keyPath] > b[keyPath: keyPath]
+        }
     }
 }
