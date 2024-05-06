@@ -12,6 +12,8 @@ class UsageViewController: NSViewController {
     let appDelegate = NSApp.delegate as! AppDelegate
     
     private var dataTimer: Timer? = nil
+    private var cpuProcessMenu: NSMenu!
+    private var memProcessMenu: NSMenu!
     private let ioService = IOServiceData()
     
     @IBOutlet var fanStack: NSStackView!
@@ -37,7 +39,11 @@ class UsageViewController: NSViewController {
     @IBOutlet var memCompBar: NSProgressIndicator!
     
     @IBOutlet var netLabel: NSTextField!
-        
+    
+    @objc private func itemMenuClick(sender: NSMenuItem) {
+        // no action yet
+    }
+    
     override func viewDidLoad() {
         // Air is not present fan
         if ioService.isAir {
@@ -50,6 +56,16 @@ class UsageViewController: NSViewController {
             cpuTempStack.removeFromSuperview()
             self.preferredContentSize = NSMakeSize(self.view.frame.size.width, 275);
         }
+        
+        // create top cpu process menu
+        cpuProcessMenu = NSMenu()
+        cpuLevel.menu = cpuProcessMenu
+        cpuProcessMenu.font = NSFont.monospacedSystemFont(ofSize: 12, weight: .medium)
+        
+        // create top mem process menu
+        memProcessMenu  = NSMenu()
+        memLevel.menu = memProcessMenu
+        memProcessMenu.font = NSFont.monospacedSystemFont(ofSize: 12, weight: .medium)
         
         super.viewDidLoad()
     }
@@ -67,6 +83,24 @@ class UsageViewController: NSViewController {
         dataTimer?.fire()
         
         super.viewDidAppear()
+        
+        cpuProcessMenu.removeAllItems()
+        for item in appDelegate.ActivityData.getTopProcess().sorted(by: \.cpu) {
+            if item.cpu > 1 {
+                let menuItem = NSMenuItem(title: String(item.cpu) + "% - " + item.name + " (pid:" + String(item.pid) + ")", action: #selector(itemMenuClick(sender:)), keyEquivalent: "")
+                menuItem.image = item.icon
+                cpuProcessMenu.addItem(menuItem)
+            }
+        }
+        
+        memProcessMenu.removeAllItems()
+        for item in appDelegate.ActivityData.getTopProcess().sorted(by: \.mem) {
+            if item.cpu > 1 {
+                let menuItem = NSMenuItem(title: String(item.mem) + "% - " + item.name + " (pid:" + String(item.pid) + ")", action: #selector(itemMenuClick(sender:)), keyEquivalent: "")
+                menuItem.image = item.icon
+                memProcessMenu.addItem(menuItem)
+            }
+        }
     }
     
     private func updateData() {
