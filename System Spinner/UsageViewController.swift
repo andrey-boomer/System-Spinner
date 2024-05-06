@@ -42,11 +42,13 @@ class UsageViewController: NSViewController {
         // Air is not present fan
         if ioService.isAir {
             fanStack.removeFromSuperview()
+            self.preferredContentSize = NSMakeSize(self.view.frame.size.width, 330);
         }
         
         // if no SMC, remove CPU temp data
         if !ioService.presentSMC {
             cpuTempStack.removeFromSuperview()
+            self.preferredContentSize = NSMakeSize(self.view.frame.size.width, 275);
         }
         
         super.viewDidLoad()
@@ -64,13 +66,6 @@ class UsageViewController: NSViewController {
         RunLoop.main.add(dataTimer!, forMode: .common)
         dataTimer?.fire()
         
-        // ViewController is not auto resize at this time, so resize form
-        if ioService.isAir {
-            self.preferredContentSize = NSMakeSize(self.view.frame.size.width, 330);
-        }
-        if !ioService.presentSMC {
-            self.preferredContentSize = NSMakeSize(self.view.frame.size.width, 275);
-        }
         super.viewDidAppear()
     }
     
