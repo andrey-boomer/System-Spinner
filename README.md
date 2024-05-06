@@ -5,6 +5,7 @@ System Spinner provides macOS system information in status bar. Minimal, small a
 ## Features
 
 - Show CPU usage
+- Top CPU/MEM process in popup window
 - Memory statistics performance
 - Network connection
 - CMS Information for Cpu Temp and Fan
