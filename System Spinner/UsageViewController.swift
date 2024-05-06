@@ -40,33 +40,66 @@ class UsageViewController: NSViewController {
     
     @IBOutlet var netLabel: NSTextField!
     
+    @IBOutlet var cpuPopupButton: NSButton!
+    @IBOutlet var memPopupButton: NSButton!
+    
     @objc private func itemMenuClick(sender: NSMenuItem) {
         // no action yet
+    }
+    
+    @objc private func cpuPopupAction(sender: NSButton) {
+        cpuProcessMenu.removeAllItems()
+        for item in appDelegate.ActivityData.getTopProcess().sorted(by: \.cpu) {
+            if item.cpu > 0 {
+                let menuItem = NSMenuItem(title: item.name + " (" + String(item.pid) + ") - " + String(item.cpu) + "%", action: #selector(itemMenuClick(sender:)), keyEquivalent: "")
+                let image = item.icon
+                image.size = NSSize(width: 19 / image.size.height * image.size.width, height: 19)
+                menuItem.image = image
+                menuItem.isEnabled = true
+                cpuProcessMenu.addItem(menuItem)
+            }
+        }
+        cpuProcessMenu.popUp(positioning: nil, at: NSPoint(x: 0, y: sender.frame.height + 5), in: sender)
+    }
+    
+    @objc private func memPopupAction(sender: NSButton) {
+        memProcessMenu.removeAllItems()
+        for item in appDelegate.ActivityData.getTopProcess().sorted(by: \.mem) {
+            if item.mem > 0.5 {
+                let menuItem = NSMenuItem(title: item.name + " (" + String(item.pid) + ") " + String(item.realmem), action: #selector(itemMenuClick(sender:)), keyEquivalent: "")
+                let image = item.icon
+                image.size = NSSize(width: 19 / image.size.height * image.size.width, height: 19)
+                menuItem.image = image
+                memProcessMenu.addItem(menuItem)
+            }
+        }
+        memProcessMenu.popUp(positioning: nil, at: NSPoint(x: 0, y: sender.frame.height + 5), in: sender)
     }
     
     override func viewDidLoad() {
         // Air is not present fan
         if ioService.isAir {
             fanStack.removeFromSuperview()
-            self.preferredContentSize = NSMakeSize(self.view.frame.size.width, 330);
+            self.preferredContentSize = NSMakeSize(self.view.frame.size.width, 335);
         }
         
         // if no SMC, remove CPU temp data
         if !ioService.presentSMC {
             cpuTempStack.removeFromSuperview()
-            self.preferredContentSize = NSMakeSize(self.view.frame.size.width, 275);
+            self.preferredContentSize = NSMakeSize(self.view.frame.size.width, 280);
         }
         
         // create top cpu process menu
         cpuProcessMenu = NSMenu()
-        cpuLevel.menu = cpuProcessMenu
         cpuProcessMenu.font = NSFont.monospacedSystemFont(ofSize: 12, weight: .medium)
+        cpuPopupButton.action =  #selector(cpuPopupAction(sender:))
         
         // create top mem process menu
         memProcessMenu  = NSMenu()
         memLevel.menu = memProcessMenu
         memProcessMenu.font = NSFont.monospacedSystemFont(ofSize: 12, weight: .medium)
-        
+        memPopupButton.action =  #selector(memPopupAction(sender:))
+      
         super.viewDidLoad()
     }
     
@@ -83,24 +116,6 @@ class UsageViewController: NSViewController {
         dataTimer?.fire()
         
         super.viewDidAppear()
-        
-        cpuProcessMenu.removeAllItems()
-        for item in appDelegate.ActivityData.getTopProcess().sorted(by: \.cpu) {
-            if item.cpu > 1 {
-                let menuItem = NSMenuItem(title: String(item.cpu) + "% - " + item.name + " (pid:" + String(item.pid) + ")", action: #selector(itemMenuClick(sender:)), keyEquivalent: "")
-                menuItem.image = item.icon
-                cpuProcessMenu.addItem(menuItem)
-            }
-        }
-        
-        memProcessMenu.removeAllItems()
-        for item in appDelegate.ActivityData.getTopProcess().sorted(by: \.mem) {
-            if item.cpu > 1 {
-                let menuItem = NSMenuItem(title: String(item.mem) + "% - " + item.name + " (pid:" + String(item.pid) + ")", action: #selector(itemMenuClick(sender:)), keyEquivalent: "")
-                menuItem.image = item.icon
-                memProcessMenu.addItem(menuItem)
-            }
-        }
     }
     
     private func updateData() {
