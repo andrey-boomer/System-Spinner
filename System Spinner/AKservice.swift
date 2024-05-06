@@ -29,7 +29,8 @@ class AKservice {
     public struct topProcess: Codable {
         public var pid: Int
         public var name: String
-        public var usage: Double
+        public var usageCpu: Double
+        public var usageMem: Double
         
         public var icon: NSImage {
             get {
@@ -76,12 +77,10 @@ class AKservice {
         return info
     }
     
-    private func cpuTopProcess() -> [topProcess] {
-        let numberOfProcesses = 8
-        
+    public func getTopProcess() -> [topProcess] {
         let task = Process()
         task.launchPath = "/bin/ps"
-        task.arguments = ["-Aceo pid,pcpu,comm", "-r"]
+        task.arguments = ["-Aceo pid,pcpu,pmem,comm", "-r"]
         
         let outputPipe = Pipe()
         task.standardOutput = outputPipe
@@ -92,27 +91,19 @@ class AKservice {
         let output = String(decoding: outputData, as: UTF8.self)
         task.waitUntilExit()
         
-        var index = 0
         var processes: [topProcess] = []
         output.enumerateLines { (line, stop) -> Void in
-            if index != 0 {
                 let str = line.trimmingCharacters(in: .whitespaces)
                 let pidFind = str.findAndCrop(pattern: "^\\d+")
-                let usageFind = pidFind.remain.findAndCrop(pattern: "^[0-9,.]+ ")
-                let command = usageFind.remain.trimmingCharacters(in: .whitespaces)
-                let pid = Int(pidFind.cropped) ?? 0
-                let usage = Double(usageFind.cropped.replacingOccurrences(of: ",", with: ".")) ?? 0
+                let usageFindCpu = pidFind.remain.findAndCrop(pattern: "^[0-9,.]+ ")
+                let usageFindMem = usageFindCpu.remain.findAndCrop(pattern: "^[0-9,.]+ ")
+                let command = usageFindMem.remain.trimmingCharacters(in: .whitespaces)
+                let usagePCPU = Double(usageFindCpu.cropped.replacingOccurrences(of: ",", with: ".")) ?? 0
+                let usagePMEM = Double(usageFindMem.cropped.replacingOccurrences(of: ",", with: ".")) ?? 0
                 
-                var name: String = command
-                if let app = NSRunningApplication(processIdentifier: pid_t(pid)), let n = app.localizedName {
-                    name = n
+                if let pid = Int(pidFind.cropped) {
+                    processes.append(topProcess(pid: pid, name: command, usageCpu: usagePCPU, usageMem: usagePMEM))
                 }
-                
-                processes.append(topProcess(pid: pid, name: name, usage: usage))
-            }
-            
-            if index == numberOfProcesses { stop = true }
-            index += 1
         }
         
         return processes
@@ -270,8 +261,6 @@ class AKservice {
             previousUpload = upload
             previousDownload = download
         }
-        
-        cpuProcess = cpuTopProcess()
     }
     
 }
