@@ -280,14 +280,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(startRunningNotify(_:)),
                          name: NSWorkspace.didWakeNotification, object: nil)
         
-        NSEvent.addGlobalMonitorForEvents(matching: NSEvent.EventTypeMask.leftMouseDown, handler: { [self](event: NSEvent) in
+        NSEvent.addGlobalMonitorForEvents(matching: [NSEvent.EventTypeMask.leftMouseDown,NSEvent.EventTypeMask.rightMouseDown], handler: { [self](event: NSEvent) in
             closePopoverMenu(sender: self)
         })
-        
-        NSEvent.addGlobalMonitorForEvents(matching: NSEvent.EventTypeMask.rightMouseDown, handler: { [self](event: NSEvent) in
-            closePopoverMenu(sender: self)
-        })
-        
+                
         // end initialization
         changeSpinner(setName: spinnerActive)
         sHelper.hasNewVersion()
