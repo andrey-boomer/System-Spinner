@@ -63,7 +63,7 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
         task.waitUntilExit()
     }
     
-    func sendSystemNotification(title: String, body: String = "", action: String) {
+    public func sendSystemNotification(title: String, body: String = "", action: String) {
         let content = UNMutableNotificationContent()
         let notificationCenter = UNUserNotificationCenter.current()
         let downloadAction = UNNotificationAction(identifier: action, title: action, options: .init(rawValue: 0))
@@ -82,8 +82,8 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
         notificationCenter.add(UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil))
     }
    
-    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        if  response.actionIdentifier == "Download" {
+    public func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+         if  response.actionIdentifier == "Download" {
                 NSWorkspace.shared.open(URL(string: appLastestUrl)!)
         }
         completionHandler()
@@ -125,19 +125,14 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
         return hasUpdate
     }
     
+    public func hasNewVersion() {
+        if checkNewVersion() {
+           sendSystemNotification(title: "New System Spinner has released!", body: "An new version is available. Would you like to update?", action: "Download")
+        }
+    }
+    
     override init() {
-        
         super.init()
-        
         UNUserNotificationCenter.current().delegate = self
-        
-        // lets check new version every lay
-        versionTimer = Timer(timeInterval: 86400.0, repeats: true, block: { [weak self] _ in
-            if self!.checkNewVersion() {
-                self!.sendSystemNotification(title: "System Spinner Updated!", body: "An new version is available. Would you like to update?", action: "Download")
-            }
-        })
-        RunLoop.main.add(versionTimer!, forMode: .common)
-        versionTimer?.fire()
     }
 }

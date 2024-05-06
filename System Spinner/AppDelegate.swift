@@ -106,6 +106,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     @objc private func startRunningNotify(_ notification: NSNotification) {
         startRunning()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            self.sHelper.hasNewVersion()
+         }
     }
     
     @objc private func togglePopover(sender: NSStatusItem) {
@@ -190,18 +194,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             popover.performClose(sender)
         }
     }
-    
-    private func setNotifications() {
-           NSWorkspace.shared.notificationCenter
-            .addObserver(self, selector: #selector(stopRunningNotify(_:)),
-                            name: NSWorkspace.willSleepNotification,
-                            object: nil)
-           NSWorkspace.shared.notificationCenter
-            .addObserver(self, selector: #selector(startRunningNotify(_:)),
-                            name: NSWorkspace.didWakeNotification,
-                            object: nil)
-    }
-    
+
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         
         spinnerActive = UserDefaults.standard.string(forKey: "group.spinnerActive") ?? "Loader"
@@ -217,13 +210,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         popover.contentViewController = UsageViewController.freshController()
-        NSEvent.addGlobalMonitorForEvents(matching: NSEvent.EventTypeMask.leftMouseDown, handler: { [self](event: NSEvent) in
-            closePopoverMenu(sender: self)
-        })
-        
-        NSEvent.addGlobalMonitorForEvents(matching: NSEvent.EventTypeMask.rightMouseDown, handler: { [self](event: NSEvent) in
-            closePopoverMenu(sender: self)
-        })
 
         // create pop up menu
         statusItemMenu = NSMenu()
@@ -288,7 +274,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItemMenu.addItem(NSMenuItem(title: "About", action: #selector(aboutWindow(sender:)), keyEquivalent: ""))
         statusItemMenu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: ""))
         
+        // System Hooks
+        NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(stopRunningNotify(_:)),
+                         name: NSWorkspace.willSleepNotification, object: nil)
+        NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(startRunningNotify(_:)),
+                         name: NSWorkspace.didWakeNotification, object: nil)
+        
+        NSEvent.addGlobalMonitorForEvents(matching: NSEvent.EventTypeMask.leftMouseDown, handler: { [self](event: NSEvent) in
+            closePopoverMenu(sender: self)
+        })
+        
+        NSEvent.addGlobalMonitorForEvents(matching: NSEvent.EventTypeMask.rightMouseDown, handler: { [self](event: NSEvent) in
+            closePopoverMenu(sender: self)
+        })
+        
+        // end initialization
         changeSpinner(setName: spinnerActive)
+        sHelper.hasNewVersion()
     }
     
     func applicationWillTerminate(_ aNotification: Notification) {
