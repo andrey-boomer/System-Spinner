@@ -59,7 +59,7 @@ class UsageViewController: NSViewController {
                 cpuProcessMenu.addItem(menuItem)
             }
         }
-        cpuProcessMenu.popUp(positioning: nil, at: NSPoint(x: 0, y: sender.frame.height + 5), in: sender)
+        cpuProcessMenu.popUp(positioning: nil, at: NSPoint(x: -cpuProcessMenu.size.width/1.1, y: sender.frame.height + 5), in: sender)
     }
     
     @objc private func memPopupAction(sender: NSButton) {
@@ -73,7 +73,7 @@ class UsageViewController: NSViewController {
                 memProcessMenu.addItem(menuItem)
             }
         }
-        memProcessMenu.popUp(positioning: nil, at: NSPoint(x: 0, y: sender.frame.height + 5), in: sender)
+        memProcessMenu.popUp(positioning: nil, at: NSPoint(x:  -memProcessMenu.size.width/1.1, y: sender.frame.height + 5), in: sender)
     }
     
     override func viewDidLoad() {
