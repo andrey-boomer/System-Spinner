@@ -284,6 +284,6 @@ class IOServiceData {
             fan2Speed = Int(self.read(fanSpeedKeys[1]))
         }
         
-        systemPower = systemPowerKeys.reduce(0,{ result, sensor in max(result, self.read(sensor))})
+        systemPower = systemPowerKeys.reduce(0, { sum, sensor in round(sum + self.read(sensor))})
     }
 }
