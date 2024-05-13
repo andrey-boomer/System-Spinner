@@ -84,15 +84,15 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
    
     public func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
          if  response.actionIdentifier == "Download" {
-                NSWorkspace.shared.open(URL(string: appLastestUrl)!)
+             guard let url = URL(string: appLastestUrl) else {
+                   return
+             }
+             NSWorkspace.shared.open(url)
         }
         completionHandler()
     }
     
-    public func checkNewVersion() -> Bool {
-        let appCurrentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
-        let sem = DispatchSemaphore.init(value: 0)
-        var hasUpdate = false
+    public func hasNewVersion() {
         
         struct versionEntry: Codable {
             let id: Int
@@ -100,36 +100,38 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
             let name: String
         }
         
-        let task = URLSession.shared.dataTask(with:  URL(string: appApiUrl)!) { data, response, error in
-              guard
-                  error == nil,
-                  let data = data
-              else {
-                  return
-              }
-              
-              let decoder = JSONDecoder()
-              decoder.keyDecodingStrategy = .convertFromSnakeCase
-              do {
-                  let versionList = try decoder.decode(versionEntry.self, from: data)
-                  if !versionList.tagName.contains(appCurrentVersion!) {
-                      hasUpdate = true
-                  }
-                  do { sem.signal() }
-              } catch {
-                  return
-             }
-          }
-          task.resume()
-        sem.wait()
-        return hasUpdate
-    }
-    
-    public func hasNewVersion() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-            if self.checkNewVersion() {
-                self.sendSystemNotification(title: "New System Spinner has released!", body: "An new version is available. Would you like to update?", action: "Download")
-            }
+        func trimCharacter(val: Any) -> Int {
+            let forFilter = val as? String ?? ""
+            let filteredString = forFilter.filter("0123456789".contains)
+            return Int(filteredString) ?? 0
+        }
+        
+        let appCurrentVersion = trimCharacter(val: Bundle.main.infoDictionary!["CFBundleShortVersionString"] as Any)
+        
+        guard let url = URL(string: appApiUrl) else {
+              return
+        }
+        
+		// start check new version after 5 minits from execute function
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            URLSession.shared.dataTask(with: url) { (data, res, err) in
+                guard let data = data else {
+                      return
+                }
+                
+                do {
+                    let decoder = JSONDecoder()
+                    decoder.keyDecodingStrategy = .convertFromSnakeCase
+                    let versionGit = try trimCharacter(val: decoder.decode(versionEntry.self, from: data).tagName)
+                    if versionGit > 0 && appCurrentVersion > 0 && versionGit > appCurrentVersion {
+                        self.sendSystemNotification(title: "New System Spinner has released!",
+                                                    body: "An new version is available. Would you like to update?",
+                                                    action: "Download")
+                    }
+                } catch {
+                   return
+                }
+			}.resume()
          }
     }
     
