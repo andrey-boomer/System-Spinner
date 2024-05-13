@@ -113,7 +113,7 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
         }
         
 		// start check new version after 5 minits from execute function
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 300) {
             URLSession.shared.dataTask(with: url) { (data, res, err) in
                 guard let data = data else {
                       return
