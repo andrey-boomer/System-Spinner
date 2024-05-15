@@ -413,6 +413,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="NSTouchBarGetInfoTemplate" width="20" height="20"/>
+        <image name="NSTouchBarGetInfoTemplate" width="19" height="19"/>
     </resources>
 </document>
