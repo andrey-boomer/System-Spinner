@@ -200,7 +200,7 @@ class IOServiceData {
         gpuTempKeys = checkNulValues(sourceArray: (SensorsList["DEFAULT"]?["GPU"])!)
         fanTempKeys = checkNulValues(sourceArray: (SensorsList["DEFAULT"]?["FAN"])!)
         fanSpeedKeys = (SensorsList["DEFAULT"]?["FAN SPEED"])!
-        systemPowerKeys = checkNulValues(sourceArray: (SensorsList["DEFAULT"]?["POWER"])!)
+        systemPowerKeys = (SensorsList["DEFAULT"]?["POWER"])!
         
         // let load apple sillicon models custom values
         for cpuModel in SensorsList {
@@ -215,7 +215,7 @@ class IOServiceData {
                     } else if sensors.key == "FAN SPEED" {
                         fanSpeedKeys = sensors.value
                     } else if sensors.key == "POWER" {
-                        systemPowerKeys = checkNulValues(sourceArray: sensors.value)
+                        systemPowerKeys = sensors.value
                     }
                }
             }
