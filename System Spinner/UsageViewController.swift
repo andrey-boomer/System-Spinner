@@ -77,16 +77,18 @@ class UsageViewController: NSViewController {
     }
     
     override func viewDidLoad() {
+        
+        //fix heigh, width
+        self.preferredContentSize = NSMakeSize(180, 180);
+
         // Air is not present fan
         if ioService.isAir {
             fanStack.removeFromSuperview()
-            self.preferredContentSize = NSMakeSize(self.view.frame.size.width, 335);
         }
         
         // if no SMC, remove CPU temp data
         if !ioService.presentSMC {
             cpuTempStack.removeFromSuperview()
-            self.preferredContentSize = NSMakeSize(self.view.frame.size.width, 280);
         }
         
         // create top cpu process menu
@@ -146,10 +148,10 @@ class UsageViewController: NSViewController {
         
         // memory data
         memPercentage.stringValue = "Memory Usage " + String(appDelegate.ActivityData.memPercentage) + "%"
-        memLevel.doubleValue = appDelegate.ActivityData.memPercentage / 10
+        memLevel.doubleValue = appDelegate.ActivityData.memPercentage / 5
         
         memPressure.stringValue = "Pressure " + String(appDelegate.ActivityData.memPressure) + "%"
-        pressureLevel.doubleValue = appDelegate.ActivityData.memPressure / 10
+        pressureLevel.doubleValue = appDelegate.ActivityData.memPressure / 5
         
         memApp.stringValue = String(Int(appDelegate.ActivityData.memApp)) + "% (App)"
         memAppBar.doubleValue = appDelegate.ActivityData.memApp
