@@ -275,7 +275,9 @@ class AKservice {
     
 }
 
-extension String: LocalizedError {
+extension String: @retroactive Error {}
+
+extension String: @retroactive LocalizedError {
     public func findAndCrop(pattern: String) -> (cropped: String, remain: String) {
         do {
             let regex = try NSRegularExpression(pattern: pattern)
