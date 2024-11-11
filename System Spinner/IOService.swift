@@ -14,6 +14,7 @@ class IOServiceData {
     private var fanTempKeys: [String] = []
     private var fanSpeedKeys:  [String] = []
     private var systemPowerKeys: [String] = []
+    private var systemAdapterKeys: [String] = []
     private let dateFormatter = DateFormatter()
     private let KERNEL_INDEX_SMC: UInt32 = 2
     private let SMC_CMD_READ_BYTES: UInt8 = 5
@@ -28,7 +29,8 @@ class IOServiceData {
             "GPU": ["TCGC"],
             "FAN": ["TaLP", "TaRF"],
             "FAN SPEED": ["F0Ac", "F1Ac"],
-            "POWER": ["PSTR", "PDTR", "PPBR"]
+            "POWER": ["PSTR", "PPBR"],
+            "ADAPTER": ["PDTR"]
         ],
         "M1": [
             "CPU": ["TC0P", "Tp09", "Tp0T", "Tp01", "Tp05", "Tp0D", "Tp0H", "Tp0L", "Tp0P", "Tp0X", "Tp0b", "Tg0H"],
@@ -52,6 +54,7 @@ class IOServiceData {
     public var fan1Speed: Int = 0
     public var fan2Speed: Int = 0
     public var systemPower: Double = 0.0
+    public var systemAdapter: Double = 0.0
     
     private struct AppleSMCVers { // 6 bytes
         var major: UInt8 = 0
@@ -201,6 +204,7 @@ class IOServiceData {
         fanTempKeys = checkNulValues(sourceArray: (SensorsList["DEFAULT"]?["FAN"])!)
         fanSpeedKeys = (SensorsList["DEFAULT"]?["FAN SPEED"])!
         systemPowerKeys = (SensorsList["DEFAULT"]?["POWER"])!
+        systemAdapterKeys = (SensorsList["DEFAULT"]?["ADAPTER"])!
         
         // let load apple sillicon models custom values
         for cpuModel in SensorsList {
@@ -216,6 +220,8 @@ class IOServiceData {
                         fanSpeedKeys = sensors.value
                     } else if sensors.key == "POWER" {
                         systemPowerKeys = sensors.value
+                    } else if sensors.key == "ADAPTER" {
+                        systemAdapterKeys = sensors.value
                     }
                }
             }
@@ -285,5 +291,6 @@ class IOServiceData {
         }
         
         systemPower = systemPowerKeys.reduce(0, { sum, sensor in round(sum + self.read(sensor))})
+        systemAdapter = systemAdapterKeys.reduce(0, { sum, sensor in round(sum + self.read(sensor))})
     }
 }

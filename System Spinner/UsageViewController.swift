@@ -127,8 +127,9 @@ class UsageViewController: NSViewController {
         // CPU data
         cpuLabel.stringValue = "CPU Usage " + String(appDelegate.ActivityData.cpuPercentage) + "%"
         cpuLevel.doubleValue = appDelegate.ActivityData.cpuPercentage / 5
+        
         // power data
-        powerComp.stringValue = "System power " + String(ioService.systemPower) + " watt"
+        powerComp.stringValue = "Power " + String(ioService.systemPower) + "w, Charging " + String(ioService.systemAdapter) + "w"
         
         // Air is not present fan
         if !ioService.isAir {
