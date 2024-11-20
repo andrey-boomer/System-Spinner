@@ -15,6 +15,7 @@ class IOServiceData {
     private var fanSpeedKeys:  [String] = []
     private var systemPowerKeys: [String] = []
     private var systemAdapterKeys: [String] = []
+    private var systemBatteryKeys: [String] = []
     private let dateFormatter = DateFormatter()
     private let KERNEL_INDEX_SMC: UInt32 = 2
     private let SMC_CMD_READ_BYTES: UInt8 = 5
@@ -29,7 +30,8 @@ class IOServiceData {
             "GPU": ["TCGC"],
             "FAN": ["TaLP", "TaRF"],
             "FAN SPEED": ["F0Ac", "F1Ac"],
-            "POWER": ["PSTR", "PPBR"],
+            "POWER": ["PSTR"],
+            "BATTERY": ["PPBR"],
             "ADAPTER": ["PDTR"]
         ],
         "M1": [
@@ -53,8 +55,9 @@ class IOServiceData {
     public var fanSpeed: Int = 0
     public var fan1Speed: Int = 0
     public var fan2Speed: Int = 0
-    public var systemPower: Double = 0.0
-    public var systemAdapter: Double = 0.0
+    public var systemPower: Int = 0
+    public var systemAdapter: Int = 0
+    public var systemBattery: Int = 0
     
     private struct AppleSMCVers { // 6 bytes
         var major: UInt8 = 0
@@ -205,6 +208,7 @@ class IOServiceData {
         fanSpeedKeys = (SensorsList["DEFAULT"]?["FAN SPEED"])!
         systemPowerKeys = (SensorsList["DEFAULT"]?["POWER"])!
         systemAdapterKeys = (SensorsList["DEFAULT"]?["ADAPTER"])!
+        systemBatteryKeys = (SensorsList["DEFAULT"]?["BATTERY"])!
         
         // let load apple sillicon models custom values
         for cpuModel in SensorsList {
@@ -222,6 +226,8 @@ class IOServiceData {
                         systemPowerKeys = sensors.value
                     } else if sensors.key == "ADAPTER" {
                         systemAdapterKeys = sensors.value
+                    } else if sensors.key == "BATTERY" {
+                        systemBatteryKeys = sensors.value
                     }
                }
             }
@@ -290,7 +296,8 @@ class IOServiceData {
             fan2Speed = Int(self.read(fanSpeedKeys[1]))
         }
         
-        systemPower = systemPowerKeys.reduce(0, { sum, sensor in round(sum + self.read(sensor))})
-        systemAdapter = systemAdapterKeys.reduce(0, { sum, sensor in round(sum + self.read(sensor))})
+        systemPower = Int(systemPowerKeys.reduce(0, { sum, sensor in round(sum + self.read(sensor))}))
+        systemAdapter = Int(systemAdapterKeys.reduce(0, { sum, sensor in round(sum + self.read(sensor))}))
+        systemBattery = Int(systemBatteryKeys.reduce(0, { sum, sensor in round(sum + self.read(sensor))}))
     }
 }

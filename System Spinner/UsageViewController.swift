@@ -129,7 +129,13 @@ class UsageViewController: NSViewController {
         cpuLevel.doubleValue = appDelegate.ActivityData.cpuPercentage / 5
         
         // power data
-        powerComp.stringValue = "Power " + String(ioService.systemPower) + "w, Charging " + String(ioService.systemAdapter) + "w"
+        if ioService.systemAdapter > 0 {
+            powerComp.stringValue = "PWR: " + String(ioService.systemPower) + "w, DC: " + String(ioService.systemAdapter) + "w"
+        } else if (ioService.systemBattery > 0 && ioService.systemAdapter > 0)  {
+            powerComp.stringValue = "PWR: " + String(ioService.systemPower) + "w, BAT: " + String(ioService.systemBattery) + "w, DC: " + String(ioService.systemAdapter) + "w"
+        } else {
+            powerComp.stringValue = "PWR: " + String(ioService.systemPower) + "w, BAT: " + String(ioService.systemBattery) + "w"
+        }
         
         // Air is not present fan
         if !ioService.isAir {
