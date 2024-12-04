@@ -45,6 +45,10 @@ class IOServiceData {
         "M3": [
             "CPU": ["TC0P", "Te05", "Te0L", "Te0P", "Te0S", "Tf04", "Tf09", "Tf0A", "Tf0B", "Tf0D", "Tf0E", "Tf44", "Tf49", "Tf4A", "Tf4B", "Tf4D", "Tf4E"],
             "GPU": ["Tf14", "Tf18", "Tf19", "Tf1A", "Tf24", "Tf28", "Tf29", "Tf2A"],
+        ],
+        "M4": [
+            "CPU": ["TC0P", "Te05", "Te0L", "Te0P", "Te0S", "Tf04", "Tf09", "Tf0A", "Tf0B", "Tf0D", "Tf0E", "Tf44", "Tf49", "Tf4A", "Tf4B", "Tf4D", "Tf4E"],
+            "GPU": ["Tf14", "Tf18", "Tf19", "Tf1A", "Tf24", "Tf28", "Tf29", "Tf2A"],
         ]
     ]
     
@@ -177,7 +181,9 @@ class IOServiceData {
             isAir = true
         }
         
-        if String(cString: nameChars).uppercased().contains("M3") {
+        if String(cString: nameChars).uppercased().contains("M4") {
+            return "M4"
+        } else if String(cString: nameChars).uppercased().contains("M3") {
             return "M3"
         } else if String(cString: nameChars).uppercased().contains("M2") {
             return "M2"
