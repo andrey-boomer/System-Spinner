@@ -21,6 +21,7 @@ var statusItem: NSStatusItem = {
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItemMenu: NSMenu!
     private var sHelper = Helper()
+    private var displays = DisplayManager()
     private var updateIntervalName = ["0.5", "1.0", "1.5", "2.0"]
     private var spinners = ["Loader" : 8, "Grey Loader" : 18, "Cirrcles": 8, "Dots": 12, "Pie": 6, "Rainbow Pie": 15, "Recharges": 8, "Cat": 5]
 
@@ -209,6 +210,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // end initialization
         sHelper.changeSpinner(spinnerName: spinnerActive, spinnerFrames: Int(spinners[spinnerActive]!))
         sHelper.hasNewVersion()
+        
+        displays.configureDisplays()
     }
     
     func applicationWillTerminate(_ aNotification: Notification) {

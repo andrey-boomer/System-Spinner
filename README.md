@@ -32,5 +32,6 @@ Written in Swift 5. Universal build.
 - Based on [menubar_runcat](https://github.com/Kyome22/menubar_runcat)
 - Based on [stats](https://github.com/exelban/stats)
 - Based on [ActivityKit](https://github.com/Kyome22/ActivityKit)
+- Based on [MonitorControl](https://github.com/MonitorControl/MonitorControl)
 
 You can download app from [releases](https://github.com/andrey-boomer/System-Spinner/releases)

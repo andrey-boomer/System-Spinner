@@ -4,13 +4,15 @@
 <dict>
 	<key>com.apple.security.app-sandbox</key>
 	<false/>
+	<key>com.apple.security.cs.disable-library-validation</key>
+	<true/>
 	<key>com.apple.security.network.client</key>
 	<true/>
 	<key>com.apple.security.temporary-exception.sbpl</key>
 	<array>
 		<string>(allow iokit-open)</string>
-		<string>(allow iokit-set-properties (iokit-property &quot;ConsoleUID&quot;))</string>
-		<string>(allow mach-lookup (global-name &quot;com.apple.AssetCacheLocatorService&quot;))</string>
+		<string>(allow iokit-set-properties (iokit-property "ConsoleUID"))</string>
+		<string>(allow mach-lookup (global-name "com.apple.AssetCacheLocatorService"))</string>
 	</array>
 </dict>
 </plist>

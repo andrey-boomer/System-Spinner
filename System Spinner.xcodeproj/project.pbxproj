@@ -7,18 +7,32 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7F0D02622D1EBCFA0029C507 /* Display.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F0D02612D1EBCFA0029C507 /* Display.swift */; };
 		7F80E7972BD815270006AD44 /* Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F80E7962BD815270006AD44 /* Helper.swift */; };
 		7F8124E92B96DC8600B05107 /* AKservice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8124E82B96DC8600B05107 /* AKservice.swift */; };
+		7F866E292D1ECAFC00F20488 /* DisplayServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F0D02722D1ECADD0029C507 /* DisplayServices.framework */; };
+		7F866E2C2D1ECAFE00F20488 /* CoreDisplay.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F0D026E2D1ECA450029C507 /* CoreDisplay.framework */; };
+		7F866E2F2D1ECB1600F20488 /* OSD.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F866E2E2D1ECB1600F20488 /* OSD.framework */; };
+		7F866E322D1ECBFE00F20488 /* DisplayManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F866E312D1ECBFE00F20488 /* DisplayManager.swift */; };
+		7F866E352D1ECD9A00F20488 /* Arm64DDC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F866E332D1ECD9A00F20488 /* Arm64DDC.swift */; };
+		7F866E362D1ECD9A00F20488 /* IntelDDC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F866E342D1ECD9A00F20488 /* IntelDDC.swift */; };
 		7FB908C62B67B9FD00E9EE24 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB908BE2B67B9FD00E9EE24 /* AppDelegate.swift */; };
 		7FFC0C552B7B6845002F9990 /* IOService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FFC0C542B7B6845002F9990 /* IOService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		7F0D025A2D1EAD9A0029C507 /* DDCHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DDCHeader.h; sourceTree = "<group>"; };
+		7F0D02612D1EBCFA0029C507 /* Display.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Display.swift; sourceTree = "<group>"; };
+		7F0D026E2D1ECA450029C507 /* CoreDisplay.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreDisplay.framework; path = ../../../../System/Library/Frameworks/CoreDisplay.framework; sourceTree = "<group>"; };
+		7F0D02722D1ECADD0029C507 /* DisplayServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DisplayServices.framework; path = ../../../../System/Library/PrivateFrameworks/DisplayServices.framework; sourceTree = "<group>"; };
 		7F35E5922B847EBC0032163E /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		7F35E5932B847F230032163E /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		7F80E7962BD815270006AD44 /* Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helper.swift; sourceTree = "<group>"; };
 		7F8124E82B96DC8600B05107 /* AKservice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AKservice.swift; sourceTree = "<group>"; };
+		7F866E2E2D1ECB1600F20488 /* OSD.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSD.framework; path = ../../../../System/Library/PrivateFrameworks/OSD.framework; sourceTree = "<group>"; };
+		7F866E312D1ECBFE00F20488 /* DisplayManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayManager.swift; sourceTree = "<group>"; };
+		7F866E332D1ECD9A00F20488 /* Arm64DDC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Arm64DDC.swift; sourceTree = "<group>"; };
+		7F866E342D1ECD9A00F20488 /* IntelDDC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntelDDC.swift; sourceTree = "<group>"; };
 		7FB908A72B67B9A400E9EE24 /* System Spinner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "System Spinner.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7FB908B32B67B9A500E9EE24 /* System_Spinner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = System_Spinner.entitlements; sourceTree = "<group>"; };
 		7FB908BE2B67B9FD00E9EE24 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -48,23 +62,37 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7F866E2C2D1ECAFE00F20488 /* CoreDisplay.framework in Frameworks */,
+				7F866E2F2D1ECB1600F20488 /* OSD.framework in Frameworks */,
+				7F866E292D1ECAFC00F20488 /* DisplayServices.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		7F0D026D2D1ECA450029C507 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				7F866E2E2D1ECB1600F20488 /* OSD.framework */,
+				7F0D02722D1ECADD0029C507 /* DisplayServices.framework */,
+				7F0D026E2D1ECA450029C507 /* CoreDisplay.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		7FB9089E2B67B9A400E9EE24 = {
 			isa = PBXGroup;
 			children = (
-				7F35E5922B847EBC0032163E /* LICENSE */,
-				7F35E5932B847F230032163E /* README.md */,
-				7FB908B32B67B9A500E9EE24 /* System_Spinner.entitlements */,
 				7FB908BE2B67B9FD00E9EE24 /* AppDelegate.swift */,
 				7F80E7962BD815270006AD44 /* Helper.swift */,
+				7FB908B32B67B9A500E9EE24 /* System_Spinner.entitlements */,
+				7F35E5932B847F230032163E /* README.md */,
+				7F35E5922B847EBC0032163E /* LICENSE */,
 				7F6D12232D1D868100C44FAC /* Pictures */,
 				7FB908A92B67B9A400E9EE24 /* Library */,
 				7F0D025B2D1EADEF0029C507 /* Controllers */,
+				7F0D026D2D1ECA450029C507 /* Frameworks */,
 				7FB908A82B67B9A400E9EE24 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -81,6 +109,10 @@
 			isa = PBXGroup;
 			children = (
 				7F0D025A2D1EAD9A0029C507 /* DDCHeader.h */,
+				7F866E332D1ECD9A00F20488 /* Arm64DDC.swift */,
+				7F866E342D1ECD9A00F20488 /* IntelDDC.swift */,
+				7F0D02612D1EBCFA0029C507 /* Display.swift */,
+				7F866E312D1ECBFE00F20488 /* DisplayManager.swift */,
 				7F8124E82B96DC8600B05107 /* AKservice.swift */,
 				7FFC0C542B7B6845002F9990 /* IOService.swift */,
 			);
@@ -166,8 +198,12 @@
 			files = (
 				7FFC0C552B7B6845002F9990 /* IOService.swift in Sources */,
 				7FB908C62B67B9FD00E9EE24 /* AppDelegate.swift in Sources */,
+				7F0D02622D1EBCFA0029C507 /* Display.swift in Sources */,
 				7F80E7972BD815270006AD44 /* Helper.swift in Sources */,
 				7F8124E92B96DC8600B05107 /* AKservice.swift in Sources */,
+				7F866E352D1ECD9A00F20488 /* Arm64DDC.swift in Sources */,
+				7F866E362D1ECD9A00F20488 /* IntelDDC.swift in Sources */,
+				7F866E322D1ECBFE00F20488 /* DisplayManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -209,6 +245,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 14.6;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -247,6 +284,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -265,6 +303,10 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = D2GKV4ZUT5;
 				ENABLE_HARDENED_RUNTIME = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Controllers",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "System Spinner";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
@@ -283,6 +325,10 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = Library/DDCHeader.h;
 				SWIFT_VERSION = 5.0;
+				SYSTEM_FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks",
+				);
 			};
 			name = Debug;
 		};
@@ -301,6 +347,10 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = D2GKV4ZUT5;
 				ENABLE_HARDENED_RUNTIME = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Controllers",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "System Spinner";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
@@ -319,6 +369,10 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = Library/DDCHeader.h;
 				SWIFT_VERSION = 5.0;
+				SYSTEM_FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks",
+				);
 			};
 			name = Release;
 		};
