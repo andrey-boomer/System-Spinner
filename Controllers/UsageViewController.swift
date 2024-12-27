@@ -8,9 +8,6 @@
 import Cocoa
 
 class UsageViewController: NSViewController {
-    
-    let appDelegate = NSApp.delegate as! AppDelegate
-    
     private var dataTimer: Timer? = nil
     private var cpuProcessMenu: NSMenu!
     private var memProcessMenu: NSMenu!
@@ -49,7 +46,7 @@ class UsageViewController: NSViewController {
     
     @objc private func cpuPopupAction(sender: NSButton) {
         cpuProcessMenu.removeAllItems()
-        for item in appDelegate.ActivityData.getTopProcess().sorted(by: \.cpu) {
+        for item in ActivityData.getTopProcess().sorted(by: \.cpu) {
             if item.cpu > 0 {
                 let menuItem = NSMenuItem(title: item.name + " (" + String(item.pid) + ") - " + String(item.cpu) + "%", action: #selector(itemMenuClick(sender:)), keyEquivalent: "")
                 let image = item.icon
@@ -64,7 +61,7 @@ class UsageViewController: NSViewController {
     
     @objc private func memPopupAction(sender: NSButton) {
         memProcessMenu.removeAllItems()
-        for item in appDelegate.ActivityData.getTopProcess().sorted(by: \.mem) {
+        for item in ActivityData.getTopProcess().sorted(by: \.mem) {
             if item.mem > 0.5 {
                 let menuItem = NSMenuItem(title: item.name + " (" + String(item.pid) + ") " + String(item.realmem), action: #selector(itemMenuClick(sender:)), keyEquivalent: "")
                 let image = item.icon
@@ -111,7 +108,7 @@ class UsageViewController: NSViewController {
     }
     
     override func viewDidAppear() {
-        dataTimer = Timer(timeInterval: appDelegate.updateInterval, repeats: true, block: { [weak self] _ in
+        dataTimer = Timer(timeInterval: updateInterval, repeats: true, block: { [weak self] _ in
              self?.updateData()
         })
         RunLoop.main.add(dataTimer!, forMode: .common)
@@ -122,11 +119,11 @@ class UsageViewController: NSViewController {
     
     private func updateData() {
         ioService.update()
-        appDelegate.ActivityData.updateAll()
+        ActivityData.updateAll()
         
         // CPU data
-        cpuLabel.stringValue = "CPU Usage " + String(appDelegate.ActivityData.cpuPercentage) + "%"
-        cpuLevel.doubleValue = appDelegate.ActivityData.cpuPercentage / 5
+        cpuLabel.stringValue = "CPU Usage " + String(ActivityData.cpuPercentage) + "%"
+        cpuLevel.doubleValue = ActivityData.cpuPercentage / 5
         
         // power data
         if ioService.systemAdapter > 0 {
@@ -154,22 +151,22 @@ class UsageViewController: NSViewController {
         }
         
         // memory data
-        memPercentage.stringValue = "Memory Usage " + String(appDelegate.ActivityData.memPercentage) + "%"
-        memLevel.doubleValue = appDelegate.ActivityData.memPercentage / 5
+        memPercentage.stringValue = "Memory Usage " + String(ActivityData.memPercentage) + "%"
+        memLevel.doubleValue = ActivityData.memPercentage / 5
         
-        memPressure.stringValue = "Pressure " + String(appDelegate.ActivityData.memPressure) + "%"
-        pressureLevel.doubleValue = appDelegate.ActivityData.memPressure / 5
+        memPressure.stringValue = "Pressure " + String(ActivityData.memPressure) + "%"
+        pressureLevel.doubleValue = ActivityData.memPressure / 5
         
-        memApp.stringValue = String(Int(appDelegate.ActivityData.memApp)) + "% (App)"
-        memAppBar.doubleValue = appDelegate.ActivityData.memApp
+        memApp.stringValue = String(Int(ActivityData.memApp)) + "% (App)"
+        memAppBar.doubleValue = ActivityData.memApp
         
-        memWired.stringValue = String(Int(appDelegate.ActivityData.memWired)) + "% (Wrd)"
-        memWiredBar.doubleValue = appDelegate.ActivityData.memWired
+        memWired.stringValue = String(Int(ActivityData.memWired)) + "% (Wrd)"
+        memWiredBar.doubleValue = ActivityData.memWired
         
-        memComp.stringValue = String(Int(appDelegate.ActivityData.memCompressed)) + "% (Zip)"
-        memCompBar.doubleValue = appDelegate.ActivityData.memCompressed
+        memComp.stringValue = String(Int(ActivityData.memCompressed)) + "% (Zip)"
+        memCompBar.doubleValue = ActivityData.memCompressed
         
-        netLabel.stringValue = appDelegate.ActivityData.netIp + "\n↓ " + String(appDelegate.ActivityData.netIn.value) + appDelegate.ActivityData.netIn.unit + " | ↑ " + String(appDelegate.ActivityData.netOut.value) + appDelegate.ActivityData.netOut.unit
+        netLabel.stringValue = ActivityData.netIp + "\n↓ " + String(ActivityData.netIn.value) + ActivityData.netIn.unit + " | ↑ " + String(ActivityData.netOut.value) + ActivityData.netOut.unit
         
     }
 }

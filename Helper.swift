@@ -11,12 +11,17 @@ import AppKit
 import UserNotifications
 
 class Helper: NSObject, UNUserNotificationCenterDelegate {
-    
     // Autoupdate links
     public let appApiUrl = "https://api.github.com/repos/andrey-boomer/System-Spinner/releases/latest"
     public let appLastestUrl = "https://github.com/andrey-boomer/System-Spinner/releases/latest"
     public let appAboutUrl = "https://github.com/andrey-boomer/System-Spinner"
+    public let popover = NSPopover()
     private var versionTimer: Timer? = nil
+    private var cpuTimer: Timer? = nil
+    private var spinnerTimer: Timer? = nil
+    private var frames: [NSImage] =  []
+    private var curFrame: Int = 0
+    private var maxFrame: Int = 0
     
     public var isAutoLaunch: Bool {
             get { SMAppService.mainApp.status == .enabled }
@@ -82,6 +87,19 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
         notificationCenter.add(UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil))
     }
    
+    public func showPopover(sender: Any?) {
+      if let button = statusItem.button {
+          popover.show(relativeTo: button.bounds, of: button, preferredEdge: NSRectEdge.minY)
+      }
+    }
+
+    public func closePopoverMenu(sender: Any?) {
+        statusItem.menu = nil
+        if popover.isShown {
+            popover.performClose(sender)
+        }
+    }
+    
     public func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
          if  response.actionIdentifier == "Download" {
              guard let url = URL(string: appLastestUrl) else {
@@ -133,6 +151,63 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
                 }
 			}.resume()
          }
+    }
+    
+    public func changeSpinner(spinnerName: String, spinnerFrames: Int) {
+        stopRunning()
+        spinnerActive = spinnerName
+        
+        // load spinner
+        frames = {
+            return (0 ..< spinnerFrames).map { n in
+                let image = NSImage(named: spinnerName + " \(n)")!
+                image.size = NSSize(width: 19 / image.size.height * image.size.width, height: 19)
+                return image
+            }
+        }()
+        curFrame = 0
+        maxFrame = spinnerFrames
+        startRunning()
+    }
+    
+    public func startRunning() {
+        cpuTimer = Timer(timeInterval: updateInterval, repeats: true, block: { [weak self] _ in
+            self?.updateUsage()
+        })
+        RunLoop.main.add(cpuTimer!, forMode: .common)
+        cpuTimer?.fire()
+    }
+    
+    public func stopRunning() {
+        spinnerTimer?.invalidate()
+        cpuTimer?.invalidate()
+    }
+    
+    private func updateUsage() {
+        ActivityData.updateCpuOnly()
+        curFrame =  curFrame + 1
+        if curFrame > maxFrame - 1 {
+            curFrame = 0
+        }
+        statusItem.button?.image = frames[curFrame]
+        
+        if enableStatusText {
+            statusItem.button?.title =  String(Int(ActivityData.cpuPercentage)) + "% "
+        } else {
+            statusItem.button?.title = ""
+        }
+        
+        let interval = 0.25 / max(1.0, min(100.0, ActivityData.cpuPercentage / Double(maxFrame)))
+        spinnerTimer?.invalidate()
+        spinnerTimer = Timer(timeInterval: interval, repeats: true, block: { [weak self] _ in
+            self!.curFrame =  self!.curFrame + 1
+            if self!.curFrame == self!.maxFrame {
+                self!.curFrame = 0
+            }
+            statusItem.button?.image = self?.frames[self!.curFrame]
+            
+        })
+        RunLoop.main.add(spinnerTimer!, forMode: .common)
     }
     
     override init() {

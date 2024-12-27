@@ -8,84 +8,22 @@
 import Cocoa
 import Foundation
 
+let ActivityData = AKservice()
+var spinnerActive: String!
+var enableStatusText: Bool = false
+var updateInterval: Double = 1.0
+var keyRemap: Bool = false
+var statusItem: NSStatusItem = {
+    return NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+}()
+
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
-    
-    private lazy var statusItem: NSStatusItem = {
-        return NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-    }()
-    
-    public let popover = NSPopover()
-    public let ActivityData = AKservice()
-    public var updateInterval: Double = 1.0
-    private var keyRemap: Bool = false
-    private var enableStatusText: Bool = false
-    private var updateIntervalName = ["0.3", "0.5", "1.0", "1.5", "2.0"]
-    private var spinners = ["Loader" : 8, "Grey Loader" : 18, "Cirrcles": 8, "Dots": 12, "Pie": 6, "Rainbow Pie": 15, "Recharges": 8, "Cat": 5]
-    private var spinnerActive: String!
     private var statusItemMenu: NSMenu!
-    private var frames: [NSImage] =  []
-    private var curFrame: Int = 0
-    private var cpuTimer: Timer? = nil
-    private var spinnerTimer: Timer? = nil
     private var sHelper = Helper()
-    
-    private func startRunning() {
-        cpuTimer = Timer(timeInterval: updateInterval, repeats: true, block: { [weak self] _ in
-            self?.updateUsage()
-        })
-        RunLoop.main.add(cpuTimer!, forMode: .common)
-        cpuTimer?.fire()
-    }
-    
-    private func stopRunning() {
-        spinnerTimer?.invalidate()
-        cpuTimer?.invalidate()
-    }
-    
-    private func updateUsage() {
-        ActivityData.updateCpuOnly()
-        curFrame =  curFrame + 1
-        if curFrame > Int(spinners[spinnerActive]!) - 1 {
-            curFrame = 0
-        }
-        statusItem.button?.image = frames[curFrame]
-        
-        if enableStatusText {
-            statusItem.button?.title =  String(Int(ActivityData.cpuPercentage)) + "% "
-        } else {
-            statusItem.button?.title = ""
-        }
-        
-        let interval = 0.25 / max(1.0, min(100.0, ActivityData.cpuPercentage / Double(spinners[spinnerActive]!)))
-        spinnerTimer?.invalidate()
-        spinnerTimer = Timer(timeInterval: interval, repeats: true, block: { [weak self] _ in
-            self!.curFrame =  self!.curFrame + 1
-            if self!.curFrame == Int(self!.spinners[self!.spinnerActive]!) {
-                self!.curFrame = 0
-            }
-            self?.statusItem.button?.image = self?.frames[self!.curFrame]
-            
-        })
-        RunLoop.main.add(spinnerTimer!, forMode: .common)
-    }
-    
-    private func changeSpinner(setName: String) {
-        stopRunning()
-        spinnerActive = setName
-        
-        // load spinner
-        frames = {
-            return (0 ..< spinners[setName]!).map { n in
-                let image = NSImage(named: setName + " \(n)")!
-                image.size = NSSize(width: 19 / image.size.height * image.size.width, height: 19)
-                return image
-            }
-        }()
-        curFrame = 0
-        startRunning()
-    }
-    
+    private var updateIntervalName = ["0.5", "1.0", "1.5", "2.0"]
+    private var spinners = ["Loader" : 8, "Grey Loader" : 18, "Cirrcles": 8, "Dots": 12, "Pie": 6, "Rainbow Pie": 15, "Recharges": 8, "Cat": 5]
+
     @objc private func aboutWindow(sender: NSStatusItem) {
         let appCurrentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
         let anAbout = NSAlert()
@@ -100,23 +38,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @objc private func stopRunningNotify(_ notification: NSNotification) {
-        closePopoverMenu(sender: self)
-        stopRunning()
+        sHelper.closePopoverMenu(sender: self)
+        sHelper.stopRunning()
     }
     
     @objc private func startRunningNotify(_ notification: NSNotification) {
-        startRunning()
+        sHelper.startRunning()
         sHelper.hasNewVersion()
     }
     
     @objc private func togglePopover(sender: NSStatusItem) {
         let event = NSApp.currentEvent!
         if event.type == NSEvent.EventType.leftMouseUp {
-            if popover.isShown {
-                closePopoverMenu(sender: sender)
+            if sHelper.popover.isShown {
+                sHelper.closePopoverMenu(sender: sender)
             } else {
                 statusItem.menu = nil
-                showPopover(sender: sender)
+                sHelper.showPopover(sender: sender)
             }
         } else {
             statusItem.menu = statusItemMenu
@@ -125,7 +63,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @objc private func changeSpinnerClick(sender: NSMenuItem) {
-        changeSpinner(setName: sender.title)
+        sHelper.changeSpinner(spinnerName: sender.title, spinnerFrames: Int(spinners[sender.title]!))
     }
     
     @objc private func analitycstApp(sender: NSMenuItem) {
@@ -133,7 +71,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
         
     @objc private func changeUpdateSpeedClick(sender: NSMenuItem) {
-        stopRunning()
+        sHelper.stopRunning()
         
         for menuItem in statusItem.menu!.items { // set all submenu state off
             if menuItem.hasSubmenu && menuItem.title == sender.parent?.title {
@@ -145,7 +83,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         updateInterval = Double(sender.title.replacingOccurrences(of: " s", with: ""))!
         sender.state = .on
-        startRunning()
+        sHelper.startRunning()
     }
     
     @objc private func changeLaunchAtLogin(sender: NSMenuItem) {
@@ -179,19 +117,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
-    private func showPopover(sender: Any?) {
-      if let button = statusItem.button {
-          popover.show(relativeTo: button.bounds, of: button, preferredEdge: NSRectEdge.minY)
-      }
-    }
-
-    private func closePopoverMenu(sender: Any?) {
-        statusItem.menu = nil
-        if popover.isShown {
-            popover.performClose(sender)
-        }
-    }
-
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         
         spinnerActive = UserDefaults.standard.string(forKey: "group.spinnerActive") ?? "Loader"
@@ -206,7 +131,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             button.font = NSFont.monospacedSystemFont(ofSize: 12, weight: .medium)
         }
 
-        popover.contentViewController = UsageViewController.freshController()
+        sHelper.popover.contentViewController = UsageViewController.freshController()
 
         // create pop up menu
         statusItemMenu = NSMenu()
@@ -278,17 +203,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                          name: NSWorkspace.didWakeNotification, object: nil)
         
         NSEvent.addGlobalMonitorForEvents(matching: [NSEvent.EventTypeMask.leftMouseDown,NSEvent.EventTypeMask.rightMouseDown], handler: { [self](event: NSEvent) in
-            closePopoverMenu(sender: self)
+            sHelper.closePopoverMenu(sender: self)
         })
                 
         // end initialization
-        changeSpinner(setName: spinnerActive)
+        sHelper.changeSpinner(spinnerName: spinnerActive, spinnerFrames: Int(spinners[spinnerActive]!))
         sHelper.hasNewVersion()
     }
     
     func applicationWillTerminate(_ aNotification: Notification) {
-        closePopoverMenu(sender: self)
-        stopRunning()
+        sHelper.closePopoverMenu(sender: self)
+        sHelper.stopRunning()
         UserDefaults.standard.set(spinnerActive, forKey: "group.spinnerActive")
         UserDefaults.standard.set(updateInterval, forKey: "group.spinnerUpdateInterval")
         UserDefaults.standard.set(keyRemap, forKey: "group.keyRemap")
@@ -298,6 +223,4 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
         return true
     }
-
-
 }
