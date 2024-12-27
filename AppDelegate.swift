@@ -8,11 +8,13 @@
 import Cocoa
 import Foundation
 
+var app: AppDelegate!
 let ActivityData = AKservice()
 var spinnerActive: String!
 var enableStatusText: Bool = false
 var updateInterval: Double = 1.0
 var keyRemap: Bool = false
+var displayControll: Bool = true
 var statusItem: NSStatusItem = {
     return NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 }()
@@ -21,7 +23,7 @@ var statusItem: NSStatusItem = {
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItemMenu: NSMenu!
     private var sHelper = Helper()
-    private var displays = DisplayManager()
+    private var displayList = DisplayManager()
     private var updateIntervalName = ["0.5", "1.0", "1.5", "2.0"]
     private var spinners = ["Loader" : 8, "Grey Loader" : 18, "Cirrcles": 8, "Dots": 12, "Pie": 6, "Rainbow Pie": 15, "Recharges": 8, "Cat": 5]
 
@@ -108,6 +110,31 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         sHelper.remapKeysBacklight(toggle: keyRemap)
     }
     
+    @objc private func changeDisplayControll(sender: NSMenuItem) {
+        displayDeviceChanged() // update display and menu
+        if displayControll {
+            sender.state = .off
+            displayControll = false
+        } else {
+            sender.state = .on
+            displayControll = true
+        }
+    }
+   
+    @objc func displayDeviceChanged() {
+        displayList.configureDisplays()
+        for menuItem in statusItem.menu!.items { // set all submenu state off
+            if menuItem.hasSubmenu && menuItem.title == "Allow control of display" {
+                let displaySubMenu = NSMenu()
+                for displayItem in displayList.displays {
+                    let newItem = NSMenuItem(title: displayItem.name + " s", action: nil, keyEquivalent: "")
+                    displaySubMenu.addItem(newItem)
+                }
+                menuItem.submenu = displaySubMenu
+            }
+        }
+    }
+    
    @objc private func changeStatusMenuClick(sender: NSMenuItem) {
         if enableStatusText {
             sender.state = .off
@@ -119,11 +146,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        
         spinnerActive = UserDefaults.standard.string(forKey: "group.spinnerActive") ?? "Loader"
         updateInterval = Double(UserDefaults.standard.string(forKey: "group.spinnerUpdateInterval") ?? "1.0")!
         keyRemap = Bool(UserDefaults.standard.bool(forKey: "group.keyRemap"))
         enableStatusText = Bool(UserDefaults.standard.bool(forKey: "group.enableStatusText"))
+        displayControll = Bool(UserDefaults.standard.bool(forKey: "group.enableDisplayControll"))
         
         if let button = statusItem.button {
             button.action = #selector(togglePopover(sender:))
@@ -147,6 +174,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         sHelper.remapKeysBacklight(toggle: keyRemap)
         statusItemMenu.addItem(remapItem)
+        
+        // Display controll support Menu
+        displayList.configureDisplays()
+        let displayItem = NSMenuItem(title: "Allow control of display", action: #selector(changeDisplayControll(sender:)), keyEquivalent: "")
+        if displayControll {
+            displayItem.state = .on
+        }
+        let displaySubMenu = NSMenu()
+        for displayItem in displayList.displays {
+            let newItem = NSMenuItem(title: displayItem.name + " s", action: nil, keyEquivalent: "")
+            displaySubMenu.addItem(newItem)
+        }
+        statusItemMenu.addItem(displayItem)
+        statusItemMenu.setSubmenu(displaySubMenu, for: displayItem)
         
         // Text status in Menu
         let statusItem = NSMenuItem(title: "Show CPU usage in menu", action: #selector(changeStatusMenuClick(sender:)), keyEquivalent: "")
@@ -211,7 +252,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         sHelper.changeSpinner(spinnerName: spinnerActive, spinnerFrames: Int(spinners[spinnerActive]!))
         sHelper.hasNewVersion()
         
-        displays.configureDisplays()
+        // Hook for Change Display
+        CGDisplayRegisterReconfigurationCallback({ _, _, _ in app.displayDeviceChanged()}, nil)
     }
     
     func applicationWillTerminate(_ aNotification: Notification) {
@@ -221,6 +263,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         UserDefaults.standard.set(updateInterval, forKey: "group.spinnerUpdateInterval")
         UserDefaults.standard.set(keyRemap, forKey: "group.keyRemap")
         UserDefaults.standard.set(enableStatusText, forKey: "group.enableStatusText")
+        UserDefaults.standard.set(displayControll, forKey: "group.enableDisplayControll")
     }
 
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
