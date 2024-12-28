@@ -8,14 +8,12 @@
 import Cocoa
 import Foundation
 
-var app: AppDelegate!
 var spinnerActive: String!
 var enableStatusText: Bool = false
 var updateInterval: Double = 1.0
 var keyRemap: Bool = false
-var displayControll: Bool = true
-var brightnessValue: Float = 1
-var volumeValue: Float = 1
+var brightnessValue: Double = 50.0
+var volumeValue: Double = 50.0
 let ActivityData = AKservice()
 var statusItem: NSStatusItem = {
     return NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -118,26 +116,19 @@ class AppDelegate: NSObject, NSApplicationDelegate{
     }
     
     @objc private func changeDisplayControll(sender: NSMenuItem) {
-        if displayControll {
-            sender.state = .off
-            displayControll = false
-            mediaKeyTap.Stop()
-        } else if MediaKeyTapManager.readPrivileges() && displayControll && !displayList.displays.isEmpty {
-            sender.state = .on
-            displayControll = true
-            mediaKeyTap.Start()
-        }
+        displayDeviceChanged()
+        mediaKeyTap.updateMediaKeyTap()
     }
     
     @objc private func displayDeviceChangedNotify(_ notification: NSNotification) {
         displayDeviceChanged()
+        mediaKeyTap.updateMediaKeyTap()
     }
     
     private func displayDeviceChanged() {
         displayList.configureDisplays()
-        
         for menuItem in statusItem.menu!.items {
-            if menuItem.hasSubmenu && menuItem.title == "Enable DDC controll" {
+            if menuItem.hasSubmenu && menuItem.title == "DDC enabled for display" {
                 let displaySubMenu = NSMenu()
                 for displayItem in displayList.displays {
                     let newItem = NSMenuItem(title: displayItem.name, action: #selector(displayItemMenuClick(sender:)), keyEquivalent: "")
@@ -146,6 +137,7 @@ class AppDelegate: NSObject, NSApplicationDelegate{
                 menuItem.submenu = displaySubMenu
             }
         }
+        mediaKeyTap.updateMediaKeyTap()
     }
     
    @objc private func changeStatusMenuClick(sender: NSMenuItem) {
@@ -160,11 +152,12 @@ class AppDelegate: NSObject, NSApplicationDelegate{
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         spinnerActive = UserDefaults.standard.string(forKey: "group.spinnerActive") ?? "Loader"
-        updateInterval = Double(UserDefaults.standard.string(forKey: "group.spinnerUpdateInterval") ?? "1.0")!
+        updateInterval = Double(UserDefaults.standard.string(forKey: "group.spinnerUpdateInterval") ?? String(updateInterval))!
         keyRemap = Bool(UserDefaults.standard.bool(forKey: "group.keyRemap"))
         enableStatusText = Bool(UserDefaults.standard.bool(forKey: "group.enableStatusText"))
-        displayControll = Bool(UserDefaults.standard.bool(forKey: "group.enableDisplayControll"))
-        
+        brightnessValue = Double(UserDefaults.standard.string(forKey: "group.brightnessValue") ?? String(brightnessValue))!
+        volumeValue = Double(UserDefaults.standard.string(forKey: "group.volumeValue") ?? String(volumeValue))!
+
         if let button = statusItem.button {
             button.action = #selector(togglePopover(sender:))
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
@@ -206,7 +199,9 @@ class AppDelegate: NSObject, NSApplicationDelegate{
         
         // Display controll support Menu
         displayList.configureDisplays()
-        let displayItem = NSMenuItem(title: "Enable DDC controll", action: #selector(changeDisplayControll(sender:)), keyEquivalent: "")
+        DisplayManager.shared.configureDisplays()
+        DisplayManager.shared.updateArm64AVServices()
+        let displayItem = NSMenuItem(title: "DDC enabled for display", action: #selector(changeDisplayControll(sender:)), keyEquivalent: "")
        
         let displaySubMenu = NSMenu()
         for displayItem in displayList.displays {
@@ -214,12 +209,9 @@ class AppDelegate: NSObject, NSApplicationDelegate{
             displaySubMenu.addItem(newItem)
         }
         
-        if MediaKeyTapManager.readPrivileges() && displayControll && !displayList.displays.isEmpty {
-            displayItem.state = .on
+        if MediaKeyTapManager.readPrivileges() && !displayList.displays.isEmpty {
             statusItemMenu.setSubmenu(displaySubMenu, for: displayItem)
-            mediaKeyTap.Start()
-        } else {
-            displayItem.isEnabled = false
+            mediaKeyTap.updateMediaKeyTap()
         }
         statusItemMenu.addItem(displayItem)
     
@@ -275,7 +267,7 @@ class AppDelegate: NSObject, NSApplicationDelegate{
         })
         
         // Hook for Change Display
-        CGDisplayRegisterReconfigurationCallback({ _, _, _ in app.displayDeviceChanged()}, nil)
+        //CGDisplayRegisterReconfigurationCallback({ _, _, _ in app.displayDeviceChanged()}, nil)
         
         // end initialization
         sHelper.changeSpinner(spinnerName: spinnerActive, spinnerFrames: Int(spinners[spinnerActive]!))
@@ -289,7 +281,8 @@ class AppDelegate: NSObject, NSApplicationDelegate{
         UserDefaults.standard.set(updateInterval, forKey: "group.spinnerUpdateInterval")
         UserDefaults.standard.set(keyRemap, forKey: "group.keyRemap")
         UserDefaults.standard.set(enableStatusText, forKey: "group.enableStatusText")
-        UserDefaults.standard.set(displayControll, forKey: "group.enableDisplayControll")
+        UserDefaults.standard.set(brightnessValue, forKey: "group.brightnessValue")
+        UserDefaults.standard.set(volumeValue, forKey: "group.volumeValue")
     }
 
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {

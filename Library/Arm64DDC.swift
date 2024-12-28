@@ -273,3 +273,28 @@ class Arm64DDC: NSObject {
     false
   }
 }
+
+class AppleDisplay: Display {
+  private var displayQueue: DispatchQueue
+
+  override init(_ identifier: CGDirectDisplayID, name: String, vendorNumber: UInt32?, modelNumber: UInt32?, serialNumber: UInt32?) {
+    self.displayQueue = DispatchQueue(label: String("displayQueue-\(identifier)"))
+    super.init(identifier, name: name, vendorNumber: vendorNumber, modelNumber: modelNumber, serialNumber: serialNumber)
+  }
+
+  public func getAppleBrightness() -> Float {
+    var brightness: Float = 0
+    DisplayServicesGetBrightness(self.identifier, &brightness)
+    return brightness
+  }
+
+  public func setAppleBrightness(value: Float) {
+    _ = self.displayQueue.sync {
+      DisplayServicesSetBrightness(self.identifier, value)
+    }
+  }
+    
+  override func setDirectBrightness(valueBrightness: Float) {
+      self.setAppleBrightness(value: valueBrightness/100)
+  }
+}

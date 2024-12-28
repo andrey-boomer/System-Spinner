@@ -7,13 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		7F0D02622D1EBCFA0029C507 /* Display.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F0D02612D1EBCFA0029C507 /* Display.swift */; };
 		7F80E7972BD815270006AD44 /* Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F80E7962BD815270006AD44 /* Helper.swift */; };
 		7F8124E92B96DC8600B05107 /* AKservice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8124E82B96DC8600B05107 /* AKservice.swift */; };
 		7F866E292D1ECAFC00F20488 /* DisplayServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F0D02722D1ECADD0029C507 /* DisplayServices.framework */; };
 		7F866E2C2D1ECAFE00F20488 /* CoreDisplay.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F0D026E2D1ECA450029C507 /* CoreDisplay.framework */; };
 		7F866E2F2D1ECB1600F20488 /* OSD.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F866E2E2D1ECB1600F20488 /* OSD.framework */; };
-		7F866E322D1ECBFE00F20488 /* DisplayManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F866E312D1ECBFE00F20488 /* DisplayManager.swift */; };
+		7F866E322D1ECBFE00F20488 /* Displays.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F866E312D1ECBFE00F20488 /* Displays.swift */; };
 		7F866E352D1ECD9A00F20488 /* Arm64DDC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F866E332D1ECD9A00F20488 /* Arm64DDC.swift */; };
 		7F866E362D1ECD9A00F20488 /* IntelDDC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F866E342D1ECD9A00F20488 /* IntelDDC.swift */; };
 		7F866E402D1EDFD700F20488 /* MediaKeyTap in Frameworks */ = {isa = PBXBuildFile; productRef = 7F866E3F2D1EDFD700F20488 /* MediaKeyTap */; };
@@ -24,7 +23,6 @@
 
 /* Begin PBXFileReference section */
 		7F0D025A2D1EAD9A0029C507 /* DDCHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DDCHeader.h; sourceTree = "<group>"; };
-		7F0D02612D1EBCFA0029C507 /* Display.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Display.swift; sourceTree = "<group>"; };
 		7F0D026E2D1ECA450029C507 /* CoreDisplay.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreDisplay.framework; path = ../../../../System/Library/Frameworks/CoreDisplay.framework; sourceTree = "<group>"; };
 		7F0D02722D1ECADD0029C507 /* DisplayServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DisplayServices.framework; path = ../../../../System/Library/PrivateFrameworks/DisplayServices.framework; sourceTree = "<group>"; };
 		7F35E5922B847EBC0032163E /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
@@ -32,7 +30,7 @@
 		7F80E7962BD815270006AD44 /* Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helper.swift; sourceTree = "<group>"; };
 		7F8124E82B96DC8600B05107 /* AKservice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AKservice.swift; sourceTree = "<group>"; };
 		7F866E2E2D1ECB1600F20488 /* OSD.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSD.framework; path = ../../../../System/Library/PrivateFrameworks/OSD.framework; sourceTree = "<group>"; };
-		7F866E312D1ECBFE00F20488 /* DisplayManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayManager.swift; sourceTree = "<group>"; };
+		7F866E312D1ECBFE00F20488 /* Displays.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Displays.swift; sourceTree = "<group>"; };
 		7F866E332D1ECD9A00F20488 /* Arm64DDC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Arm64DDC.swift; sourceTree = "<group>"; };
 		7F866E342D1ECD9A00F20488 /* IntelDDC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntelDDC.swift; sourceTree = "<group>"; };
 		7FB908A72B67B9A400E9EE24 /* System Spinner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "System Spinner.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -115,8 +113,7 @@
 				7F0D025A2D1EAD9A0029C507 /* DDCHeader.h */,
 				7F866E332D1ECD9A00F20488 /* Arm64DDC.swift */,
 				7F866E342D1ECD9A00F20488 /* IntelDDC.swift */,
-				7F0D02612D1EBCFA0029C507 /* Display.swift */,
-				7F866E312D1ECBFE00F20488 /* DisplayManager.swift */,
+				7F866E312D1ECBFE00F20488 /* Displays.swift */,
 				7F8124E82B96DC8600B05107 /* AKservice.swift */,
 				7FFC0C542B7B6845002F9990 /* IOService.swift */,
 			);
@@ -206,12 +203,11 @@
 			files = (
 				7FFC0C552B7B6845002F9990 /* IOService.swift in Sources */,
 				7FB908C62B67B9FD00E9EE24 /* AppDelegate.swift in Sources */,
-				7F0D02622D1EBCFA0029C507 /* Display.swift in Sources */,
 				7F80E7972BD815270006AD44 /* Helper.swift in Sources */,
 				7F8124E92B96DC8600B05107 /* AKservice.swift in Sources */,
 				7F866E352D1ECD9A00F20488 /* Arm64DDC.swift in Sources */,
 				7F866E362D1ECD9A00F20488 /* IntelDDC.swift in Sources */,
-				7F866E322D1ECBFE00F20488 /* DisplayManager.swift in Sources */,
+				7F866E322D1ECBFE00F20488 /* Displays.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

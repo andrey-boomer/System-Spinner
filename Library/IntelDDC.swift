@@ -229,3 +229,73 @@ public class IntelDDC {
     return servicePort
   }
 }
+
+class OtherDisplay: Display {
+    var ddc: IntelDDC?
+    var arm64ddc: Bool = false
+    var arm64avService: IOAVService?
+    var isDiscouraged: Bool = false
+    let writeDDCQueue = DispatchQueue(label: "Local write DDC queue")
+    var writeDDCNextValue: [Command: UInt16] = [:]
+    var writeDDCLastSavedValue: [Command: UInt16] = [:]
+    
+    override init(_ identifier: CGDirectDisplayID, name: String, vendorNumber: UInt32?, modelNumber: UInt32?, serialNumber: UInt32?) {
+        super.init(identifier, name: name, vendorNumber: vendorNumber, modelNumber: modelNumber, serialNumber: serialNumber)
+        if !Arm64DDC.isArm64 {
+            self.ddc = IntelDDC(for: identifier)
+        }
+    }
+    
+    func calcNewValue(currentValue: Float, isUp: Bool, half: Bool = false) -> Float {
+        let nextValue: Float
+        let osdChicletFromValue = OSDUtils.chiclet(fromValue: currentValue, maxValue: 1, half: half)
+        let distance = OSDUtils.getDistance(fromNearestChiclet: osdChicletFromValue)
+        var nextFilledChiclet = isUp ? ceil(osdChicletFromValue) : floor(osdChicletFromValue)
+        let distanceThreshold: Float = 0.25 // 25% of the distance between the edges of an osd box
+        if distance == 0 {
+            nextFilledChiclet += (isUp ? 1 : -1)
+            } else if !isUp, distance < distanceThreshold {
+                nextFilledChiclet -= 1
+            } else if isUp, distance > (1 - distanceThreshold) {
+                nextFilledChiclet += 1
+        }
+        nextValue = OSDUtils.value(fromChiclet: nextFilledChiclet, maxValue: 1, half: half)
+        return max(0, min(1, nextValue))
+    }
+
+    public func writeDDCValues(command: Command, value: UInt16) {
+      self.writeDDCQueue.async(flags: .barrier) {
+        self.writeDDCNextValue[command] = value
+      }
+        DisplayManager.shared.globalDDCQueue.async(flags: .barrier) {
+        self.asyncPerformWriteDDCValues(command: command)
+      }
+    }
+    
+    override func setDirectBrightness(valueBrightness: Float) {
+        self.writeDDCValues(command: .brightness, value: UInt16(valueBrightness))
+        OSDUtils.showOsd(displayID: self.identifier, command: .brightness, value: valueBrightness, maxValue: Float(100))
+    }
+    
+    func asyncPerformWriteDDCValues(command: Command) {
+        var value = UInt16.max
+        var lastValue = UInt16.max
+        self.writeDDCQueue.sync {
+            value = self.writeDDCNextValue[command] ?? UInt16.max
+            lastValue = self.writeDDCLastSavedValue[command] ?? UInt16.max
+        }
+        guard value != UInt16.max, value != lastValue else {
+            return
+        }
+        self.writeDDCQueue.async(flags: .barrier) {
+            self.writeDDCLastSavedValue[command] = value
+        }
+        if Arm64DDC.isArm64 {
+            if self.arm64ddc {
+                _ = Arm64DDC.write(service: self.arm64avService, command: command.rawValue, value: value)
+            }
+        } else {
+            _ = self.ddc?.write(command: command.rawValue, value: value, errorRecoveryWaitTime: 2000) ?? false
+        }
+    }
+}
