@@ -120,7 +120,7 @@ class AppDelegate: NSObject, NSApplicationDelegate{
             sender.state = .off
             displayControll = false
             mediaKeyTap.Stop()
-        } else {
+        } else if MediaKeyTapManager.readPrivileges() && displayControll && !displayList.displays.isEmpty {
             sender.state = .on
             displayControll = true
             mediaKeyTap.Start()
@@ -211,15 +211,14 @@ class AppDelegate: NSObject, NSApplicationDelegate{
             displaySubMenu.addItem(newItem)
         }
         
-        if !MediaKeyTapManager.readPrivileges(prompt: false) {
-            MediaKeyTapManager.acquirePrivileges()
-        } else if (displayControll && !displayList.displays.isEmpty) {
+        if MediaKeyTapManager.readPrivileges() && displayControll && !displayList.displays.isEmpty {
             displayItem.state = .on
+            statusItemMenu.setSubmenu(displaySubMenu, for: displayItem)
             mediaKeyTap.Start()
+        } else {
+            displayItem.isEnabled = false
         }
-        
         statusItemMenu.addItem(displayItem)
-        statusItemMenu.setSubmenu(displaySubMenu, for: displayItem)
     
         statusItemMenu.addItem(NSMenuItem.separator())
         

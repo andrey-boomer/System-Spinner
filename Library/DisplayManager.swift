@@ -79,7 +79,7 @@ class DisplayManager {
             
             if !DisplayManager.isDummy(displayID: onlineDisplayID) && !DisplayManager.isVirtual(displayID: onlineDisplayID) {
                 if  DisplayManager.isAppleDisplay(displayID: onlineDisplayID) {
-                    let appleDisplay = AppleDisplay(id, name: name, vendorNumber: vendorNumber, modelNumber: modelNumber, serialNumber: serialNumber)
+                    let appleDisplay = AppleDisplay(id, name: "Apple " + name, vendorNumber: vendorNumber, modelNumber: modelNumber, serialNumber: serialNumber)
                     self.displays.append(appleDisplay)
                 } else {
                     let otherDisplay = OtherDisplay(id, name: name, vendorNumber: vendorNumber, modelNumber: modelNumber, serialNumber: serialNumber)
@@ -90,7 +90,6 @@ class DisplayManager {
     }
 }
 
-
 class MediaKeyTapManager: MediaKeyTapDelegate {
     var mediaKeyTap: MediaKeyTap?
     var keyRepeatTimers: [MediaKey: Timer] = [:]
@@ -98,19 +97,16 @@ class MediaKeyTapManager: MediaKeyTapDelegate {
     func handle(mediaKey: MediaKey, event: KeyEvent?, modifiers: NSEvent.ModifierFlags?) {
         print(MediaKey.self)
     }
-    
-    static func acquirePrivileges(firstAsk: Bool = false) {
-      if !self.readPrivileges(prompt: true), !firstAsk {
-        let alert = NSAlert()
-        alert.messageText = NSLocalizedString("Shortcuts not available", comment: "Shown in the alert dialog")
-        alert.informativeText = NSLocalizedString("You need to enable MonitorControl in System Settings > Security and Privacy > Accessibility for the keyboard shortcuts to work", comment: "Shown in the alert dialog")
-        alert.runModal()
-      }
-    }
 
-    static func readPrivileges(prompt: Bool) -> Bool {
-      let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: prompt]
+    static func readPrivileges() -> Bool {
+      let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: true]
       let status = AXIsProcessTrustedWithOptions(options)
+        if status == false {
+            let alert = NSAlert()
+            alert.messageText = "Keyboard not available"
+            alert.informativeText = "You need enable application in System Settings > Security and Privacy > Accessibility for the keyboard shortcuts to work"
+            alert.runModal()
+        }
       return status
     }
     
