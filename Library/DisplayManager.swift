@@ -2,9 +2,9 @@
 
 import Cocoa
 import CoreGraphics
+import MediaKeyTap
 
 class DisplayManager {
-
     var displays: [Display] = []
     
     static func getDisplayNameByID(displayID: CGDirectDisplayID) -> String {
@@ -77,16 +77,48 @@ class DisplayManager {
             let modelNumber = CGDisplayModelNumber(onlineDisplayID)
             let serialNumber = CGDisplaySerialNumber(onlineDisplayID)
             
-            let isDummy: Bool = DisplayManager.isDummy(displayID: onlineDisplayID)
-            let isVirtual: Bool = DisplayManager.isVirtual(displayID: onlineDisplayID)
-            print(name)
-            if  DisplayManager.isAppleDisplay(displayID: onlineDisplayID) {
-                let appleDisplay = AppleDisplay(id, name: name, vendorNumber: vendorNumber, modelNumber: modelNumber, serialNumber: serialNumber, isVirtual: isVirtual, isDummy: isDummy)
-                self.displays.append(appleDisplay)
-            } else {
-                let otherDisplay = OtherDisplay(id, name: name, vendorNumber: vendorNumber, modelNumber: modelNumber, serialNumber: serialNumber, isVirtual: isVirtual, isDummy: isDummy)
-                self.displays.append(otherDisplay)
+            if !DisplayManager.isDummy(displayID: onlineDisplayID) && !DisplayManager.isVirtual(displayID: onlineDisplayID) {
+                if  DisplayManager.isAppleDisplay(displayID: onlineDisplayID) {
+                    let appleDisplay = AppleDisplay(id, name: name, vendorNumber: vendorNumber, modelNumber: modelNumber, serialNumber: serialNumber)
+                    self.displays.append(appleDisplay)
+                } else {
+                    let otherDisplay = OtherDisplay(id, name: name, vendorNumber: vendorNumber, modelNumber: modelNumber, serialNumber: serialNumber)
+                    self.displays.append(otherDisplay)
+                }
             }
         }
+    }
+}
+
+
+class MediaKeyTapManager: MediaKeyTapDelegate {
+    var mediaKeyTap: MediaKeyTap?
+    var keyRepeatTimers: [MediaKey: Timer] = [:]
+    
+    func handle(mediaKey: MediaKey, event: KeyEvent?, modifiers: NSEvent.ModifierFlags?) {
+        print(MediaKey.self)
+    }
+    
+    static func acquirePrivileges(firstAsk: Bool = false) {
+      if !self.readPrivileges(prompt: true), !firstAsk {
+        let alert = NSAlert()
+        alert.messageText = NSLocalizedString("Shortcuts not available", comment: "Shown in the alert dialog")
+        alert.informativeText = NSLocalizedString("You need to enable MonitorControl in System Settings > Security and Privacy > Accessibility for the keyboard shortcuts to work", comment: "Shown in the alert dialog")
+        alert.runModal()
+      }
+    }
+
+    static func readPrivileges(prompt: Bool) -> Bool {
+      let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: prompt]
+      let status = AXIsProcessTrustedWithOptions(options)
+      return status
+    }
+    
+    public func Start() {
+        mediaKeyTap?.start()
+    }
+    
+    public func Stop() {
+        mediaKeyTap?.stop()
     }
 }

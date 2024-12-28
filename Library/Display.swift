@@ -7,9 +7,9 @@ import IOKit
 class AppleDisplay: Display {
   private var displayQueue: DispatchQueue
 
-  override init(_ identifier: CGDirectDisplayID, name: String, vendorNumber: UInt32?, modelNumber: UInt32?, serialNumber: UInt32?, isVirtual: Bool = false, isDummy: Bool = false) {
+  override init(_ identifier: CGDirectDisplayID, name: String, vendorNumber: UInt32?, modelNumber: UInt32?, serialNumber: UInt32?) {
     self.displayQueue = DispatchQueue(label: String("displayQueue-\(identifier)"))
-    super.init(identifier, name: name, vendorNumber: vendorNumber, modelNumber: modelNumber, serialNumber: serialNumber, isVirtual: isVirtual, isDummy: isDummy)
+    super.init(identifier, name: name, vendorNumber: vendorNumber, modelNumber: modelNumber, serialNumber: serialNumber)
   }
 
   public func getAppleBrightness() -> Float {
@@ -31,9 +31,9 @@ class OtherDisplay: Display {
     var arm64avService: IOAVService?
     var isDiscouraged: Bool = false
      
-    override init(_ identifier: CGDirectDisplayID, name: String, vendorNumber: UInt32?, modelNumber: UInt32?, serialNumber: UInt32?, isVirtual: Bool = false, isDummy: Bool = false) {
-        super.init(identifier, name: name, vendorNumber: vendorNumber, modelNumber: modelNumber, serialNumber: serialNumber, isVirtual: isVirtual, isDummy: isDummy)
-        if !isVirtual, !Arm64DDC.isArm64 {
+    override init(_ identifier: CGDirectDisplayID, name: String, vendorNumber: UInt32?, modelNumber: UInt32?, serialNumber: UInt32?) {
+        super.init(identifier, name: name, vendorNumber: vendorNumber, modelNumber: modelNumber, serialNumber: serialNumber)
+        if !Arm64DDC.isArm64 {
             self.ddc = IntelDDC(for: identifier)
         }
     }
@@ -54,7 +54,7 @@ class Display: Equatable {
     }
     var brightnessSyncSourceValue: Float = 1
 
-    init(_ identifier: CGDirectDisplayID, name: String, vendorNumber: UInt32?, modelNumber: UInt32?, serialNumber: UInt32?, isVirtual: Bool = false, isDummy: Bool = false) {
+    init(_ identifier: CGDirectDisplayID, name: String, vendorNumber: UInt32?, modelNumber: UInt32?, serialNumber: UInt32?) {
         self.identifier = identifier
         self.name = name
         self.vendorNumber = vendorNumber
