@@ -167,7 +167,6 @@ class UsageViewController: NSViewController {
         memCompBar.doubleValue = ActivityData.memCompressed
         
         netLabel.stringValue = ActivityData.netIp + "\n↓ " + String(ActivityData.netIn.value) + ActivityData.netIn.unit + " | ↑ " + String(ActivityData.netOut.value) + ActivityData.netOut.unit
-        
     }
 }
 
