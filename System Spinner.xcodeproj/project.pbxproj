@@ -18,6 +18,7 @@
 		7F866E362D1ECD9A00F20488 /* IntelDDC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F866E342D1ECD9A00F20488 /* IntelDDC.swift */; };
 		7F866E402D1EDFD700F20488 /* MediaKeyTap in Frameworks */ = {isa = PBXBuildFile; productRef = 7F866E3F2D1EDFD700F20488 /* MediaKeyTap */; };
 		7FB908C62B67B9FD00E9EE24 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB908BE2B67B9FD00E9EE24 /* AppDelegate.swift */; };
+		7FDDC0BD2D200EDE00E36691 /* SimplyCoreAudio in Frameworks */ = {isa = PBXBuildFile; productRef = 7FDDC0BC2D200EDE00E36691 /* SimplyCoreAudio */; };
 		7FFC0C552B7B6845002F9990 /* IOService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FFC0C542B7B6845002F9990 /* IOService.swift */; };
 /* End PBXBuildFile section */
 
@@ -64,6 +65,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7F866E2C2D1ECAFE00F20488 /* CoreDisplay.framework in Frameworks */,
+				7FDDC0BD2D200EDE00E36691 /* SimplyCoreAudio in Frameworks */,
 				7F866E402D1EDFD700F20488 /* MediaKeyTap in Frameworks */,
 				7F866E2F2D1ECB1600F20488 /* OSD.framework in Frameworks */,
 				7F866E292D1ECAFC00F20488 /* DisplayServices.framework in Frameworks */,
@@ -143,6 +145,7 @@
 			name = "System Spinner";
 			packageProductDependencies = (
 				7F866E3F2D1EDFD700F20488 /* MediaKeyTap */,
+				7FDDC0BC2D200EDE00E36691 /* SimplyCoreAudio */,
 			);
 			productName = "System Spinner";
 			productReference = 7FB908A72B67B9A400E9EE24 /* System Spinner.app */;
@@ -175,6 +178,7 @@
 			mainGroup = 7FB9089E2B67B9A400E9EE24;
 			packageReferences = (
 				7F866E3E2D1EDFD700F20488 /* XCRemoteSwiftPackageReference "MediaKeyTap" */,
+				7FDDC0BB2D200EDE00E36691 /* XCRemoteSwiftPackageReference "SimplyCoreAudio" */,
 			);
 			productRefGroup = 7FB908A82B67B9A400E9EE24 /* Products */;
 			projectDirPath = "";
@@ -412,6 +416,14 @@
 				kind = branch;
 			};
 		};
+		7FDDC0BB2D200EDE00E36691 /* XCRemoteSwiftPackageReference "SimplyCoreAudio" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/rnine/SimplyCoreAudio";
+			requirement = {
+				branch = develop;
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -419,6 +431,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 7F866E3E2D1EDFD700F20488 /* XCRemoteSwiftPackageReference "MediaKeyTap" */;
 			productName = MediaKeyTap;
+		};
+		7FDDC0BC2D200EDE00E36691 /* SimplyCoreAudio */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7FDDC0BB2D200EDE00E36691 /* XCRemoteSwiftPackageReference "SimplyCoreAudio" */;
+			productName = SimplyCoreAudio;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

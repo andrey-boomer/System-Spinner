@@ -9,12 +9,14 @@ import Cocoa
 import Foundation
 
 var app: AppDelegate!
-let ActivityData = AKservice()
 var spinnerActive: String!
 var enableStatusText: Bool = false
 var updateInterval: Double = 1.0
 var keyRemap: Bool = false
 var displayControll: Bool = true
+var brightnessValue: Float = 1
+var volumeValue: Float = 1
+let ActivityData = AKservice()
 var statusItem: NSStatusItem = {
     return NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 }()
@@ -27,7 +29,7 @@ class AppDelegate: NSObject, NSApplicationDelegate{
     private var displayList = DisplayManager()
     private var updateIntervalName = ["0.5", "1.0", "1.5", "2.0"]
     private var spinners = ["Loader" : 8, "Grey Loader" : 18, "Cirrcles": 8, "Dots": 12, "Pie": 6, "Rainbow Pie": 15, "Recharges": 8, "Cat": 5]
-
+    
     @objc private func aboutWindow(sender: NSStatusItem) {
         let appCurrentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
         let anAbout = NSAlert()
@@ -133,6 +135,7 @@ class AppDelegate: NSObject, NSApplicationDelegate{
     
     private func displayDeviceChanged() {
         displayList.configureDisplays()
+        
         for menuItem in statusItem.menu!.items {
             if menuItem.hasSubmenu && menuItem.title == "Enable DDC controll" {
                 let displaySubMenu = NSMenu()
@@ -270,13 +273,13 @@ class AppDelegate: NSObject, NSApplicationDelegate{
         NSEvent.addGlobalMonitorForEvents(matching: [NSEvent.EventTypeMask.leftMouseDown,NSEvent.EventTypeMask.rightMouseDown], handler: { [self](event: NSEvent) in
             sHelper.closePopoverMenu(sender: self)
         })
-                
+        
+        // Hook for Change Display
+        CGDisplayRegisterReconfigurationCallback({ _, _, _ in app.displayDeviceChanged()}, nil)
+        
         // end initialization
         sHelper.changeSpinner(spinnerName: spinnerActive, spinnerFrames: Int(spinners[spinnerActive]!))
         sHelper.hasNewVersion()
-    
-        // Hook for Change Display
-        CGDisplayRegisterReconfigurationCallback({ _, _, _ in app.displayDeviceChanged()}, nil)
     }
     
     func applicationWillTerminate(_ aNotification: Notification) {
