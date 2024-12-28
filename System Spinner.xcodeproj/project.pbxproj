@@ -16,6 +16,7 @@
 		7F866E322D1ECBFE00F20488 /* DisplayManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F866E312D1ECBFE00F20488 /* DisplayManager.swift */; };
 		7F866E352D1ECD9A00F20488 /* Arm64DDC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F866E332D1ECD9A00F20488 /* Arm64DDC.swift */; };
 		7F866E362D1ECD9A00F20488 /* IntelDDC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F866E342D1ECD9A00F20488 /* IntelDDC.swift */; };
+		7F866E402D1EDFD700F20488 /* MediaKeyTap in Frameworks */ = {isa = PBXBuildFile; productRef = 7F866E3F2D1EDFD700F20488 /* MediaKeyTap */; };
 		7FB908C62B67B9FD00E9EE24 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB908BE2B67B9FD00E9EE24 /* AppDelegate.swift */; };
 		7FFC0C552B7B6845002F9990 /* IOService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FFC0C542B7B6845002F9990 /* IOService.swift */; };
 /* End PBXBuildFile section */
@@ -63,6 +64,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7F866E2C2D1ECAFE00F20488 /* CoreDisplay.framework in Frameworks */,
+				7F866E402D1EDFD700F20488 /* MediaKeyTap in Frameworks */,
 				7F866E2F2D1ECB1600F20488 /* OSD.framework in Frameworks */,
 				7F866E292D1ECAFC00F20488 /* DisplayServices.framework in Frameworks */,
 			);
@@ -140,6 +142,7 @@
 			);
 			name = "System Spinner";
 			packageProductDependencies = (
+				7F866E3F2D1EDFD700F20488 /* MediaKeyTap */,
 			);
 			productName = "System Spinner";
 			productReference = 7FB908A72B67B9A400E9EE24 /* System Spinner.app */;
@@ -171,6 +174,7 @@
 			);
 			mainGroup = 7FB9089E2B67B9A400E9EE24;
 			packageReferences = (
+				7F866E3E2D1EDFD700F20488 /* XCRemoteSwiftPackageReference "MediaKeyTap" */,
 			);
 			productRefGroup = 7FB908A82B67B9A400E9EE24 /* Products */;
 			projectDirPath = "";
@@ -398,6 +402,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		7F866E3E2D1EDFD700F20488 /* XCRemoteSwiftPackageReference "MediaKeyTap" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/MonitorControl/MediaKeyTap";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		7F866E3F2D1EDFD700F20488 /* MediaKeyTap */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7F866E3E2D1EDFD700F20488 /* XCRemoteSwiftPackageReference "MediaKeyTap" */;
+			productName = MediaKeyTap;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 7FB9089F2B67B9A400E9EE24 /* Project object */;
 }

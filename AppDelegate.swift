@@ -20,9 +20,10 @@ var statusItem: NSStatusItem = {
 }()
 
 @main
-class AppDelegate: NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate{
     private var statusItemMenu: NSMenu!
     private var sHelper = Helper()
+    private var mediaKeyTap = MediaKeyTapManager()
     private var displayList = DisplayManager()
     private var updateIntervalName = ["0.5", "1.0", "1.5", "2.0"]
     private var spinners = ["Loader" : 8, "Grey Loader" : 18, "Cirrcles": 8, "Dots": 12, "Pie": 6, "Rainbow Pie": 15, "Recharges": 8, "Cat": 5]
@@ -89,6 +90,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         sHelper.startRunning()
     }
     
+    @objc private func displayItemMenuClick(sender: NSMenuItem) {
+        displayDeviceChanged()
+    }
+    
     @objc private func changeLaunchAtLogin(sender: NSMenuItem) {
         if sHelper.isAutoLaunch {
             sender.state = .off
@@ -111,23 +116,29 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @objc private func changeDisplayControll(sender: NSMenuItem) {
-        displayDeviceChanged() // update display and menu
         if displayControll {
             sender.state = .off
             displayControll = false
+            mediaKeyTap.Stop()
         } else {
             sender.state = .on
             displayControll = true
+            mediaKeyTap.Start()
         }
+        displayDeviceChanged() // update display and menu
     }
-   
-    @objc func displayDeviceChanged() {
+    
+    @objc private func displayDeviceChangedNotify(_ notification: NSNotification) {
+        displayDeviceChanged()
+    }
+    
+    private func displayDeviceChanged() {
         displayList.configureDisplays()
         for menuItem in statusItem.menu!.items { // set all submenu state off
             if menuItem.hasSubmenu && menuItem.title == "Allow control of display" {
                 let displaySubMenu = NSMenu()
                 for displayItem in displayList.displays {
-                    let newItem = NSMenuItem(title: displayItem.name + " s", action: nil, keyEquivalent: "")
+                    let newItem = NSMenuItem(title: displayItem.name + " s", action: #selector(displayItemMenuClick(sender:)), keyEquivalent: "")
                     displaySubMenu.addItem(newItem)
                 }
                 menuItem.submenu = displaySubMenu
@@ -183,9 +194,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         let displaySubMenu = NSMenu()
         for displayItem in displayList.displays {
-            let newItem = NSMenuItem(title: displayItem.name + " s", action: nil, keyEquivalent: "")
+            let newItem = NSMenuItem(title: displayItem.name + " s", action: #selector(displayItemMenuClick(sender:)), keyEquivalent: "")
             displaySubMenu.addItem(newItem)
         }
+        
         statusItemMenu.addItem(displayItem)
         statusItemMenu.setSubmenu(displaySubMenu, for: displayItem)
         
@@ -243,6 +255,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                          name: NSWorkspace.willSleepNotification, object: nil)
         NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(startRunningNotify(_:)),
                          name: NSWorkspace.didWakeNotification, object: nil)
+        NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(stopRunningNotify(_:)),
+                         name: NSWorkspace.screensDidSleepNotification, object: nil)
+        NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(startRunningNotify(_:)),
+                         name: NSWorkspace.screensDidWakeNotification, object: nil)
+        DistributedNotificationCenter.default.addObserver(self, selector: #selector(displayDeviceChangedNotify(_:)),
+                        name: NSNotification.Name(rawValue: kColorSyncDisplayDeviceProfilesNotification.takeRetainedValue() as String), object: nil)
         
         NSEvent.addGlobalMonitorForEvents(matching: [NSEvent.EventTypeMask.leftMouseDown,NSEvent.EventTypeMask.rightMouseDown], handler: { [self](event: NSEvent) in
             sHelper.closePopoverMenu(sender: self)
@@ -251,6 +269,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // end initialization
         sHelper.changeSpinner(spinnerName: spinnerActive, spinnerFrames: Int(spinners[spinnerActive]!))
         sHelper.hasNewVersion()
+        
+        // if controll enabled, set hooks for keys
+        if displayControll {
+            mediaKeyTap.Start()
+        }
+        
+        if !MediaKeyTapManager.readPrivileges(prompt: false) {
+          MediaKeyTapManager.acquirePrivileges()
+        }
         
         // Hook for Change Display
         CGDisplayRegisterReconfigurationCallback({ _, _, _ in app.displayDeviceChanged()}, nil)
