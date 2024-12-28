@@ -125,7 +125,6 @@ class AppDelegate: NSObject, NSApplicationDelegate{
             displayControll = true
             mediaKeyTap.Start()
         }
-        displayDeviceChanged() // update display and menu
     }
     
     @objc private func displayDeviceChangedNotify(_ notification: NSNotification) {
@@ -134,11 +133,11 @@ class AppDelegate: NSObject, NSApplicationDelegate{
     
     private func displayDeviceChanged() {
         displayList.configureDisplays()
-        for menuItem in statusItem.menu!.items { // set all submenu state off
-            if menuItem.hasSubmenu && menuItem.title == "Allow control of display" {
+        for menuItem in statusItem.menu!.items {
+            if menuItem.hasSubmenu && menuItem.title == "Enable DDC controll" {
                 let displaySubMenu = NSMenu()
                 for displayItem in displayList.displays {
-                    let newItem = NSMenuItem(title: displayItem.name + " s", action: #selector(displayItemMenuClick(sender:)), keyEquivalent: "")
+                    let newItem = NSMenuItem(title: displayItem.name, action: #selector(displayItemMenuClick(sender:)), keyEquivalent: "")
                     displaySubMenu.addItem(newItem)
                 }
                 menuItem.submenu = displaySubMenu
@@ -186,21 +185,6 @@ class AppDelegate: NSObject, NSApplicationDelegate{
         sHelper.remapKeysBacklight(toggle: keyRemap)
         statusItemMenu.addItem(remapItem)
         
-        // Display controll support Menu
-        displayList.configureDisplays()
-        let displayItem = NSMenuItem(title: "Allow control of display", action: #selector(changeDisplayControll(sender:)), keyEquivalent: "")
-        if displayControll {
-            displayItem.state = .on
-        }
-        let displaySubMenu = NSMenu()
-        for displayItem in displayList.displays {
-            let newItem = NSMenuItem(title: displayItem.name + " s", action: #selector(displayItemMenuClick(sender:)), keyEquivalent: "")
-            displaySubMenu.addItem(newItem)
-        }
-        
-        statusItemMenu.addItem(displayItem)
-        statusItemMenu.setSubmenu(displaySubMenu, for: displayItem)
-        
         // Text status in Menu
         let statusItem = NSMenuItem(title: "Show CPU usage in menu", action: #selector(changeStatusMenuClick(sender:)), keyEquivalent: "")
         if enableStatusText {
@@ -215,6 +199,28 @@ class AppDelegate: NSObject, NSApplicationDelegate{
         }
         statusItemMenu.addItem(launchAtLoginItem)
         
+        statusItemMenu.addItem(NSMenuItem.separator())
+        
+        // Display controll support Menu
+        displayList.configureDisplays()
+        let displayItem = NSMenuItem(title: "Enable DDC controll", action: #selector(changeDisplayControll(sender:)), keyEquivalent: "")
+       
+        let displaySubMenu = NSMenu()
+        for displayItem in displayList.displays {
+            let newItem = NSMenuItem(title: displayItem.name, action: #selector(displayItemMenuClick(sender:)), keyEquivalent: "")
+            displaySubMenu.addItem(newItem)
+        }
+        
+        if !MediaKeyTapManager.readPrivileges(prompt: false) {
+            MediaKeyTapManager.acquirePrivileges()
+        } else if (displayControll && !displayList.displays.isEmpty) {
+            displayItem.state = .on
+            mediaKeyTap.Start()
+        }
+        
+        statusItemMenu.addItem(displayItem)
+        statusItemMenu.setSubmenu(displaySubMenu, for: displayItem)
+    
         statusItemMenu.addItem(NSMenuItem.separator())
         
         // update interval
@@ -269,16 +275,7 @@ class AppDelegate: NSObject, NSApplicationDelegate{
         // end initialization
         sHelper.changeSpinner(spinnerName: spinnerActive, spinnerFrames: Int(spinners[spinnerActive]!))
         sHelper.hasNewVersion()
-        
-        // if controll enabled, set hooks for keys
-        if displayControll {
-            mediaKeyTap.Start()
-        }
-        
-        if !MediaKeyTapManager.readPrivileges(prompt: false) {
-          MediaKeyTapManager.acquirePrivileges()
-        }
-        
+    
         // Hook for Change Display
         CGDisplayRegisterReconfigurationCallback({ _, _, _ in app.displayDeviceChanged()}, nil)
     }
