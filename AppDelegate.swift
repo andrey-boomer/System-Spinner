@@ -89,11 +89,7 @@ class AppDelegate: NSObject, NSApplicationDelegate{
         sender.state = .on
         sHelper.startRunning()
     }
-    
-    @objc private func displayItemMenuClick(sender: NSMenuItem) {
-        displayDeviceChanged()
-    }
-    
+        
     @objc private func changeLaunchAtLogin(sender: NSMenuItem) {
         if sHelper.isAutoLaunch {
             sender.state = .off
@@ -131,7 +127,7 @@ class AppDelegate: NSObject, NSApplicationDelegate{
             if menuItem.hasSubmenu && menuItem.title == "DDC enabled for display" {
                 let displaySubMenu = NSMenu()
                 for displayItem in displayList.displays {
-                    let newItem = NSMenuItem(title: displayItem.name, action: #selector(displayItemMenuClick(sender:)), keyEquivalent: "")
+                    let newItem = NSMenuItem(title: displayItem.name, action: #selector(changeDisplayControll(sender:)), keyEquivalent: "")
                     displaySubMenu.addItem(newItem)
                 }
                 menuItem.submenu = displaySubMenu
@@ -205,7 +201,7 @@ class AppDelegate: NSObject, NSApplicationDelegate{
        
         let displaySubMenu = NSMenu()
         for displayItem in displayList.displays {
-            let newItem = NSMenuItem(title: displayItem.name, action: #selector(displayItemMenuClick(sender:)), keyEquivalent: "")
+            let newItem = NSMenuItem(title: displayItem.name, action: #selector(changeDisplayControll(sender:)), keyEquivalent: "")
             displaySubMenu.addItem(newItem)
         }
         

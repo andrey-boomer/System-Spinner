@@ -293,7 +293,7 @@ class AppleDisplay: Display {
       DisplayServicesSetBrightness(self.identifier, value)
     }
   }
-    
+
   override func setDirectBrightness(valueBrightness: Float) {
       self.setAppleBrightness(value: valueBrightness/100)
   }

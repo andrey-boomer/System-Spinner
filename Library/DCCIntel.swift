@@ -277,18 +277,9 @@ class OtherDisplay: Display {
         OSDUtils.showOsd(displayID: self.identifier, command: .brightness, value: valueBrightness, maxValue: Float(100))
     }
     
-    func stepVolume(isUp: Bool) {
-        volumeValue = volumeValue + (isUp ? 10 : -10)
-        if volumeValue < 0 {
-            volumeValue = 0
-        } else if brightnessValue > 100 {
-            volumeValue = 100
-        }
-        
-        self.writeDDCValues(command: .audioMuteScreenBlank, value: UInt16(volumeValue/100))
-        self.writeDDCValues(command: .audioSpeakerVolume, value: UInt16(volumeValue/100))
-
-        OSDUtils.showOsd(displayID: self.identifier, command: .audioSpeakerVolume, value: Float(volumeValue/100))
+    override func setDirectVolume(valueVolume: Float) {
+        self.writeDDCValues(command: .audioSpeakerVolume, value: UInt16(valueVolume))
+        OSDUtils.showOsd(displayID: self.identifier, command: .audioSpeakerVolume, value: Float(valueVolume), maxValue: Float(100))
     }
     
     func asyncPerformWriteDDCValues(command: Command) {
