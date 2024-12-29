@@ -53,6 +53,17 @@ class Display: Equatable {
         // for override
     }
     
+    
+    func toggleMute() {
+        let savedVolume = Double(UserDefaults.standard.string(forKey: "group.volumeValue") ?? String(volumeValue))!
+        if volumeValue == 0 {
+            volumeValue = savedVolume
+        } else {
+            volumeValue = 0
+        }
+        setDirectVolume(valueVolume: Float(volumeValue))
+    }
+    
     func stepVolume(isUp: Bool) {
         volumeValue = volumeValue + (isUp ? brValue : -brValue)
         if volumeValue < 0 {
@@ -64,7 +75,6 @@ class Display: Equatable {
         } else if (volumeValue > brValue && (isUp && volumeValue < brValue * 2)) {
             volumeValue = brValue
         }
-        print(volumeValue)
         setDirectVolume(valueVolume: Float(volumeValue))
         UserDefaults.standard.set(volumeValue, forKey: "group.volumeValue")
     }

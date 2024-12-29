@@ -205,7 +205,7 @@ class MediaKeyTapManager: MediaKeyTapDelegate {
                 switch mediaKey {
                 case .mute:
                     if !isRepeat, isPressed, let display = display as? OtherDisplay {
-                        // display.toggleMute()
+                        display.toggleMute()
                     }
                 case .volumeUp, .volumeDown:
                     if let display = display as? OtherDisplay {
