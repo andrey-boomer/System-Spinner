@@ -1,11 +1,6 @@
-//
-//  AKservice.swift
-//  System Spinner
-//
-//  Copyright 2024 Andrey Lysikov
 //  Copyright 2020 Takuto Nakamura
+//  Adapted @Andrey Lysikov
 //  SPDX-License-Identifier: Apache-2.0
-//  Based on https://github.com/Kyome22/ActivityKit
 
 import Foundation
 import Darwin

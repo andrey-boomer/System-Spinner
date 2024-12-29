@@ -1,9 +1,5 @@
-//
-//  Helper.swift
-//  System Spinner
-//
-//  Created by Андрей Лысиков on 23.04.2024.
-//
+//  Copyright 2024 Andrey Lysikov
+//  SPDX-License-Identifier: Apache-2.0
 
 import Foundation
 import ServiceManagement

@@ -1,9 +1,6 @@
-//
-//  AudioManager.swift
-//  System Spinner
-//
-//  Created by Андрей Лысиков on 29.12.2024.
-//
+//  Copyright © MonitorControl. @JoniVR, @theOneyouseek, @waydabber and others
+//  Adapted @Andrey Lysikov
+//  SPDX-License-Identifier: Apache-2.0
 
 import Foundation
 import Cocoa

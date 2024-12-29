@@ -1,5 +1,6 @@
 //  Copyright © MonitorControl. @JoniVR, @theOneyouseek, @waydabber and others
-//  Adapted from IntelDDC.swift, @reitermarkus
+//  Adapted @Andrey Lysikov
+//  SPDX-License-Identifier: Apache-2.0
 
 import Foundation
 import IOKit.i2c
