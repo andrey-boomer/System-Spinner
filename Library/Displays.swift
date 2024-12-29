@@ -84,7 +84,6 @@ class OSDUtils: NSObject {
   }
 }
 
-
 class Display: Equatable {
     let identifier: CGDirectDisplayID
     let prefsId: String
@@ -256,7 +255,38 @@ class DisplayManager {
         func getAffectedDisplays() -> [Display]? {
             return self.displays
         }
-        
+    func normalizedName(_ name: String) -> String {
+      var normalizedName = name.replacingOccurrences(of: "(", with: "")
+      normalizedName = normalizedName.replacingOccurrences(of: ")", with: "")
+      normalizedName = normalizedName.replacingOccurrences(of: " ", with: "")
+      for i in 0 ... 9 {
+        normalizedName = normalizedName.replacingOccurrences(of: String(i), with: "")
+      }
+      return normalizedName
+    }
+    
+    func getDdcCapableDisplays() -> [OtherDisplay] {
+      self.displays.compactMap { display -> OtherDisplay? in
+        if let otherDisplay = display as? OtherDisplay {
+          return otherDisplay
+        } else { return nil }
+      }
+    }
+    
+    func updateAudioControlTargetDisplays(deviceName: String) -> Int {
+      self.audioControlTargetDisplays.removeAll()
+      var numOfAddedDisplays = 0
+      var displayAudioDeviceName = ""
+      for ddcCapableDisplay in self.getDdcCapableDisplays() {
+          displayAudioDeviceName = DisplayManager.getDisplayRawNameByID(displayID: ddcCapableDisplay.identifier)
+          if self.normalizedName(displayAudioDeviceName) == self.normalizedName(deviceName) {
+              self.audioControlTargetDisplays.append(ddcCapableDisplay)
+              numOfAddedDisplays += 1
+          }
+      }
+      return numOfAddedDisplays
+    }
+    
         static func engageMirror() -> Bool {
             var onlineDisplayIDs = [CGDirectDisplayID](repeating: 0, count: 16)
             var displayCount: UInt32 = 0
@@ -381,7 +411,7 @@ class MediaKeyTapManager: MediaKeyTapDelegate {
                 case .volumeUp, .volumeDown:
                     if let display = display as? OtherDisplay {
                         if isPressed {
-                            //  display.stepVolume(isUp: mediaKey == .volumeUp)
+                            display.stepVolume(isUp: mediaKey == .volumeUp)
                         }
                     }
                 default: continue
@@ -416,16 +446,15 @@ class MediaKeyTapManager: MediaKeyTapDelegate {
                 keys.removeAll { keysToDelete.contains($0) }
             }
             
-            /*/ Remove volume related keys if audio device is controllable
-             if let defaultAudioDevice = simplyCA.defaultOutputDevice {
-             let keysToDelete: [MediaKey] = [.volumeUp, .volumeDown, .mute]
-             if DisplayManager.shared.updateAudioControlTargetDisplays(deviceName: defaultAudioDevice.name) == 0 {
-             keys.removeAll { keysToDelete.contains($0) }
-             } else if defaultAudioDevice.canSetVirtualMainVolume(scope: .output) == true {
-             keys.removeAll { keysToDelete.contains($0) }
-             }
-             }
-             */
+            if let defaultAudioDevice = simplyCA.defaultOutputDevice {
+                 let keysToDelete: [MediaKey] = [.volumeUp, .volumeDown, .mute]
+                 if DisplayManager.shared.updateAudioControlTargetDisplays(deviceName: defaultAudioDevice.name) == 0 {
+                     keys.removeAll { keysToDelete.contains($0) }
+                 } else if defaultAudioDevice.canSetVirtualMainVolume(scope: .output) == true {
+                     keys.removeAll { keysToDelete.contains($0) }
+                 }
+            }
+            
             self.mediaKeyTap?.stop()
             if keys.count > 0 {
                 self.mediaKeyTap = MediaKeyTap(delegate: self, on: KeyPressMode.keyDownAndUp, for: [.brightnessUp, .brightnessDown,.mute, .volumeUp, .volumeDown], observeBuiltIn: true)

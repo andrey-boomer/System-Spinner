@@ -13,8 +13,8 @@
 		7F866E2C2D1ECAFE00F20488 /* CoreDisplay.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F0D026E2D1ECA450029C507 /* CoreDisplay.framework */; };
 		7F866E2F2D1ECB1600F20488 /* OSD.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F866E2E2D1ECB1600F20488 /* OSD.framework */; };
 		7F866E322D1ECBFE00F20488 /* Displays.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F866E312D1ECBFE00F20488 /* Displays.swift */; };
-		7F866E352D1ECD9A00F20488 /* Arm64DDC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F866E332D1ECD9A00F20488 /* Arm64DDC.swift */; };
-		7F866E362D1ECD9A00F20488 /* IntelDDC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F866E342D1ECD9A00F20488 /* IntelDDC.swift */; };
+		7F866E352D1ECD9A00F20488 /* DCCArm64.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F866E332D1ECD9A00F20488 /* DCCArm64.swift */; };
+		7F866E362D1ECD9A00F20488 /* DCCIntel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F866E342D1ECD9A00F20488 /* DCCIntel.swift */; };
 		7F866E402D1EDFD700F20488 /* MediaKeyTap in Frameworks */ = {isa = PBXBuildFile; productRef = 7F866E3F2D1EDFD700F20488 /* MediaKeyTap */; };
 		7FB908C62B67B9FD00E9EE24 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB908BE2B67B9FD00E9EE24 /* AppDelegate.swift */; };
 		7FDDC0BD2D200EDE00E36691 /* SimplyCoreAudio in Frameworks */ = {isa = PBXBuildFile; productRef = 7FDDC0BC2D200EDE00E36691 /* SimplyCoreAudio */; };
@@ -31,8 +31,8 @@
 		7F8124E82B96DC8600B05107 /* AKservice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AKservice.swift; sourceTree = "<group>"; };
 		7F866E2E2D1ECB1600F20488 /* OSD.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSD.framework; path = ../../../../System/Library/PrivateFrameworks/OSD.framework; sourceTree = "<group>"; };
 		7F866E312D1ECBFE00F20488 /* Displays.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Displays.swift; sourceTree = "<group>"; };
-		7F866E332D1ECD9A00F20488 /* Arm64DDC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Arm64DDC.swift; sourceTree = "<group>"; };
-		7F866E342D1ECD9A00F20488 /* IntelDDC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntelDDC.swift; sourceTree = "<group>"; };
+		7F866E332D1ECD9A00F20488 /* DCCArm64.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DCCArm64.swift; sourceTree = "<group>"; };
+		7F866E342D1ECD9A00F20488 /* DCCIntel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DCCIntel.swift; sourceTree = "<group>"; };
 		7FB908A72B67B9A400E9EE24 /* System Spinner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "System Spinner.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7FB908B32B67B9A500E9EE24 /* System_Spinner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = System_Spinner.entitlements; sourceTree = "<group>"; };
 		7FB908BE2B67B9FD00E9EE24 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -111,8 +111,8 @@
 			isa = PBXGroup;
 			children = (
 				7F0D025A2D1EAD9A0029C507 /* DDCHeader.h */,
-				7F866E332D1ECD9A00F20488 /* Arm64DDC.swift */,
-				7F866E342D1ECD9A00F20488 /* IntelDDC.swift */,
+				7F866E332D1ECD9A00F20488 /* DCCArm64.swift */,
+				7F866E342D1ECD9A00F20488 /* DCCIntel.swift */,
 				7F866E312D1ECBFE00F20488 /* Displays.swift */,
 				7F8124E82B96DC8600B05107 /* AKservice.swift */,
 				7FFC0C542B7B6845002F9990 /* IOService.swift */,
@@ -205,8 +205,8 @@
 				7FB908C62B67B9FD00E9EE24 /* AppDelegate.swift in Sources */,
 				7F80E7972BD815270006AD44 /* Helper.swift in Sources */,
 				7F8124E92B96DC8600B05107 /* AKservice.swift in Sources */,
-				7F866E352D1ECD9A00F20488 /* Arm64DDC.swift in Sources */,
-				7F866E362D1ECD9A00F20488 /* IntelDDC.swift in Sources */,
+				7F866E352D1ECD9A00F20488 /* DCCArm64.swift in Sources */,
+				7F866E362D1ECD9A00F20488 /* DCCIntel.swift in Sources */,
 				7F866E322D1ECBFE00F20488 /* Displays.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
