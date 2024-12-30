@@ -3,7 +3,6 @@
 
 import Cocoa
 import Foundation
-import MediaKeyTap
 
 var spinnerActive: String!
 var enableStatusText: Bool = false
@@ -106,23 +105,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         sHelper.remapKeysBacklight(toggle: keyRemap)
     }
     
-    private func configureDisplayKey() {
+    @objc private func changeDisplayControll(sender: NSMenuItem) {
         DisplayManager.shared.configureDisplays()
-        DisplayManager.shared.updateArm64AVServices()
         MediaKeyTapManager.shared.updateMediaKeyTap()
     }
     
-    @objc private func changeDisplayControll(sender: NSMenuItem) {
-        configureDisplayKey()
-    }
-    
     @objc private func displayDeviceChangedNotify(_ notification: NSNotification) {
-        print("Change device")
-        configureDisplayKey()
+        DisplayManager.shared.configureDisplays()
+        MediaKeyTapManager.shared.updateMediaKeyTap()
     }
     
     private func displayDeviceChanged() {
-        configureDisplayKey()
+        DisplayManager.shared.configureDisplays()
+        MediaKeyTapManager.shared.updateMediaKeyTap()
         for menuItem in statusItem.menu!.items {
             if menuItem.hasSubmenu && menuItem.title == "DDC enabled for display" {
                 let displaySubMenu = NSMenu()
@@ -193,7 +188,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItemMenu.addItem(NSMenuItem.separator())
         
         // Display controll support Menu
-        configureDisplayKey()
+        DisplayManager.shared.configureDisplays()
         let displayItem = NSMenuItem(title: "DDC enabled for display", action: #selector(changeDisplayControll(sender:)), keyEquivalent: "")
         
         let displaySubMenu = NSMenu()
@@ -206,6 +201,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         if  MediaKeyTapManager.shared.readPrivileges() && !DisplayManager.shared.displays.isEmpty {
             statusItemMenu.setSubmenu(displaySubMenu, for: displayItem)
+            MediaKeyTapManager.shared.updateMediaKeyTap()
         }
         
         statusItemMenu.addItem(NSMenuItem.separator())
@@ -258,7 +254,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         DistributedNotificationCenter.default.addObserver(self, selector: #selector(displayDeviceChangedNotify(_:)),
                                                           name: NSNotification.Name(rawValue: "defaultOutputDeviceChanged"), object: nil)
 
-        
         NSEvent.addGlobalMonitorForEvents(matching: [NSEvent.EventTypeMask.leftMouseDown,NSEvent.EventTypeMask.rightMouseDown], handler: { [self](event: NSEvent) in
             sHelper.closePopoverMenu(sender: self)
         })

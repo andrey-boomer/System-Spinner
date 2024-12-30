@@ -200,6 +200,7 @@ class DisplayManager {
                 }
             }
         }
+        updateArm64AVServices()
     }
     
     func getOtherDisplays() -> [OtherDisplay] {
