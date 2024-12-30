@@ -3,6 +3,7 @@
 
 import Cocoa
 import Foundation
+import MediaKeyTap
 
 var spinnerActive: String!
 var enableStatusText: Bool = false
@@ -16,10 +17,9 @@ var statusItem: NSStatusItem = {
 }()
 
 @main
-class AppDelegate: NSObject, NSApplicationDelegate{
+class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItemMenu: NSMenu!
     private var sHelper = Helper()
-    private var mediaKeyTap = MediaKeyTapManager()
     private var updateIntervalName = ["0.5", "1.0", "1.5", "2.0"]
     private var spinners = ["Loader" : 8, "Grey Loader" : 18, "Cirrcles": 8, "Dots": 12, "Pie": 6, "Rainbow Pie": 15, "Recharges": 8, "Cat": 5]
     
@@ -106,19 +106,23 @@ class AppDelegate: NSObject, NSApplicationDelegate{
         sHelper.remapKeysBacklight(toggle: keyRemap)
     }
     
+    private func configureDisplayKey() {
+        DisplayManager.shared.configureDisplays()
+        DisplayManager.shared.updateArm64AVServices()
+        MediaKeyTapManager.shared.updateMediaKeyTap()
+    }
+    
     @objc private func changeDisplayControll(sender: NSMenuItem) {
-        displayDeviceChanged()
-        mediaKeyTap.updateMediaKeyTap()
+        configureDisplayKey()
     }
     
     @objc private func displayDeviceChangedNotify(_ notification: NSNotification) {
-        displayDeviceChanged()
-        mediaKeyTap.updateMediaKeyTap()
+        print("Change device")
+        configureDisplayKey()
     }
     
     private func displayDeviceChanged() {
-        DisplayManager.shared.configureDisplays()
-        DisplayManager.shared.updateArm64AVServices()
+        configureDisplayKey()
         for menuItem in statusItem.menu!.items {
             if menuItem.hasSubmenu && menuItem.title == "DDC enabled for display" {
                 let displaySubMenu = NSMenu()
@@ -129,7 +133,6 @@ class AppDelegate: NSObject, NSApplicationDelegate{
                 menuItem.submenu = displaySubMenu
             }
         }
-        mediaKeyTap.updateMediaKeyTap()
     }
     
     @objc private func changeStatusMenuClick(sender: NSMenuItem) {
@@ -190,8 +193,7 @@ class AppDelegate: NSObject, NSApplicationDelegate{
         statusItemMenu.addItem(NSMenuItem.separator())
         
         // Display controll support Menu
-        DisplayManager.shared.configureDisplays()
-        DisplayManager.shared.updateArm64AVServices()
+        configureDisplayKey()
         let displayItem = NSMenuItem(title: "DDC enabled for display", action: #selector(changeDisplayControll(sender:)), keyEquivalent: "")
         
         let displaySubMenu = NSMenu()
@@ -200,11 +202,11 @@ class AppDelegate: NSObject, NSApplicationDelegate{
             displaySubMenu.addItem(newItem)
         }
         
-        if mediaKeyTap.readPrivileges() && !DisplayManager.shared.displays.isEmpty {
-            statusItemMenu.setSubmenu(displaySubMenu, for: displayItem)
-            mediaKeyTap.updateMediaKeyTap()
-        }
         statusItemMenu.addItem(displayItem)
+        
+        if  MediaKeyTapManager.shared.readPrivileges() && !DisplayManager.shared.displays.isEmpty {
+            statusItemMenu.setSubmenu(displaySubMenu, for: displayItem)
+        }
         
         statusItemMenu.addItem(NSMenuItem.separator())
         
@@ -254,7 +256,8 @@ class AppDelegate: NSObject, NSApplicationDelegate{
                                                           name: NSNotification.Name(rawValue: kColorSyncDisplayDeviceProfilesNotification.takeRetainedValue() as String), object: nil)
         
         DistributedNotificationCenter.default.addObserver(self, selector: #selector(displayDeviceChangedNotify(_:)),
-                                                          name: NSNotification.Name(rawValue: kColorSyncDisplayDeviceProfilesNotification.takeRetainedValue() as String), object: nil)
+                                                          name: NSNotification.Name(rawValue: "defaultOutputDeviceChanged"), object: nil)
+
         
         NSEvent.addGlobalMonitorForEvents(matching: [NSEvent.EventTypeMask.leftMouseDown,NSEvent.EventTypeMask.rightMouseDown], handler: { [self](event: NSEvent) in
             sHelper.closePopoverMenu(sender: self)

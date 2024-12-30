@@ -6,7 +6,6 @@ import Foundation
 import Cocoa
 import AudioToolbox
 import MediaKeyTap
-import IOKit
 
 class AudioDevice {
     struct AudioDevice: Codable {
@@ -20,7 +19,7 @@ class AudioDevice {
     
     private let audioObjectPropertyElementMain: AudioObjectPropertyElement = 0
     
-    init() {
+    public func updateDevices() {
         var address = AudioObjectPropertyAddress(
             mSelector: AudioObjectPropertySelector(kAudioHardwarePropertyDevices),
             mScope: AudioObjectPropertyScope(kAudioObjectPropertyScopeGlobal),
@@ -46,6 +45,7 @@ class AudioDevice {
             &devids)
         
         if (result == 0) {
+            devices = []
             for i in 0..<numDevices {
                 let newDevice = AudioDevice(deviceID: devids[i],
                                             name: getDeviceName(audioDeviceID: devids[i]),
@@ -55,7 +55,6 @@ class AudioDevice {
             }
         }
     }
-    
     
     private func getDeviceName(audioDeviceID: AudioDeviceID) -> String {
         var propertySize = UInt32(MemoryLayout<CFString>.size)
@@ -129,6 +128,7 @@ class AudioDevice {
 }
 
 class MediaKeyTapManager: MediaKeyTapDelegate {
+    public static let shared = MediaKeyTapManager()
     let audioDevice = AudioDevice()
     var mediaKeyTap: MediaKeyTap?
     var keyRepeatTimers: [MediaKey: Timer] = [:]
@@ -235,8 +235,8 @@ class MediaKeyTapManager: MediaKeyTapDelegate {
         let keysBrightness: [MediaKey] = [.brightnessUp, .brightnessDown]
         var keys: [MediaKey] = keysAudio + keysBrightness
         
-        self.mediaKeyTap = MediaKeyTap(delegate: self, on: KeyPressMode.keyDownAndUp, for: [], observeBuiltIn: true)
-        self.mediaKeyTap?.stop()
+        mediaKeyTap?.stop()
+        audioDevice.updateDevices()
 
         var disengageBrightness = true
         
@@ -259,6 +259,7 @@ class MediaKeyTapManager: MediaKeyTapDelegate {
         if disengageVolume {
             keys.removeAll { keysAudio.contains($0) }
         }
+        
         if keys.count > 0 {
             self.mediaKeyTap = MediaKeyTap(delegate: self, on: KeyPressMode.keyDownAndUp, for: keys, observeBuiltIn: true)
             self.mediaKeyTap?.start()
