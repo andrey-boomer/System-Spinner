@@ -20,23 +20,23 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
     private var maxFrame: Int = 0
     
     public var isAutoLaunch: Bool {
-            get { SMAppService.mainApp.status == .enabled }
-            set {
-                do {
-                    if newValue {
-                        if SMAppService.mainApp.status == .enabled {
-                            try? SMAppService.mainApp.unregister()
-                        }
-
-                        try SMAppService.mainApp.register()
-                    } else {
-                        try SMAppService.mainApp.unregister()
+        get { SMAppService.mainApp.status == .enabled }
+        set {
+            do {
+                if newValue {
+                    if SMAppService.mainApp.status == .enabled {
+                        try? SMAppService.mainApp.unregister()
                     }
-                } catch {
-                    print("Can't use SMAppService")
+                    
+                    try SMAppService.mainApp.register()
+                } else {
+                    try SMAppService.mainApp.unregister()
                 }
+            } catch {
+                print("Can't use SMAppService")
             }
         }
+    }
     
     public func openAnalitycstApp() {
         let url = NSURL(fileURLWithPath: "/System/Applications/Utilities/Activity Monitor.app", isDirectory: true) as URL
@@ -69,7 +69,7 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
         let notificationCenter = UNUserNotificationCenter.current()
         let downloadAction = UNNotificationAction(identifier: action, title: action, options: .init(rawValue: 0))
         let category = UNNotificationCategory(identifier: "ACTION", actions: [downloadAction], intentIdentifiers: [], hiddenPreviewsBodyPlaceholder: "", options: .customDismissAction)
-
+        
         content.title = title
         content.body = body
         content.categoryIdentifier = "ACTION"
@@ -82,13 +82,13 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
         }
         notificationCenter.add(UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil))
     }
-   
+    
     public func showPopover(sender: Any?) {
-      if let button = statusItem.button {
-          popover.show(relativeTo: button.bounds, of: button, preferredEdge: NSRectEdge.minY)
-      }
+        if let button = statusItem.button {
+            popover.show(relativeTo: button.bounds, of: button, preferredEdge: NSRectEdge.minY)
+        }
     }
-
+    
     public func closePopoverMenu(sender: Any?) {
         statusItem.menu = nil
         if popover.isShown {
@@ -97,11 +97,11 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
     }
     
     public func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-         if  response.actionIdentifier == "Download" {
-             guard let url = URL(string: appLastestUrl) else {
-                   return
-             }
-             NSWorkspace.shared.open(url)
+        if  response.actionIdentifier == "Download" {
+            guard let url = URL(string: appLastestUrl) else {
+                return
+            }
+            NSWorkspace.shared.open(url)
         }
         completionHandler()
     }
@@ -123,14 +123,14 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
         let appCurrentVersion = trimCharacter(val: Bundle.main.infoDictionary!["CFBundleShortVersionString"] as Any)
         
         guard let url = URL(string: appApiUrl) else {
-              return
+            return
         }
         
-		// start check new version after 5 minits from execute function
+        // start check new version after 5 minits from execute function
         DispatchQueue.main.asyncAfter(deadline: .now() + 300) {
             URLSession.shared.dataTask(with: url) { (data, res, err) in
                 guard let data = data else {
-                      return
+                    return
                 }
                 
                 do {
@@ -143,10 +143,10 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
                                                     action: "Download")
                     }
                 } catch {
-                   return
+                    return
                 }
-			}.resume()
-         }
+            }.resume()
+        }
     }
     
     public func changeSpinner(spinnerName: String, spinnerFrames: Int) {
@@ -223,59 +223,59 @@ class OSDUtils: NSObject {
     static func getOSDImageByCommand(command: Command, value: Float = 1) -> OSDImage {
         var osdImage: OSDImage
         switch command {
-            case .audioSpeakerVolume: osdImage = value > 0 ? .audioSpeaker : .audioSpeakerMuted
-            case .audioMuteScreenBlank: osdImage = .audioSpeakerMuted
-            case .contrast: osdImage = .contrast
-            default: osdImage = .brightness
+        case .audioSpeakerVolume: osdImage = value > 0 ? .audioSpeaker : .audioSpeakerMuted
+        case .audioMuteScreenBlank: osdImage = .audioSpeakerMuted
+        case .contrast: osdImage = .contrast
+        default: osdImage = .brightness
         }
         return osdImage
     }
-
-  static func showOsd(displayID: CGDirectDisplayID, command: Command, value: Float, maxValue: Float = 1, lock: Bool = false) {
-    guard let manager = OSDManager.sharedManager() as? OSDManager else {
-      return
+    
+    static func showOsd(displayID: CGDirectDisplayID, command: Command, value: Float, maxValue: Float = 1, lock: Bool = false) {
+        guard let manager = OSDManager.sharedManager() as? OSDManager else {
+            return
+        }
+        let osdImage = self.getOSDImageByCommand(command: command, value: value)
+        let filledChiclets: Int
+        let totalChiclets: Int
+        filledChiclets = Int(value * 100)
+        totalChiclets = Int(maxValue * 100)
+        manager.showImage(osdImage.rawValue, onDisplayID: displayID, priority: 0x1F4, msecUntilFade: 1000, filledChiclets: UInt32(filledChiclets), totalChiclets: UInt32(totalChiclets), locked: lock)
     }
-    let osdImage = self.getOSDImageByCommand(command: command, value: value)
-    let filledChiclets: Int
-    let totalChiclets: Int
-    filledChiclets = Int(value * 100)
-    totalChiclets = Int(maxValue * 100)
-    manager.showImage(osdImage.rawValue, onDisplayID: displayID, priority: 0x1F4, msecUntilFade: 1000, filledChiclets: UInt32(filledChiclets), totalChiclets: UInt32(totalChiclets), locked: lock)
-  }
-
-  static func showOsdVolumeDisabled(displayID: CGDirectDisplayID) {
-    guard let manager = OSDManager.sharedManager() as? OSDManager else {
-      return
+    
+    static func showOsdVolumeDisabled(displayID: CGDirectDisplayID) {
+        guard let manager = OSDManager.sharedManager() as? OSDManager else {
+            return
+        }
+        manager.showImage(22, onDisplayID: displayID, priority: 0x1F4, msecUntilFade: 1000)
     }
-    manager.showImage(22, onDisplayID: displayID, priority: 0x1F4, msecUntilFade: 1000)
-  }
-
-  static func showOsdMuteDisabled(displayID: CGDirectDisplayID) {
-    guard let manager = OSDManager.sharedManager() as? OSDManager else {
-      return
+    
+    static func showOsdMuteDisabled(displayID: CGDirectDisplayID) {
+        guard let manager = OSDManager.sharedManager() as? OSDManager else {
+            return
+        }
+        manager.showImage(21, onDisplayID: displayID, priority: 0x1F4, msecUntilFade: 1000)
     }
-    manager.showImage(21, onDisplayID: displayID, priority: 0x1F4, msecUntilFade: 1000)
-  }
-
-  static func popEmptyOsd(displayID: CGDirectDisplayID, command: Command) {
-    guard let manager = OSDManager.sharedManager() as? OSDManager else {
-      return
+    
+    static func popEmptyOsd(displayID: CGDirectDisplayID, command: Command) {
+        guard let manager = OSDManager.sharedManager() as? OSDManager else {
+            return
+        }
+        let osdImage = self.getOSDImageByCommand(command: command)
+        manager.showImage(osdImage.rawValue, onDisplayID: displayID, priority: 0x1F4, msecUntilFade: 0)
     }
-    let osdImage = self.getOSDImageByCommand(command: command)
-    manager.showImage(osdImage.rawValue, onDisplayID: displayID, priority: 0x1F4, msecUntilFade: 0)
-  }
-
-  static let chicletCount: Float = 16
-
-  static func chiclet(fromValue value: Float, maxValue: Float, half: Bool = false) -> Float {
-    (value * self.chicletCount * (half ? 2 : 1)) / maxValue
-  }
-
-  static func value(fromChiclet chiclet: Float, maxValue: Float, half: Bool = false) -> Float {
-    (chiclet * maxValue) / (self.chicletCount * (half ? 2 : 1))
-  }
-
-  static func getDistance(fromNearestChiclet chiclet: Float) -> Float {
-    abs(chiclet.rounded(.towardZero) - chiclet)
-  }
+    
+    static let chicletCount: Float = 16
+    
+    static func chiclet(fromValue value: Float, maxValue: Float, half: Bool = false) -> Float {
+        (value * self.chicletCount * (half ? 2 : 1)) / maxValue
+    }
+    
+    static func value(fromChiclet chiclet: Float, maxValue: Float, half: Bool = false) -> Float {
+        (chiclet * maxValue) / (self.chicletCount * (half ? 2 : 1))
+    }
+    
+    static func getDistance(fromNearestChiclet chiclet: Float) -> Float {
+        abs(chiclet.rounded(.towardZero) - chiclet)
+    }
 }

@@ -91,161 +91,162 @@ class Display: Equatable {
         UserDefaults.standard.set(brightnessValue, forKey: "group.brightnessValue")
     }
 }
-    
+
 class DisplayManager {
-        public static let shared = DisplayManager()
-        var displays: [Display] = []
-        var audioControlTargetDisplays: [OtherDisplay] = []
-        let globalDDCQueue = DispatchQueue(label: "Global DDC queue")
-        
-        static func getDisplayNameByID(displayID: CGDirectDisplayID) -> String {
-            if let dictionary = (CoreDisplay_DisplayCreateInfoDictionary(displayID)?.takeRetainedValue() as NSDictionary?), let nameList = dictionary["DisplayProductName"] as? [String: String], var name = nameList[Locale.current.identifier] ?? nameList["en_US"] ?? nameList.first?.value {
-                if CGDisplayIsInHWMirrorSet(displayID) != 0 || CGDisplayIsInMirrorSet(displayID) != 0 {
-                    let mirroredDisplayID = CGDisplayMirrorsDisplay(displayID)
-                    if mirroredDisplayID != 0, let dictionary = (CoreDisplay_DisplayCreateInfoDictionary(mirroredDisplayID)?.takeRetainedValue() as NSDictionary?), let nameList = dictionary["DisplayProductName"] as? [String: String], let mirroredName = nameList[Locale.current.identifier] ?? nameList["en_US"] ?? nameList.first?.value {
-                        name.append(" | " + mirroredName)
-                    }
-                }
-                return name
-            }
-            return "Unknown"
-        }
-        
-        static func getDisplayRawNameByID(displayID: CGDirectDisplayID) -> String {
-            if let dictionary = (CoreDisplay_DisplayCreateInfoDictionary(displayID)?.takeRetainedValue() as NSDictionary?), let nameList = dictionary["DisplayProductName"] as? [String: String], let name = nameList["en_US"] ?? nameList.first?.value {
-                return name
-            }
-            return ""
-        }
-        
-        static func isDummy(displayID: CGDirectDisplayID) -> Bool {
-            let vendorNumber = CGDisplayVendorNumber(displayID)
-            let rawName = getDisplayRawNameByID(displayID: displayID)
-            if rawName.lowercased().contains("dummy") || (self.isVirtual(displayID: displayID) && vendorNumber == UInt32(0xF0F0)) {
-                return true
-            }
-            return false
-        }
-        
-        static func isVirtual(displayID: CGDirectDisplayID) -> Bool {
-            var isVirtual = false
-            if let dictionary = (CoreDisplay_DisplayCreateInfoDictionary(displayID)?.takeRetainedValue() as NSDictionary?) {
-                let isVirtualDevice = dictionary["kCGDisplayIsVirtualDevice"] as? Bool
-                let displayIsAirplay = dictionary["kCGDisplayIsAirPlay"] as? Bool
-                if isVirtualDevice ?? displayIsAirplay ?? false {
-                    isVirtual = true
+    public static let shared = DisplayManager()
+    var displays: [Display] = []
+    var audioControlTargetDisplays: [OtherDisplay] = []
+    let globalDDCQueue = DispatchQueue(label: "Global DDC queue")
+    
+    static func getDisplayNameByID(displayID: CGDirectDisplayID) -> String {
+        if let dictionary = (CoreDisplay_DisplayCreateInfoDictionary(displayID)?.takeRetainedValue() as NSDictionary?), let nameList = dictionary["DisplayProductName"] as? [String: String], var name = nameList[Locale.current.identifier] ?? nameList["en_US"] ?? nameList.first?.value {
+            if CGDisplayIsInHWMirrorSet(displayID) != 0 || CGDisplayIsInMirrorSet(displayID) != 0 {
+                let mirroredDisplayID = CGDisplayMirrorsDisplay(displayID)
+                if mirroredDisplayID != 0, let dictionary = (CoreDisplay_DisplayCreateInfoDictionary(mirroredDisplayID)?.takeRetainedValue() as NSDictionary?), let nameList = dictionary["DisplayProductName"] as? [String: String], let mirroredName = nameList[Locale.current.identifier] ?? nameList["en_US"] ?? nameList.first?.value {
+                    name.append(" | " + mirroredName)
                 }
             }
-            return isVirtual
+            return name
         }
-        
-        static func isAppleDisplay(displayID: CGDirectDisplayID) -> Bool {
-            if #available(macOS 15.0, *) {
-                if CGDisplayVendorNumber(displayID) != 1552, CGSIsHDRSupported(displayID), CGSIsHDREnabled(displayID) {
-                    return CGDisplayIsBuiltin(displayID) != 0
-                }
-            }
-            var brightness: Float = -1
-            let ret = DisplayServicesGetBrightness(displayID, &brightness)
-            if ret == 0, brightness >= 0 { // If brightness read appears to be successful using DisplayServices then it should be an Apple display
-                return true
-            }
-            return CGDisplayIsBuiltin(displayID) != 0 // If built-in display, it should be Apple
+        return "Unknown"
+    }
+    
+    static func getDisplayRawNameByID(displayID: CGDirectDisplayID) -> String {
+        if let dictionary = (CoreDisplay_DisplayCreateInfoDictionary(displayID)?.takeRetainedValue() as NSDictionary?), let nameList = dictionary["DisplayProductName"] as? [String: String], let name = nameList["en_US"] ?? nameList.first?.value {
+            return name
         }
-        
-        func updateArm64AVServices() {
-            if Arm64DDC.isArm64 {
-                var displayIDs: [CGDirectDisplayID] = []
-                for otherDisplay in self.getOtherDisplays() {
-                    displayIDs.append(otherDisplay.identifier)
-                }
-                for serviceMatch in Arm64DDC.getServiceMatches(displayIDs: displayIDs) {
-                    for otherDisplay in self.getOtherDisplays() where otherDisplay.identifier == serviceMatch.displayID && serviceMatch.service != nil {
-                        otherDisplay.arm64avService = serviceMatch.service
-                        if serviceMatch.discouraged {
-                            otherDisplay.isDiscouraged = true
-                        } else if serviceMatch.dummy {
-                            otherDisplay.isDiscouraged = true
-                        } else {
-                            otherDisplay.arm64ddc = true
-                        }
-                    }
-                }
+        return ""
+    }
+    
+    static func isDummy(displayID: CGDirectDisplayID) -> Bool {
+        let vendorNumber = CGDisplayVendorNumber(displayID)
+        let rawName = getDisplayRawNameByID(displayID: displayID)
+        if rawName.lowercased().contains("dummy") || (self.isVirtual(displayID: displayID) && vendorNumber == UInt32(0xF0F0)) {
+            return true
+        }
+        return false
+    }
+    
+    static func isVirtual(displayID: CGDirectDisplayID) -> Bool {
+        var isVirtual = false
+        if let dictionary = (CoreDisplay_DisplayCreateInfoDictionary(displayID)?.takeRetainedValue() as NSDictionary?) {
+            let isVirtualDevice = dictionary["kCGDisplayIsVirtualDevice"] as? Bool
+            let displayIsAirplay = dictionary["kCGDisplayIsAirPlay"] as? Bool
+            if isVirtualDevice ?? displayIsAirplay ?? false {
+                isVirtual = true
             }
         }
-        
-        func configureDisplays() {
-            self.displays = []
-            var onlineDisplayIDs = [CGDirectDisplayID](repeating: 0, count: 16)
-            var displayCount: UInt32 = 0
-            guard CGGetOnlineDisplayList(16, &onlineDisplayIDs, &displayCount) == .success else {
-                return
+        return isVirtual
+    }
+    
+    static func isAppleDisplay(displayID: CGDirectDisplayID) -> Bool {
+        if #available(macOS 15.0, *) {
+            if CGDisplayVendorNumber(displayID) != 1552, CGSIsHDRSupported(displayID), CGSIsHDREnabled(displayID) {
+                return CGDisplayIsBuiltin(displayID) != 0
             }
-            
-            for onlineDisplayID in onlineDisplayIDs where onlineDisplayID != 0 {
-                let name = DisplayManager.getDisplayNameByID(displayID: onlineDisplayID)
-                let id = onlineDisplayID
-                let vendorNumber = CGDisplayVendorNumber(onlineDisplayID)
-                let modelNumber = CGDisplayModelNumber(onlineDisplayID)
-                let serialNumber = CGDisplaySerialNumber(onlineDisplayID)
-                
-                if !DisplayManager.isDummy(displayID: onlineDisplayID) && !DisplayManager.isVirtual(displayID: onlineDisplayID) {
-                    if DisplayManager.isAppleDisplay(displayID: onlineDisplayID) {
-                        let appleDisplay = AppleDisplay(id, name: "Apple " + name, vendorNumber: vendorNumber, modelNumber: modelNumber, serialNumber: serialNumber)
-                        self.displays.append(appleDisplay)
+        }
+        var brightness: Float = -1
+        let ret = DisplayServicesGetBrightness(displayID, &brightness)
+        if ret == 0, brightness >= 0 { // If brightness read appears to be successful using DisplayServices then it should be an Apple display
+            return true
+        }
+        return CGDisplayIsBuiltin(displayID) != 0 // If built-in display, it should be Apple
+    }
+    
+    func updateArm64AVServices() {
+        if Arm64DDC.isArm64 {
+            var displayIDs: [CGDirectDisplayID] = []
+            for otherDisplay in self.getOtherDisplays() {
+                displayIDs.append(otherDisplay.identifier)
+            }
+            for serviceMatch in Arm64DDC.getServiceMatches(displayIDs: displayIDs) {
+                for otherDisplay in self.getOtherDisplays() where otherDisplay.identifier == serviceMatch.displayID && serviceMatch.service != nil {
+                    otherDisplay.arm64avService = serviceMatch.service
+                    if serviceMatch.discouraged {
+                        otherDisplay.isDiscouraged = true
+                    } else if serviceMatch.dummy {
+                        otherDisplay.isDiscouraged = true
                     } else {
-                        let otherDisplay = OtherDisplay(id, name: name, vendorNumber: vendorNumber, modelNumber: modelNumber, serialNumber: serialNumber)
-                        self.displays.append(otherDisplay)
+                        otherDisplay.arm64ddc = true
                     }
                 }
             }
         }
-        
-        func getOtherDisplays() -> [OtherDisplay] {
-            self.displays.compactMap { $0 as? OtherDisplay }
+    }
+    
+    func configureDisplays() {
+        self.displays = []
+        CGDisplayRestoreColorSyncSettings()
+        var onlineDisplayIDs = [CGDirectDisplayID](repeating: 0, count: 16)
+        var displayCount: UInt32 = 0
+        guard CGGetOnlineDisplayList(16, &onlineDisplayIDs, &displayCount) == .success else {
+            return
         }
         
-        func getAppleDisplays() -> [AppleDisplay] {
-            self.displays.compactMap { $0 as? AppleDisplay }
+        for onlineDisplayID in onlineDisplayIDs where onlineDisplayID != 0 {
+            let name = DisplayManager.getDisplayNameByID(displayID: onlineDisplayID)
+            let id = onlineDisplayID
+            let vendorNumber = CGDisplayVendorNumber(onlineDisplayID)
+            let modelNumber = CGDisplayModelNumber(onlineDisplayID)
+            let serialNumber = CGDisplaySerialNumber(onlineDisplayID)
+            
+            if !DisplayManager.isDummy(displayID: onlineDisplayID) && !DisplayManager.isVirtual(displayID: onlineDisplayID) {
+                if DisplayManager.isAppleDisplay(displayID: onlineDisplayID) {
+                    let appleDisplay = AppleDisplay(id, name: "Apple " + name, vendorNumber: vendorNumber, modelNumber: modelNumber, serialNumber: serialNumber)
+                    self.displays.append(appleDisplay)
+                } else {
+                    let otherDisplay = OtherDisplay(id, name: name, vendorNumber: vendorNumber, modelNumber: modelNumber, serialNumber: serialNumber)
+                    self.displays.append(otherDisplay)
+                }
+            }
         }
-        
-        func getBuiltInDisplay() -> Display? {
-            self.displays.first { CGDisplayIsBuiltin($0.identifier) != 0 }
-        }
-        
-        func getAffectedDisplays() -> [Display]? {
-            return self.displays
-        }
+    }
+    
+    func getOtherDisplays() -> [OtherDisplay] {
+        self.displays.compactMap { $0 as? OtherDisplay }
+    }
+    
+    func getAppleDisplays() -> [AppleDisplay] {
+        self.displays.compactMap { $0 as? AppleDisplay }
+    }
+    
+    func getBuiltInDisplay() -> Display? {
+        self.displays.first { CGDisplayIsBuiltin($0.identifier) != 0 }
+    }
+    
+    func getAffectedDisplays() -> [Display]? {
+        return self.displays
+    }
     func normalizedName(_ name: String) -> String {
-      var normalizedName = name.replacingOccurrences(of: "(", with: "")
-      normalizedName = normalizedName.replacingOccurrences(of: ")", with: "")
-      normalizedName = normalizedName.replacingOccurrences(of: " ", with: "")
-      for i in 0 ... 9 {
-        normalizedName = normalizedName.replacingOccurrences(of: String(i), with: "")
-      }
-      return normalizedName
+        var normalizedName = name.replacingOccurrences(of: "(", with: "")
+        normalizedName = normalizedName.replacingOccurrences(of: ")", with: "")
+        normalizedName = normalizedName.replacingOccurrences(of: " ", with: "")
+        for i in 0 ... 9 {
+            normalizedName = normalizedName.replacingOccurrences(of: String(i), with: "")
+        }
+        return normalizedName
     }
     
     func getDdcCapableDisplays() -> [OtherDisplay] {
-      self.displays.compactMap { display -> OtherDisplay? in
-        if let otherDisplay = display as? OtherDisplay {
-          return otherDisplay
-        } else { return nil }
-      }
+        self.displays.compactMap { display -> OtherDisplay? in
+            if let otherDisplay = display as? OtherDisplay {
+                return otherDisplay
+            } else { return nil }
+        }
     }
     
     func updateAudioControlTargetDisplays(deviceName: String) -> Int {
-      self.audioControlTargetDisplays.removeAll()
-      var numOfAddedDisplays = 0
-      var displayAudioDeviceName = ""
-      for ddcCapableDisplay in self.getDdcCapableDisplays() {
-          displayAudioDeviceName = DisplayManager.getDisplayRawNameByID(displayID: ddcCapableDisplay.identifier)
-          if self.normalizedName(displayAudioDeviceName) == self.normalizedName(deviceName) {
-              self.audioControlTargetDisplays.append(ddcCapableDisplay)
-              numOfAddedDisplays += 1
-          }
-      }
-      return numOfAddedDisplays
+        self.audioControlTargetDisplays.removeAll()
+        var numOfAddedDisplays = 0
+        var displayAudioDeviceName = ""
+        for ddcCapableDisplay in self.getDdcCapableDisplays() {
+            displayAudioDeviceName = DisplayManager.getDisplayRawNameByID(displayID: ddcCapableDisplay.identifier)
+            if self.normalizedName(displayAudioDeviceName) == self.normalizedName(deviceName) {
+                self.audioControlTargetDisplays.append(ddcCapableDisplay)
+                numOfAddedDisplays += 1
+            }
+        }
+        return numOfAddedDisplays
     }
     
     static func engageMirror() -> Bool {

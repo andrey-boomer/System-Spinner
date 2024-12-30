@@ -94,7 +94,7 @@ class UsageViewController: NSViewController {
         memLevel.menu = memProcessMenu
         memProcessMenu.font = NSFont.monospacedSystemFont(ofSize: 12, weight: .medium)
         memPopupButton.action =  #selector(memPopupAction(sender:))
-      
+        
         super.viewDidLoad()
     }
     
@@ -105,7 +105,7 @@ class UsageViewController: NSViewController {
     
     override func viewDidAppear() {
         dataTimer = Timer(timeInterval: updateInterval, repeats: true, block: { [weak self] _ in
-             self?.updateData()
+            self?.updateData()
         })
         RunLoop.main.add(dataTimer!, forMode: .common)
         dataTimer?.fire()

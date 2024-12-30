@@ -55,7 +55,7 @@ class AudioDevice {
             }
         }
     }
-
+    
     
     private func getDeviceName(audioDeviceID: AudioDeviceID) -> String {
         var propertySize = UInt32(MemoryLayout<CFString>.size)
@@ -108,7 +108,7 @@ class AudioDevice {
             mSelector: AudioObjectPropertySelector(kAudioHardwarePropertyDefaultOutputDevice),
             mScope: AudioObjectPropertyScope(kAudioObjectPropertyScopeGlobal),
             mElement: audioObjectPropertyElementMain)
-
+        
         let result = AudioObjectGetPropertyData(
             id,
             &idPropertyAddress,
@@ -116,7 +116,7 @@ class AudioDevice {
             nil,
             &idSize,
             &id)
-
+        
         if (result != 0) {
             return false
         } else {
@@ -129,140 +129,139 @@ class AudioDevice {
 }
 
 class MediaKeyTapManager: MediaKeyTapDelegate {
-        let audioDevice = AudioDevice()
-        var mediaKeyTap: MediaKeyTap?
-        var keyRepeatTimers: [MediaKey: Timer] = [:]
-        
-        static func readPrivileges() -> Bool {
-            let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: true]
-            let status = AXIsProcessTrustedWithOptions(options)
-            if status == false {
-                let alert = NSAlert()
-                alert.messageText = "Keyboard not available"
-                alert.informativeText = "You need enable application in System Settings > Security and Privacy > Accessibility for the keyboard shortcuts to work"
-                alert.runModal()
-            }
-            return status
+    let audioDevice = AudioDevice()
+    var mediaKeyTap: MediaKeyTap?
+    var keyRepeatTimers: [MediaKey: Timer] = [:]
+    
+    public func readPrivileges() -> Bool {
+        let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: true]
+        let status = AXIsProcessTrustedWithOptions(options)
+        if status == false {
+            let alert = NSAlert()
+            alert.messageText = "Keyboard not available"
+            alert.informativeText = "You need enable application in System Settings > Security and Privacy > Accessibility for the keyboard shortcuts to work"
+            alert.runModal()
         }
-        
-        func handle(mediaKey: MediaKey, event: KeyEvent?, modifiers: NSEvent.ModifierFlags?) {
-            let isPressed = event?.keyPressed ?? true
-            let isRepeat = event?.keyRepeat ?? false
-            let isControl = modifiers?.isSuperset(of: NSEvent.ModifierFlags([.control])) ?? false
-            let isCommand = modifiers?.isSuperset(of: NSEvent.ModifierFlags([.command])) ?? false
-            let isOption = modifiers?.isSuperset(of: NSEvent.ModifierFlags([.option])) ?? false
-            if isPressed, isCommand, !isControl, mediaKey == .brightnessDown, DisplayManager.engageMirror() {
-                return
-            }
-            if isPressed, isControl, !isOption, mediaKey == .brightnessUp || mediaKey == .brightnessDown {
-                self.handleDirectedBrightness(isCommandModifier: isCommand, isUp: mediaKey == .brightnessUp)
-                return
-            }
-            let oppositeKey: MediaKey? = self.oppositeMediaKey(mediaKey: mediaKey)
-            // If the opposite key to the one being held has an active timer, cancel it - we'll be going in the opposite direction
-            if let oppositeKey = oppositeKey, let oppositeKeyTimer = self.keyRepeatTimers[oppositeKey], oppositeKeyTimer.isValid {
-                oppositeKeyTimer.invalidate()
-            } else if let mediaKeyTimer = self.keyRepeatTimers[mediaKey], mediaKeyTimer.isValid {
-                // If there's already an active timer for the key being held down, let it run rather than executing it again
-                if isRepeat {
-                    return
-                }
-                mediaKeyTimer.invalidate()
-            }
-            self.sendDisplayCommand(mediaKey: mediaKey, isRepeat: isRepeat, isPressed: isPressed)
+        return status
+    }
+    
+    public func handle(mediaKey: MediaKey, event: KeyEvent?, modifiers: NSEvent.ModifierFlags?) {
+        let isPressed = event?.keyPressed ?? true
+        let isRepeat = event?.keyRepeat ?? false
+        let isControl = modifiers?.isSuperset(of: NSEvent.ModifierFlags([.control])) ?? false
+        let isCommand = modifiers?.isSuperset(of: NSEvent.ModifierFlags([.command])) ?? false
+        let isOption = modifiers?.isSuperset(of: NSEvent.ModifierFlags([.option])) ?? false
+        if isPressed, isCommand, !isControl, mediaKey == .brightnessDown, DisplayManager.engageMirror() {
+            return
         }
-        
-        func handleDirectedBrightness(isCommandModifier: Bool, isUp: Bool) {
-            if isCommandModifier {
-                for otherDisplay in DisplayManager.shared.getOtherDisplays() {
-                    otherDisplay.setBrightness(to: otherDisplay, isUp: true)
-                }
-                for appleDisplay in DisplayManager.shared.getAppleDisplays() where !appleDisplay.isBuiltIn() {
-                    appleDisplay.setBrightness(to: appleDisplay, isUp: true)
-                }
-                return
-            } else if let internalDisplay = DisplayManager.shared.getBuiltInDisplay() as? AppleDisplay {
-                internalDisplay.setBrightness(to: internalDisplay, isUp: true)
-                return
-            }
+        if isPressed, isControl, !isOption, mediaKey == .brightnessUp || mediaKey == .brightnessDown {
+            self.handleDirectedBrightness(isCommandModifier: isCommand, isUp: mediaKey == .brightnessUp)
+            return
         }
+        let oppositeKey: MediaKey? = self.oppositeMediaKey(mediaKey: mediaKey)
         
-        private func sendDisplayCommand(mediaKey: MediaKey, isRepeat: Bool, isPressed: Bool) {
-            guard [.brightnessUp, .brightnessDown, .volumeUp, .volumeDown, .mute].contains(mediaKey), isPressed, let affectedDisplays = DisplayManager.shared.getAffectedDisplays() else {
+        if let oppositeKey = oppositeKey, let oppositeKeyTimer = self.keyRepeatTimers[oppositeKey], oppositeKeyTimer.isValid {
+            oppositeKeyTimer.invalidate()
+        } else if let mediaKeyTimer = self.keyRepeatTimers[mediaKey], mediaKeyTimer.isValid {
+            if isRepeat {
                 return
             }
-            for display in affectedDisplays {
-                switch mediaKey {
-                case .brightnessUp:
-                    display.setBrightness(to: display, isUp: true)
-                case .brightnessDown:
-                    display.setBrightness(to: display, isUp: false)
-                default: continue
-                }
+            mediaKeyTimer.invalidate()
+        }
+        self.sendDisplayCommand(mediaKey: mediaKey, isRepeat: isRepeat, isPressed: isPressed)
+    }
+    
+    private func handleDirectedBrightness(isCommandModifier: Bool, isUp: Bool) {
+        if isCommandModifier {
+            for otherDisplay in DisplayManager.shared.getOtherDisplays() {
+                otherDisplay.setBrightness(to: otherDisplay, isUp: true)
             }
-            
-            for display in affectedDisplays {
-                switch mediaKey {
-                case .mute:
-                    if !isRepeat, isPressed, let display = display as? OtherDisplay {
-                        display.toggleMute()
-                    }
-                case .volumeUp, .volumeDown:
-                    if let display = display as? OtherDisplay {
-                        if isPressed {
-                            display.stepVolume(isUp: mediaKey == .volumeUp)
-                        }
-                    }
-                default: continue
-                }
+            for appleDisplay in DisplayManager.shared.getAppleDisplays() where !appleDisplay.isBuiltIn() {
+                appleDisplay.setBrightness(to: appleDisplay, isUp: true)
+            }
+            return
+        } else if let internalDisplay = DisplayManager.shared.getBuiltInDisplay() as? AppleDisplay {
+            internalDisplay.setBrightness(to: internalDisplay, isUp: true)
+            return
+        }
+    }
+    
+    private func sendDisplayCommand(mediaKey: MediaKey, isRepeat: Bool, isPressed: Bool) {
+        guard [.brightnessUp, .brightnessDown, .volumeUp, .volumeDown, .mute].contains(mediaKey), isPressed, let affectedDisplays = DisplayManager.shared.getAffectedDisplays() else {
+            return
+        }
+        for display in affectedDisplays {
+            switch mediaKey {
+            case .brightnessUp:
+                display.setBrightness(to: display, isUp: true)
+            case .brightnessDown:
+                display.setBrightness(to: display, isUp: false)
+            default: continue
             }
         }
         
-        private func oppositeMediaKey(mediaKey: MediaKey) -> MediaKey? {
-            if mediaKey == .brightnessUp {
-                return .brightnessDown
-            } else if mediaKey == .brightnessDown {
-                return .brightnessUp
-            } else if mediaKey == .volumeUp {
-                return .volumeDown
-            } else if mediaKey == .volumeDown {
-                return .volumeUp
-            }
-            return nil
-        }
-        
-        func updateMediaKeyTap() {
-            let keysAudio: [MediaKey] = [.volumeUp, .volumeDown, .mute]
-            let keysBrightness: [MediaKey] = [.brightnessUp, .brightnessDown]
-            var keys: [MediaKey] = keysAudio + keysBrightness
-            
-            // Remove brightness keys if no external displays are connected, but only if brightness fine control is not active
-            var disengageBrightness = true
-            
-            for display in DisplayManager.shared.displays where !display.isBuiltIn() {
-                disengageBrightness = false
-            }
-            if disengageBrightness {
-                keys.removeAll { keysBrightness.contains($0) }
-            }
-            
-            var disengageVolume = true
-            for display in DisplayManager.shared.displays {
-                for audio in audioDevice.devices where audio.selected == true {
-                    if display.name == audio.name {
-                        disengageVolume = false
+        for display in affectedDisplays {
+            switch mediaKey {
+            case .mute:
+                if !isRepeat, isPressed, let display = display as? OtherDisplay {
+                    display.toggleMute()
+                }
+            case .volumeUp, .volumeDown:
+                if let display = display as? OtherDisplay {
+                    if isPressed {
+                        display.stepVolume(isUp: mediaKey == .volumeUp)
                     }
                 }
-            }
-            
-            if disengageVolume {
-                keys.removeAll { keysAudio.contains($0) }
-            }
-            
-            self.mediaKeyTap?.stop()
-            if keys.count > 0 {
-                self.mediaKeyTap = MediaKeyTap(delegate: self, on: KeyPressMode.keyDownAndUp, for: keys, observeBuiltIn: true)
-                self.mediaKeyTap?.start()
+            default: continue
             }
         }
+    }
+    
+    private func oppositeMediaKey(mediaKey: MediaKey) -> MediaKey? {
+        if mediaKey == .brightnessUp {
+            return .brightnessDown
+        } else if mediaKey == .brightnessDown {
+            return .brightnessUp
+        } else if mediaKey == .volumeUp {
+            return .volumeDown
+        } else if mediaKey == .volumeDown {
+            return .volumeUp
+        }
+        return nil
+    }
+    
+    public func updateMediaKeyTap() {
+        let keysAudio: [MediaKey] = [.volumeUp, .volumeDown, .mute]
+        let keysBrightness: [MediaKey] = [.brightnessUp, .brightnessDown]
+        var keys: [MediaKey] = keysAudio + keysBrightness
+        
+        self.mediaKeyTap = MediaKeyTap(delegate: self, on: KeyPressMode.keyDownAndUp, for: [], observeBuiltIn: true)
+        self.mediaKeyTap?.stop()
+
+        var disengageBrightness = true
+        
+        for display in DisplayManager.shared.displays where !display.isBuiltIn() {
+            disengageBrightness = false
+        }
+        if disengageBrightness {
+            keys.removeAll { keysBrightness.contains($0) }
+        }
+        
+        var disengageVolume = true
+        for display in DisplayManager.shared.displays {
+            for audio in audioDevice.devices {
+                if display.name == audio.name && audio.selected == true {
+                    disengageVolume = false
+                }
+            }
+        }
+        
+        if disengageVolume {
+            keys.removeAll { keysAudio.contains($0) }
+        }
+        if keys.count > 0 {
+            self.mediaKeyTap = MediaKeyTap(delegate: self, on: KeyPressMode.keyDownAndUp, for: keys, observeBuiltIn: true)
+            self.mediaKeyTap?.start()
+        }
+    }
 }

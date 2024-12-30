@@ -8,7 +8,7 @@ import Cocoa
 import SystemConfiguration
 
 class AKservice {
-
+    
     private let loadInfoCount = UInt32(exactly: MemoryLayout<host_cpu_load_info_data_t>.size / MemoryLayout<integer_t>.size)!
     private let hostVmInfo64Count = UInt32(exactly: MemoryLayout<vm_statistics64_data_t>.size / MemoryLayout<integer_t>.size)!
     private let hostBasicInfoCount = UInt32(exactly: MemoryLayout<host_basic_info_data_t>.size / MemoryLayout<integer_t>.size)!
@@ -16,7 +16,7 @@ class AKservice {
     private var loadPrevious = host_cpu_load_info()
     private var previousUpload: Int64 = 0
     private var previousDownload: Int64 = 0
-
+    
     public struct netPacketData {
         public var value: Double
         public var unit: String
@@ -54,7 +54,7 @@ class AKservice {
     public var netIp: String = "no ip found"
     public var netIn = netPacketData(value: 0.0, unit: "KB/s")
     public var netOut = netPacketData(value: 0.0, unit: "KB/s")
-        
+    
     private func round(In: Double) -> Double {
         return Double(ceil(In * 10) / 10.0)
     }
@@ -64,11 +64,11 @@ class AKservice {
         var count = mach_msg_type_number_t(MemoryLayout<host_cpu_load_info>.stride / MemoryLayout<integer_t>.stride)
         
         let kerr: kern_return_t = withUnsafeMutablePointer(to: &info, {
-          host_statistics(mach_host_self(), HOST_CPU_LOAD_INFO, $0.withMemoryRebound(to: integer_t.self, capacity: 1, { $0 }), &count)
+            host_statistics(mach_host_self(), HOST_CPU_LOAD_INFO, $0.withMemoryRebound(to: integer_t.self, capacity: 1, { $0 }), &count)
         })
         
         guard kerr == KERN_SUCCESS else {
-          return host_cpu_load_info()
+            return host_cpu_load_info()
         }
         
         return info
@@ -83,25 +83,25 @@ class AKservice {
         task.standardOutput = outputPipe
         
         task.launch()
-      
+        
         let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
         let output = String(decoding: outputData, as: UTF8.self)
         task.waitUntilExit()
         
         var processes: [topProcess] = []
         output.enumerateLines { (line, stop) -> Void in
-                let str = line.trimmingCharacters(in: .whitespaces)
-                let pidFind = str.findAndCrop(pattern: "^\\d+")
-                let usageFindCpu = pidFind.remain.findAndCrop(pattern: "^[0-9,.]+ ")
-                let usageFindMem = usageFindCpu.remain.findAndCrop(pattern: "^[0-9,.]+ ")
-                let command = usageFindMem.remain.trimmingCharacters(in: .whitespaces)
-                let usagePCPU = Double(usageFindCpu.cropped.replacingOccurrences(of: ",", with: ".")) ?? 0
-                let usagePMEM = Double(usageFindMem.cropped.replacingOccurrences(of: ",", with: ".")) ?? 0
-                let strMem = String(self.round(In: (self.maxMemory * 10.24 * usagePMEM))) + " MB"
-                
-                if let pid = Int(pidFind.cropped), command != "WindowServer" {
-                    processes.append(topProcess(pid: pid, name: command, cpu: usagePCPU, mem: usagePMEM, realmem: strMem))
-                }
+            let str = line.trimmingCharacters(in: .whitespaces)
+            let pidFind = str.findAndCrop(pattern: "^\\d+")
+            let usageFindCpu = pidFind.remain.findAndCrop(pattern: "^[0-9,.]+ ")
+            let usageFindMem = usageFindCpu.remain.findAndCrop(pattern: "^[0-9,.]+ ")
+            let command = usageFindMem.remain.trimmingCharacters(in: .whitespaces)
+            let usagePCPU = Double(usageFindCpu.cropped.replacingOccurrences(of: ",", with: ".")) ?? 0
+            let usagePMEM = Double(usageFindMem.cropped.replacingOccurrences(of: ",", with: ".")) ?? 0
+            let strMem = String(self.round(In: (self.maxMemory * 10.24 * usagePMEM))) + " MB"
+            
+            if let pid = Int(pidFind.cropped), command != "WindowServer" {
+                processes.append(topProcess(pid: pid, name: command, cpu: usagePCPU, mem: usagePMEM, realmem: strMem))
+            }
         }
         
         return processes
@@ -206,11 +206,11 @@ class AKservice {
         
         // Update CPU Data
         updateCpuOnly()
-              
+        
         // Update MEM Data
         let maxMem = maxMemory
         let memLoad = vmStatistics64
-
+        
         let unit        = Double(vm_kernel_page_size) / 1073741824
         let active      = Double(memLoad.active_count) * unit
         let speculative = Double(memLoad.speculative_count) * unit
@@ -226,7 +226,7 @@ class AKservice {
         memApp        = round(In: using - wired - compressed)
         memWired      = round(In: wired)
         memCompressed = round(In: compressed)
-                              
+        
         // Update NET Data
         let netId = getDefaultNetworkDevice()
         if netId.isEmpty {

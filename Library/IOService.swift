@@ -33,7 +33,7 @@ class IOServiceData {
         "M1": [
             "CPU": ["TC0P", "Tp09", "Tp0T", "Tp01", "Tp05", "Tp0D", "Tp0H", "Tp0L", "Tp0P", "Tp0X", "Tp0b", "Tg0H"],
             "GPU": ["Tg05", "Tg0D", "Tg0L" ,"Tg0T"],
-            ],
+        ],
         "M2": [
             "CPU": ["TC0P", "Tp0A", "Tp0D", "Tp0E", "Tp01", "Tp02", "Tp05", "Tp06", "Tp09"],
             "GPU": ["Tg0f", "Tg0j"],
@@ -66,7 +66,7 @@ class IOServiceData {
         var reserved: UInt8 = 0
         var release: UInt16 = 0
     }
-
+    
     private struct AppleSMCLimit { // 16 bytes
         var version: UInt16 = 0
         var length: UInt16 = 0
@@ -74,7 +74,7 @@ class IOServiceData {
         var gpu: UInt32 = 0
         var mem: UInt32 = 0
     }
-
+    
     private struct AppleSMCInfo { // 9+3=12 bytes
         var size: UInt32 = 0
         var type = AppleSMC4Chars()
@@ -83,13 +83,13 @@ class IOServiceData {
         var unused2: UInt8 = 0
         var unused3: UInt8 = 0
     }
-
+    
     private struct AppleSMCBytes { // 32 bytes
         var bytes: (UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8,
                     UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8,
                     UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8,
                     UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8) =
-                   (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+        (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
     }
     enum MyError: Error {
         case iokit(kern_return_t)
@@ -112,7 +112,7 @@ class IOServiceData {
             chars.3 = string.utf8.reversed()[3]
         }
     }
-
+    
     private struct AppleSMCKey {
         var key = AppleSMC4Chars()
         var vers = AppleSMCVers()
@@ -154,15 +154,15 @@ class IOServiceData {
         guard let res = process(path: "/usr/sbin/system_profiler", arguments: ["SPHardwareDataType", "-json"]) else {
             return nil
         }
-             
+        
         do {
-             if let json = try JSONSerialization.jsonObject(with: Data(res.utf8), options: []) as? [String: Any],
-                let obj = json["SPHardwareDataType"] as? [[String: Any]], !obj.isEmpty, let val = obj.first,
-                let name = val["machine_name"] as? String {
-                    return name
-             }
+            if let json = try JSONSerialization.jsonObject(with: Data(res.utf8), options: []) as? [String: Any],
+               let obj = json["SPHardwareDataType"] as? [[String: Any]], !obj.isEmpty, let val = obj.first,
+               let name = val["machine_name"] as? String {
+                return name
+            }
         } catch {
-             return nil
+            return nil
         }
         return nil
     }
@@ -192,9 +192,9 @@ class IOServiceData {
         }  else {
             return "INTEL"
         }
-       
+        
     }
-
+    
     init() {
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         let mainport: mach_port_t = 0
@@ -231,7 +231,7 @@ class IOServiceData {
                     } else if sensors.key == "BATTERY" {
                         systemBatteryKeys = sensors.value
                     }
-               }
+                }
             }
         }
         
@@ -290,7 +290,7 @@ class IOServiceData {
         // get SMC data
         cpuTemp = cpuTempKeys.reduce(0,{ result, sensor in max(result, self.read(sensor))})
         gpuTemp = gpuTempKeys.reduce(0,{ result, sensor in max(result, self.read(sensor))})
-
+        
         if fanSpeedKeys.count > 0 {
             fanTemp = fanTempKeys.reduce(0,{ result, sensor in max(result, self.read(sensor))})
             fanSpeed = Int(fanSpeedKeys.reduce(0,{ result, sensor in max(result, self.read(sensor))}))
