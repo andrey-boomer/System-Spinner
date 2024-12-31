@@ -43,6 +43,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func startRunningNotify(_ notification: NSNotification) {
         sHelper.startRunning()
         sHelper.hasNewVersion()
+        
+        // update desplay menu
+        for menuItem in statusItemMenu.items {
+            if menuItem.title == "HDMI/DVI DDC enabled" {
+                displayDeviceChanged(sender: menuItem)
+            }
+        }
     }
     
     @objc private func togglePopover(sender: NSStatusItem) {
@@ -119,12 +126,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let newItem = NSMenuItem(title: displayItem.name, action: #selector(displayDeviceChanged(sender:)), keyEquivalent: "")
             displaySubMenu.addItem(newItem)
         }
+        sender.submenu = displaySubMenu
         if (DisplayManager.shared.hasBrightnessControll()) {
-            sender.submenu = displaySubMenu
             sender.action =  #selector(displayDeviceChanged(sender:))
             sender.state = .on
         } else {
-            sender.submenu = nil
             sender.action =  nil
             sender.state = .off
         }
