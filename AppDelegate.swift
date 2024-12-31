@@ -58,6 +58,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             statusItem.menu = statusItemMenu
             statusItem.button?.performClick(nil)
         }
+        
+        // update desplay menu
+        for menuItem in statusItemMenu.items {
+            if menuItem.title == "HDMI/DVI DDC enabled" {
+                displayDeviceChanged(sender: menuItem)
+            }
+        }
     }
     
     @objc private func changeSpinnerClick(sender: NSMenuItem) {
@@ -105,38 +112,26 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         sHelper.remapKeysBacklight(toggle: keyRemap)
     }
     
-    @objc private func changeDisplayControll(sender: NSMenuItem) {
-        displayDeviceChanged()
-    }
-    
-    @objc private func displayDeviceChangedNotify(_ notification: NSNotification) {
-        displayDeviceChanged()
-    }
-    
-    private func displayDeviceChanged() {
+    @objc private func displayDeviceChanged(sender: NSMenuItem) {
         DisplayManager.shared.configureDisplays()
-        for menuItem in statusItem.menu!.items {
-            if menuItem.hasSubmenu && menuItem.title == "HDMI/DVI DDC enabled" {
-                let displaySubMenu = NSMenu()
-                for displayItem in DisplayManager.shared.displays {
-                    let newItem = NSMenuItem(title: displayItem.name, action: #selector(changeDisplayControll(sender:)), keyEquivalent: "")
-                    displaySubMenu.addItem(newItem)
-                }
-                if (DisplayManager.shared.hasBrightnessControll()) {
-                    menuItem.submenu = displaySubMenu
-                    menuItem.action =  #selector(changeDisplayControll(sender:))
-                    menuItem.state = .on
-                } else {
-                    menuItem.submenu = nil
-                    menuItem.action =  nil
-                    menuItem.state = .off
-                }
-            }
+        let displaySubMenu = NSMenu()
+        for displayItem in DisplayManager.shared.displays {
+            let newItem = NSMenuItem(title: displayItem.name, action: #selector(displayDeviceChanged(sender:)), keyEquivalent: "")
+            displaySubMenu.addItem(newItem)
+        }
+        if (DisplayManager.shared.hasBrightnessControll()) {
+            sender.submenu = displaySubMenu
+            sender.action =  #selector(displayDeviceChanged(sender:))
+            sender.state = .on
+        } else {
+            sender.submenu = nil
+            sender.action =  nil
+            sender.state = .off
         }
         MediaKeyTapManager.shared.updateMediaKeyTap()
         
         // check for keyboadr blacklight controll
-        for menuItem in statusItem.menu!.items {
+        for menuItem in statusItemMenu.items {
             if menuItem.title == "Keyboard backlight (F5/F6)" {
                 if DisplayManager.shared.isAppleDisplayPresent() {
                     menuItem.action = #selector(changeRemapClick(sender:))
@@ -204,7 +199,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         let displaySubMenu = NSMenu()
         for displayItem in DisplayManager.shared.displays {
-            let newItem = NSMenuItem(title: displayItem.name, action: #selector(changeDisplayControll(sender:)), keyEquivalent: "")
+            let newItem = NSMenuItem(title: displayItem.name, action: #selector(displayDeviceChanged(sender:)), keyEquivalent: "")
             displaySubMenu.addItem(newItem)
         }
         
@@ -277,12 +272,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                                                           name: NSWorkspace.screensDidSleepNotification, object: nil)
         NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(startRunningNotify(_:)),
                                                           name: NSWorkspace.screensDidWakeNotification, object: nil)
-        DistributedNotificationCenter.default.addObserver(self, selector: #selector(displayDeviceChangedNotify(_:)),
-                                                          name: NSNotification.Name(rawValue: kColorSyncDisplayDeviceProfilesNotification.takeRetainedValue() as String), object: nil)
-        
-        DistributedNotificationCenter.default.addObserver(self, selector: #selector(displayDeviceChangedNotify(_:)),
-                                                          name: NSNotification.Name(rawValue: "defaultOutputDeviceChanged"), object: nil)
-
         NSEvent.addGlobalMonitorForEvents(matching: [NSEvent.EventTypeMask.leftMouseDown,NSEvent.EventTypeMask.rightMouseDown], handler: { [self](event: NSEvent) in
             sHelper.closePopoverMenu(sender: self)
         })
