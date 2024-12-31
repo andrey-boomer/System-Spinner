@@ -106,26 +106,45 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @objc private func changeDisplayControll(sender: NSMenuItem) {
-        DisplayManager.shared.configureDisplays()
-        MediaKeyTapManager.shared.updateMediaKeyTap()
+        displayDeviceChanged()
     }
     
     @objc private func displayDeviceChangedNotify(_ notification: NSNotification) {
-        DisplayManager.shared.configureDisplays()
-        MediaKeyTapManager.shared.updateMediaKeyTap()
+        displayDeviceChanged()
     }
     
     private func displayDeviceChanged() {
         DisplayManager.shared.configureDisplays()
-        MediaKeyTapManager.shared.updateMediaKeyTap()
         for menuItem in statusItem.menu!.items {
-            if menuItem.hasSubmenu && menuItem.title == "DDC enabled for display" {
+            if menuItem.hasSubmenu && menuItem.title == "HDMI/DVI DDC enabled" {
                 let displaySubMenu = NSMenu()
                 for displayItem in DisplayManager.shared.displays {
                     let newItem = NSMenuItem(title: displayItem.name, action: #selector(changeDisplayControll(sender:)), keyEquivalent: "")
                     displaySubMenu.addItem(newItem)
                 }
-                menuItem.submenu = displaySubMenu
+                if (DisplayManager.shared.hasBrightnessControll()) {
+                    menuItem.submenu = displaySubMenu
+                    menuItem.action =  #selector(changeDisplayControll(sender:))
+                    menuItem.state = .on
+                } else {
+                    menuItem.submenu = nil
+                    menuItem.action =  nil
+                    menuItem.state = .off
+                }
+            }
+        }
+        MediaKeyTapManager.shared.updateMediaKeyTap()
+        
+        // check for keyboadr blacklight controll
+        for menuItem in statusItem.menu!.items {
+            if menuItem.title == "Keyboard backlight (F5/F6)" {
+                if DisplayManager.shared.isAppleDisplayPresent() {
+                    menuItem.action = #selector(changeRemapClick(sender:))
+                    sHelper.remapKeysBacklight(toggle: keyRemap)
+                } else {
+                    menuItem.action = nil
+                    sHelper.remapKeysBacklight(toggle: false)
+                }
             }
         }
     }
@@ -163,14 +182,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // open Analytics
         statusItemMenu.addItem(NSMenuItem(title: "Activity Monitor", action: #selector(analitycstApp(sender:)), keyEquivalent: ""))
         
-        // Remap Menu
-        let remapItem = NSMenuItem(title: "Keyboard backlight (F5/F6)", action: #selector(changeRemapClick(sender:)), keyEquivalent: "")
-        if keyRemap {
-            remapItem.state = .on
-        }
-        sHelper.remapKeysBacklight(toggle: keyRemap)
-        statusItemMenu.addItem(remapItem)
-        
         // Text status in Menu
         let statusItem = NSMenuItem(title: "Show CPU usage in menu", action: #selector(changeStatusMenuClick(sender:)), keyEquivalent: "")
         if enableStatusText {
@@ -189,7 +200,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         // Display controll support Menu
         DisplayManager.shared.configureDisplays()
-        let displayItem = NSMenuItem(title: "DDC enabled for display", action: #selector(changeDisplayControll(sender:)), keyEquivalent: "")
+        let displayItem = NSMenuItem(title: "HDMI/DVI DDC enabled", action: nil, keyEquivalent: "")
         
         let displaySubMenu = NSMenu()
         for displayItem in DisplayManager.shared.displays {
@@ -198,11 +209,29 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         
         statusItemMenu.addItem(displayItem)
+        statusItemMenu.setSubmenu(displaySubMenu, for: displayItem)
         
-        if  MediaKeyTapManager.shared.readPrivileges() && !DisplayManager.shared.displays.isEmpty {
-            statusItemMenu.setSubmenu(displaySubMenu, for: displayItem)
-            MediaKeyTapManager.shared.updateMediaKeyTap()
+        // Display controll check provoleges
+        if  MediaKeyTapManager.shared.readPrivileges() && !DisplayManager.shared.displays.isEmpty && DisplayManager.shared.hasBrightnessControll() {
+            displayItem.state = .on
+        } else {
+            displayItem.state = .off
+            displayItem.action = nil
         }
+        
+        MediaKeyTapManager.shared.updateMediaKeyTap()
+        
+        // Remap Menu
+        let remapItem = NSMenuItem(title: "Keyboard backlight (F5/F6)", action: #selector(changeRemapClick(sender:)), keyEquivalent: "")
+        if keyRemap && DisplayManager.shared.isAppleDisplayPresent() {
+            remapItem.state = .on
+            sHelper.remapKeysBacklight(toggle: keyRemap)
+        } else {
+            remapItem.action = nil
+            sHelper.remapKeysBacklight(toggle: false)
+        }
+        
+        statusItemMenu.addItem(remapItem)
         
         statusItemMenu.addItem(NSMenuItem.separator())
         
