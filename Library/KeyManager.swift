@@ -238,12 +238,7 @@ class MediaKeyTapManager: MediaKeyTapDelegate {
         mediaKeyTap?.stop()
         audioDevice.updateDevices()
 
-        var disengageBrightness = true
-        
-        for display in DisplayManager.shared.displays where !display.isBuiltIn() {
-            disengageBrightness = false
-        }
-        if disengageBrightness {
+        if !DisplayManager.shared.hasBrightnessControll() {
             keys.removeAll { keysBrightness.contains($0) }
         }
         

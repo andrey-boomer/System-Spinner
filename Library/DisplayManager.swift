@@ -228,6 +228,26 @@ class DisplayManager {
         return normalizedName
     }
     
+    func isAppleDisplayPresent() -> Bool {
+        for display in DisplayManager.shared.displays where display.isBuiltIn() {
+            return true
+        }
+        return false
+    }
+    
+    func hasBrightnessControll() -> Bool {
+        var disengageBrightness = true
+        
+        for display in DisplayManager.shared.displays where !display.isBuiltIn() {
+            disengageBrightness = false
+        }
+        if disengageBrightness {
+            return false
+        } else {
+            return true
+        }
+    }
+    
     func getDdcCapableDisplays() -> [OtherDisplay] {
         self.displays.compactMap { display -> OtherDisplay? in
             if let otherDisplay = display as? OtherDisplay {
