@@ -15,7 +15,7 @@ class AudioDevice {
         var selected: Bool
     }
     
-    var devices: [AudioDevice] = []
+    public var devices: [AudioDevice] = []
     
     private let audioObjectPropertyElementMain: AudioObjectPropertyElement = 0
     
