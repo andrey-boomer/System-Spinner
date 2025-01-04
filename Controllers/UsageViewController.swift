@@ -8,7 +8,6 @@ class UsageViewController: NSViewController {
     private var cpuProcessMenu: NSMenu!
     private var memProcessMenu: NSMenu!
     private let ioService = IOServiceData()
-    private let ActivityData = AKservice()
     
     @IBOutlet var fanStack: NSStackView!
     @IBOutlet var cpuTempStack: NSStackView!

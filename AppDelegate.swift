@@ -10,6 +10,7 @@ var updateInterval: Double = 1.0
 var keyRemap: Bool = false
 var brightnessValue: Double = 50.0
 var volumeValue: Double = 50.0
+let ActivityData = AKservice()
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -18,7 +19,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var statusItem: NSStatusItem = {
         return NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     }()
-    private let ActivityData = AKservice()
+
     private var cpuTimer: Timer? = nil
     private var spinnerTimer: Timer? = nil
     private var frames: [NSImage] =  []
