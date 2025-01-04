@@ -216,6 +216,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // check for keyboadr blacklight controll
         for menuItem in statusItemMenu.items {
             if menuItem.title == "Keyboard backlight (F5/F6)" {
+                if keyRemap {
+                    menuItem.state = .on
+                } else {
+                    menuItem.state = .off
+                }
                 if DisplayManager.shared.isAppleDisplayPresent() {
                     menuItem.action = #selector(changeRemapClick(sender:))
                     sHelper.remapKeysBacklight(toggle: keyRemap)
@@ -373,6 +378,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         UserDefaults.standard.set(enableStatusText, forKey: "group.enableStatusText")
         UserDefaults.standard.set(brightnessValue, forKey: "group.brightnessValue")
         UserDefaults.standard.set(volumeValue, forKey: "group.volumeValue")
+        sHelper.remapKeysBacklight(toggle: false) // stop keys remap
     }
     
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
