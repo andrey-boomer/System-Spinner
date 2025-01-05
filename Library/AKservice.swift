@@ -256,8 +256,8 @@ class AKservice {
             }
             freeifaddrs(ifaddr)
             if previousUpload != 0 && previousDownload != 0 {
-                netIn = convert(byte: Double(upload - previousUpload))
-                netOut = convert(byte: Double(download - previousDownload))
+                netIn = convert(byte: Double(download - previousDownload))
+                netOut = convert(byte: Double(upload - previousUpload))
             }
             previousUpload = upload
             previousDownload = download
