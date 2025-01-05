@@ -64,11 +64,15 @@ class AudioDevice {
             mScope: AudioObjectPropertyScope(kAudioObjectPropertyScopeGlobal),
             mElement: AudioObjectPropertyElement(kAudioObjectPropertyElementMain))
         
-        var result: CFString = "" as CFString
+        var dataString: Unmanaged<CFString>?
         
-        AudioObjectGetPropertyData(audioDeviceID, &propertyAddress, 0, nil, &propertySize, &result)
+        let result = AudioObjectGetPropertyData(audioDeviceID, &propertyAddress, 0, nil, &propertySize, &dataString)
         
-        return result as String
+        if (result != 0) {
+            return "Un-named"
+        } else {
+            return dataString!.takeRetainedValue() as String
+        }
     }
     
     private func hasOutput(audioDeviceID: AudioDeviceID) ->  Bool {
