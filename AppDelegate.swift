@@ -73,6 +73,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     private func startRunning() {
+        cpuTimer?.invalidate()
         cpuTimer = Timer(timeInterval: updateInterval, repeats: true, block: { [weak self] _ in
             self?.updateUsage()
         })
