@@ -256,7 +256,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             button.action = #selector(togglePopover(sender:))
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
             button.imagePosition = .imageLeading
-            button.font = NSFont.monospacedSystemFont(ofSize: 12, weight: .medium)
+            button.font = NSFont.monospacedSystemFont(ofSize: 11, weight: .medium)
         }
         
         popover.contentViewController = UsageViewController.freshController()
