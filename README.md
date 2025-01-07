@@ -9,7 +9,7 @@ System Spinner provides macOS system information in status bar. Minimal, small a
 - Memory statistics performance
 - Network connection
 - CMS Information for Cpu Temp and Fan
-- Audio and Brightness contoll DDC ove HDIM/DVI/USB-C *
+- Audio and Brightness contoll DDC ove HDIM/DVI/USB-C [^1]
 - Auto update
 
 ## Screenshots
@@ -37,4 +37,4 @@ Written in Swift 5. Universal build.
 
 You can download app from [releases](https://github.com/andrey-boomer/System-Spinner/releases)
 
-* - !WARNING! This version can't detect monitor or audio output change, only when connect device on sleep! You need update it by hand, on click to status menu.
+[^1]:!WARNING! This version can't detect monitor or audio output change, only when connect device on sleep! You need update it by hand, on click to status menu.
