@@ -11,6 +11,7 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
     public let appApiUrl = "https://api.github.com/repos/andrey-boomer/System-Spinner/releases/latest"
     public let appLastestUrl = "https://github.com/andrey-boomer/System-Spinner/releases/latest"
     public let appAboutUrl = "https://github.com/andrey-boomer/System-Spinner"
+    private var isCheckNewVersionStarted: Bool = false
     
     public var isAutoLaunch: Bool {
         get { SMAppService.mainApp.status == .enabled }
@@ -105,27 +106,31 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
         guard let url = URL(string: appApiUrl) else {
             return
         }
-        
-        // start check new version after 5 minits from execute function
-        DispatchQueue.main.asyncAfter(deadline: .now() + 300) {
-            URLSession.shared.dataTask(with: url) { (data, res, err) in
-                guard let data = data else {
-                    return
-                }
-                
-                do {
-                    let decoder = JSONDecoder()
-                    decoder.keyDecodingStrategy = .convertFromSnakeCase
-                    let versionGit = try trimCharacter(val: decoder.decode(versionEntry.self, from: data).tagName)
-                    if versionGit > 0 && appCurrentVersion > 0 && versionGit > appCurrentVersion {
-                        self.sendSystemNotification(title: "New System Spinner has released!",
-                                                    body: "An new version is available. Would you like to update?",
-                                                    action: "Download")
+        if !isCheckNewVersionStarted {
+            // start check new version after 5 minits from execute function
+            isCheckNewVersionStarted = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 30) {
+                URLSession.shared.dataTask(with: url) { (data, res, err) in
+                    guard let data = data else {
+                        return
                     }
-                } catch {
-                    return
-                }
-            }.resume()
+                    
+                    do {
+                        let decoder = JSONDecoder()
+                        decoder.keyDecodingStrategy = .convertFromSnakeCase
+                        let versionGit = try trimCharacter(val: decoder.decode(versionEntry.self, from: data).tagName)
+                        if versionGit > 0 && appCurrentVersion > 0 && versionGit > appCurrentVersion {
+                            self.sendSystemNotification(title: "System Spinner has updated!",
+                                                        body: "An new version is available. Would you like to update?",
+                                                        action: "Download")
+                        }
+                        self.isCheckNewVersionStarted = false
+                    } catch {
+                        self.isCheckNewVersionStarted = false
+                        return
+                    }
+                }.resume()
+            }
         }
     }
 
