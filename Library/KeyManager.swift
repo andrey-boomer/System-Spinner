@@ -4,136 +4,10 @@
 
 import Foundation
 import Cocoa
-import AudioToolbox
 import MediaKeyTap
-
-class AudioDevice {
-    struct AudioDevice: Codable {
-        var deviceID: AudioDeviceID
-        var name: String
-        var hasOutput: Bool
-        var selected: Bool
-    }
-    
-    public var devices: [AudioDevice] = []
-    
-    private let audioObjectPropertyElementMain: AudioObjectPropertyElement = 0
-    
-    public func updateDevices() {
-        var address = AudioObjectPropertyAddress(
-            mSelector: AudioObjectPropertySelector(kAudioHardwarePropertyDevices),
-            mScope: AudioObjectPropertyScope(kAudioObjectPropertyScopeGlobal),
-            mElement: audioObjectPropertyElementMain)
-        
-        var propSize: UInt32 = 0
-        var result = AudioObjectGetPropertyDataSize(
-            AudioObjectID(kAudioObjectSystemObject),
-            &address,
-            0,
-            nil,
-            &propSize)
-        
-        let numDevices = Int(propSize / UInt32(MemoryLayout<AudioDeviceID>.size))
-        var devids = Array<AudioDeviceID>(repeating: AudioDeviceID(), count: numDevices)
-        
-        result = AudioObjectGetPropertyData(
-            AudioObjectID(kAudioObjectSystemObject),
-            &address,
-            0,
-            nil,
-            &propSize,
-            &devids)
-        
-        if (result == 0) {
-            devices = []
-            for i in 0..<numDevices {
-                let newDevice = AudioDevice(deviceID: devids[i],
-                                            name: getDeviceName(audioDeviceID: devids[i]),
-                                            hasOutput: hasOutput(audioDeviceID: devids[i]),
-                                            selected: selectedDevice(audioDeviceID: devids[i]))
-                devices.append(newDevice)
-            }
-        }
-    }
-    
-    private func getDeviceName(audioDeviceID: AudioDeviceID) -> String {
-        var propertySize = UInt32(MemoryLayout<CFString>.size)
-        
-        var propertyAddress = AudioObjectPropertyAddress(
-            mSelector: AudioObjectPropertySelector(kAudioDevicePropertyDeviceNameCFString),
-            mScope: AudioObjectPropertyScope(kAudioObjectPropertyScopeGlobal),
-            mElement: AudioObjectPropertyElement(kAudioObjectPropertyElementMain))
-        
-        var dataString: Unmanaged<CFString>?
-        
-        let result = AudioObjectGetPropertyData(audioDeviceID, &propertyAddress, 0, nil, &propertySize, &dataString)
-        
-        if (result != 0) {
-            return "Un-named"
-        } else {
-            return dataString!.takeRetainedValue() as String
-        }
-    }
-    
-    private func hasOutput(audioDeviceID: AudioDeviceID) ->  Bool {
-        var address: AudioObjectPropertyAddress = AudioObjectPropertyAddress(
-            mSelector: AudioObjectPropertySelector(kAudioDevicePropertyStreamConfiguration),
-            mScope: AudioObjectPropertyScope(kAudioDevicePropertyScopeOutput),
-            mElement: audioObjectPropertyElementMain)
-        
-        var propSize: UInt32 = 0
-        var result = AudioObjectGetPropertyDataSize(
-            audioDeviceID,
-            &address,
-            0,
-            nil,
-            &propSize)
-        if (result != 0) {
-            return false
-        }
-        let bufferList = UnsafeMutablePointer<AudioBufferList>.allocate(capacity: Int(propSize))
-        defer {
-            bufferList.deallocate()
-        }
-        result = AudioObjectGetPropertyData(audioDeviceID, &address, 0, nil, &propSize, bufferList)
-        if (result != 0) {
-            return false
-        }
-        let buffers = UnsafeMutableAudioBufferListPointer(bufferList)
-        return buffers.contains { $0.mNumberChannels > 0 }
-    }
-    
-    private func selectedDevice(audioDeviceID: AudioDeviceID) -> Bool {
-        var id = AudioObjectID(kAudioObjectSystemObject)
-        var idSize = UInt32(MemoryLayout.size(ofValue: id))
-        
-        var idPropertyAddress = AudioObjectPropertyAddress(
-            mSelector: AudioObjectPropertySelector(kAudioHardwarePropertyDefaultOutputDevice),
-            mScope: AudioObjectPropertyScope(kAudioObjectPropertyScopeGlobal),
-            mElement: audioObjectPropertyElementMain)
-        
-        let result = AudioObjectGetPropertyData(
-            id,
-            &idPropertyAddress,
-            0,
-            nil,
-            &idSize,
-            &id)
-        
-        if (result != 0) {
-            return false
-        } else {
-            if audioDeviceID == id {
-                return true
-            }
-        }
-        return false
-    }
-}
 
 class MediaKeyTapManager: MediaKeyTapDelegate {
     public static let shared = MediaKeyTapManager()
-    let audioDevice = AudioDevice()
     var mediaKeyTap: MediaKeyTap?
     var keyRepeatTimers: [MediaKey: Timer] = [:]
     
@@ -229,12 +103,12 @@ class MediaKeyTapManager: MediaKeyTapDelegate {
     }
     
     public func updateMediaKeyTap() {
+        let device = simplyCA.defaultOutputDevice
         let keysAudio: [MediaKey] = [.volumeUp, .volumeDown, .mute]
         let keysBrightness: [MediaKey] = [.brightnessUp, .brightnessDown]
         var keys: [MediaKey] = keysAudio + keysBrightness
         
         mediaKeyTap?.stop()
-        audioDevice.updateDevices()
 
         if !DisplayManager.shared.hasBrightnessControll() {
             keys.removeAll { keysBrightness.contains($0) }
@@ -242,10 +116,8 @@ class MediaKeyTapManager: MediaKeyTapDelegate {
         
         var disengageVolume = true
         for display in DisplayManager.shared.displays {
-            for audio in audioDevice.devices {
-                if display.name == audio.name && audio.selected == true {
-                    disengageVolume = false
-                }
+            if display.name == device?.name {
+                disengageVolume = false
             }
         }
         
