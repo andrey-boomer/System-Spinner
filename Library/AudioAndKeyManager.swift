@@ -140,12 +140,6 @@ class MediaKeyTapManager: MediaKeyTapDelegate {
     public func readPrivileges() -> Bool {
         let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: true]
         let status = AXIsProcessTrustedWithOptions(options)
-        if status == false {
-            let alert = NSAlert()
-            alert.messageText = "Keyboard not available"
-            alert.informativeText = "You need enable application in System Settings > Security and Privacy > Accessibility for the keyboard shortcuts to work"
-            alert.runModal()
-        }
         return status
     }
     
