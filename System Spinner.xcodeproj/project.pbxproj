@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7F26224A2D2FFD3600863B33 /* SimplyCoreAudio in Frameworks */ = {isa = PBXBuildFile; productRef = 7F2622492D2FFD3600863B33 /* SimplyCoreAudio */; };
 		7F80E7972BD815270006AD44 /* Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F80E7962BD815270006AD44 /* Helper.swift */; };
 		7F8124E92B96DC8600B05107 /* AKservice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8124E82B96DC8600B05107 /* AKservice.swift */; };
 		7F866E292D1ECAFC00F20488 /* DisplayServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F0D02722D1ECADD0029C507 /* DisplayServices.framework */; };
@@ -16,7 +17,7 @@
 		7F866E352D1ECD9A00F20488 /* DCCArm64.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F866E332D1ECD9A00F20488 /* DCCArm64.swift */; };
 		7F866E362D1ECD9A00F20488 /* DCCIntel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F866E342D1ECD9A00F20488 /* DCCIntel.swift */; };
 		7F866E402D1EDFD700F20488 /* MediaKeyTap in Frameworks */ = {isa = PBXBuildFile; productRef = 7F866E3F2D1EDFD700F20488 /* MediaKeyTap */; };
-		7FA5AC542D21BAC000049C91 /* AudioAndKeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FA5AC532D21BABB00049C91 /* AudioAndKeyManager.swift */; };
+		7FA5AC542D21BAC000049C91 /* KeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FA5AC532D21BABB00049C91 /* KeyManager.swift */; };
 		7FB908C62B67B9FD00E9EE24 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FB908BE2B67B9FD00E9EE24 /* AppDelegate.swift */; };
 		7FFC0C552B7B6845002F9990 /* IOService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FFC0C542B7B6845002F9990 /* IOService.swift */; };
 /* End PBXBuildFile section */
@@ -33,7 +34,7 @@
 		7F866E312D1ECBFE00F20488 /* DisplayManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayManager.swift; sourceTree = "<group>"; };
 		7F866E332D1ECD9A00F20488 /* DCCArm64.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DCCArm64.swift; sourceTree = "<group>"; };
 		7F866E342D1ECD9A00F20488 /* DCCIntel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DCCIntel.swift; sourceTree = "<group>"; };
-		7FA5AC532D21BABB00049C91 /* AudioAndKeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioAndKeyManager.swift; sourceTree = "<group>"; };
+		7FA5AC532D21BABB00049C91 /* KeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyManager.swift; sourceTree = "<group>"; };
 		7FB908A72B67B9A400E9EE24 /* System Spinner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "System Spinner.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7FB908B32B67B9A500E9EE24 /* System_Spinner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = System_Spinner.entitlements; sourceTree = "<group>"; };
 		7FB908BE2B67B9FD00E9EE24 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -64,6 +65,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7F866E2C2D1ECAFE00F20488 /* CoreDisplay.framework in Frameworks */,
+				7F26224A2D2FFD3600863B33 /* SimplyCoreAudio in Frameworks */,
 				7F866E402D1EDFD700F20488 /* MediaKeyTap in Frameworks */,
 				7F866E2F2D1ECB1600F20488 /* OSD.framework in Frameworks */,
 				7F866E292D1ECAFC00F20488 /* DisplayServices.framework in Frameworks */,
@@ -113,7 +115,7 @@
 				7F866E332D1ECD9A00F20488 /* DCCArm64.swift */,
 				7F866E342D1ECD9A00F20488 /* DCCIntel.swift */,
 				7F80E7962BD815270006AD44 /* Helper.swift */,
-				7FA5AC532D21BABB00049C91 /* AudioAndKeyManager.swift */,
+				7FA5AC532D21BABB00049C91 /* KeyManager.swift */,
 				7F866E312D1ECBFE00F20488 /* DisplayManager.swift */,
 				7F8124E82B96DC8600B05107 /* AKservice.swift */,
 				7FFC0C542B7B6845002F9990 /* IOService.swift */,
@@ -143,6 +145,7 @@
 			name = "System Spinner";
 			packageProductDependencies = (
 				7F866E3F2D1EDFD700F20488 /* MediaKeyTap */,
+				7F2622492D2FFD3600863B33 /* SimplyCoreAudio */,
 			);
 			productName = "System Spinner";
 			productReference = 7FB908A72B67B9A400E9EE24 /* System Spinner.app */;
@@ -175,6 +178,7 @@
 			mainGroup = 7FB9089E2B67B9A400E9EE24;
 			packageReferences = (
 				7F866E3E2D1EDFD700F20488 /* XCRemoteSwiftPackageReference "MediaKeyTap" */,
+				7F2622482D2FFD3600863B33 /* XCRemoteSwiftPackageReference "SimplyCoreAudio" */,
 			);
 			productRefGroup = 7FB908A82B67B9A400E9EE24 /* Products */;
 			projectDirPath = "";
@@ -205,7 +209,7 @@
 				7F80E7972BD815270006AD44 /* Helper.swift in Sources */,
 				7F8124E92B96DC8600B05107 /* AKservice.swift in Sources */,
 				7F866E352D1ECD9A00F20488 /* DCCArm64.swift in Sources */,
-				7FA5AC542D21BAC000049C91 /* AudioAndKeyManager.swift in Sources */,
+				7FA5AC542D21BAC000049C91 /* KeyManager.swift in Sources */,
 				7F866E362D1ECD9A00F20488 /* DCCIntel.swift in Sources */,
 				7F866E322D1ECBFE00F20488 /* DisplayManager.swift in Sources */,
 			);
@@ -271,7 +275,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.6;
-				MARKETING_VERSION = 3.0.3;
+				MARKETING_VERSION = 3.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "System-Spinner";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -317,7 +321,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.6;
-				MARKETING_VERSION = 3.0.3;
+				MARKETING_VERSION = 3.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "System-Spinner";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -355,6 +359,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		7F2622482D2FFD3600863B33 /* XCRemoteSwiftPackageReference "SimplyCoreAudio" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/rnine/SimplyCoreAudio";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.1.1;
+			};
+		};
 		7F866E3E2D1EDFD700F20488 /* XCRemoteSwiftPackageReference "MediaKeyTap" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/MonitorControl/MediaKeyTap";
@@ -366,6 +378,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		7F2622492D2FFD3600863B33 /* SimplyCoreAudio */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7F2622482D2FFD3600863B33 /* XCRemoteSwiftPackageReference "SimplyCoreAudio" */;
+			productName = SimplyCoreAudio;
+		};
 		7F866E3F2D1EDFD700F20488 /* MediaKeyTap */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 7F866E3E2D1EDFD700F20488 /* XCRemoteSwiftPackageReference "MediaKeyTap" */;
