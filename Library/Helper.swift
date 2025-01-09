@@ -107,7 +107,7 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
             return
         }
         if !isCheckNewVersionStarted {
-            // start check new version after 5 minits from execute function
+            // start check new version after 30 second from execute function
             isCheckNewVersionStarted = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 30) {
                 URLSession.shared.dataTask(with: url) { (data, res, err) in
