@@ -70,10 +70,6 @@ class UsageViewController: NSViewController {
     }
     
     override func viewDidLoad() {
-        
-        //for autoresize
-        self.preferredContentSize = NSMakeSize(self.view.frame.width, 100);
-        
         // Air is not present fan
         if ioService.isAir {
             fanStack.removeFromSuperview()
@@ -119,7 +115,7 @@ class UsageViewController: NSViewController {
         ActivityData.updateAll()
         
         // CPU data
-        cpuLabel.stringValue = "CPU Usage " + String(ActivityData.cpuPercentage) + "%"
+        cpuLabel.stringValue = "CPU Usage " + String(Int(ActivityData.cpuPercentage)) + "%"
         cpuLevel.doubleValue = ActivityData.cpuPercentage / 5
         
         // power data
@@ -148,10 +144,10 @@ class UsageViewController: NSViewController {
         }
         
         // memory data
-        memPercentage.stringValue = "Memory Usage " + String(ActivityData.memPercentage) + "%"
+        memPercentage.stringValue = "Memory Usage " + String(Int(ActivityData.memPercentage)) + "%"
         memLevel.doubleValue = ActivityData.memPercentage / 5
         
-        memPressure.stringValue = "Pressure " + String(ActivityData.memPressure) + "%"
+        memPressure.stringValue = "Pressure " + String(Int(ActivityData.memPressure)) + "%"
         pressureLevel.doubleValue = ActivityData.memPressure / 5
         
         memApp.stringValue = String(Int(ActivityData.memApp)) + "% (App)"
@@ -163,7 +159,7 @@ class UsageViewController: NSViewController {
         memComp.stringValue = String(Int(ActivityData.memCompressed)) + "% (Zip)"
         memCompBar.doubleValue = ActivityData.memCompressed
         
-        netLabel.stringValue = ActivityData.netIp + "\n↓ " + String(ActivityData.netIn.value) + ActivityData.netIn.unit + " | ↑ " + String(ActivityData.netOut.value) + ActivityData.netOut.unit
+        netLabel.stringValue = ActivityData.netIp + "\n↓ " + String(Int(ActivityData.netIn.value)) + ActivityData.netIn.unit + " | ↑ " + String(Int(ActivityData.netOut.value)) + ActivityData.netOut.unit
     }
 }
 
