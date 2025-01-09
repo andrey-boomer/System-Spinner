@@ -201,7 +201,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         DisplayManager.shared.configureDisplays()
         let displaySubMenu = NSMenu()
         for displayItem in DisplayManager.shared.displays {
-            let newItem = NSMenuItem(title: displayItem.name, action: #selector(displayDeviceChanged(sender:)), keyEquivalent: "")
+            let newItem = NSMenuItem(title: displayItem.name, action: #selector(AppDelegate.doChangeDevice), keyEquivalent: "")
             displaySubMenu.addItem(newItem)
         }
         sender.submenu = displaySubMenu
@@ -287,7 +287,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         let displaySubMenu = NSMenu()
         for displayItem in DisplayManager.shared.displays {
-            let newItem = NSMenuItem(title: displayItem.name, action: #selector(displayDeviceChanged(sender:)), keyEquivalent: "")
+            let newItem = NSMenuItem(title: displayItem.name, action: #selector(AppDelegate.doChangeDevice), keyEquivalent: "")
             displaySubMenu.addItem(newItem)
         }
         statusItemMenu.addItem(displayItem)
