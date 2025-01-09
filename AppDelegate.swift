@@ -3,6 +3,7 @@
 
 import Cocoa
 import Foundation
+import SimplyCoreAudio
 
 var spinnerActive: String!
 var enableStatusText: Bool = false
@@ -10,7 +11,9 @@ var updateInterval: Double = 1.0
 var keyRemap: Bool = false
 var brightnessValue: Double = 50.0
 var volumeValue: Double = 50.0
+var isDeviceChanged: Bool = true // update display menu on application start
 let ActivityData = AKservice()
+let simplyCA = SimplyCoreAudio()
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -19,7 +22,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var statusItem: NSStatusItem = {
         return NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     }()
-
+    
     private var cpuTimer: Timer? = nil
     private var spinnerTimer: Timer? = nil
     private var frames: [NSImage] =  []
@@ -72,7 +75,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         startRunning()
     }
     
-    private func startRunning() {
+    @objc private func WakeNotification() {
+        isDeviceChanged = true // maybe devices changed?
+        startRunning()
+        sHelper.hasNewVersion()
+    }
+    
+    @objc private func startRunning() {
         cpuTimer?.invalidate()
         cpuTimer = Timer(timeInterval: updateInterval, repeats: true, block: { [weak self] _ in
             self?.updateUsage()
@@ -81,7 +90,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         cpuTimer?.fire()
     }
     
-    private func stopRunning() {
+    @objc private func stopRunning() {
+        closePopoverMenu(sender: self)
         spinnerTimer?.invalidate()
         cpuTimer?.invalidate()
     }
@@ -111,23 +121,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             
         })
         RunLoop.main.add(spinnerTimer!, forMode: .common)
-    }
-    
-    @objc private func stopRunningNotify(_ notification: NSNotification) {
-        closePopoverMenu(sender: self)
-        stopRunning()
-    }
-    
-    @objc private func startRunningNotify(_ notification: NSNotification) {
-        startRunning()
-        sHelper.hasNewVersion()
         
-        // update desplay menu
-        for menuItem in statusItemMenu.items {
-            if menuItem.title == "HDMI/DVI DDC enabled" {
-                displayDeviceChanged(sender: menuItem)
+        // check if we need update display and menu
+        if isDeviceChanged {
+            isDeviceChanged = false
+            for menuItem in statusItemMenu.items {
+                if menuItem.title == "HDMI/DVI DDC enabled" {
+                    displayDeviceChanged(sender: menuItem)
+                }
             }
         }
+    }
+    
+    @objc static func doChangeDevice() {
+        isDeviceChanged = true
     }
     
     @objc private func togglePopover(sender: NSStatusItem) {
@@ -141,14 +148,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         } else {
             statusItem.menu = statusItemMenu
-            
-            // update desplay menu
-            for menuItem in statusItemMenu.items {
-                if menuItem.title == "HDMI/DVI DDC enabled" {
-                    displayDeviceChanged(sender: menuItem)
-                }
-            }
-            
             statusItem.button?.performClick(nil)
         }
     }
@@ -280,7 +279,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             launchAtLoginItem.state = .on
         }
         statusItemMenu.addItem(launchAtLoginItem)
-        
         statusItemMenu.addItem(NSMenuItem.separator())
         
         // Display controll support Menu
@@ -292,12 +290,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let newItem = NSMenuItem(title: displayItem.name, action: #selector(displayDeviceChanged(sender:)), keyEquivalent: "")
             displaySubMenu.addItem(newItem)
         }
-        
         statusItemMenu.addItem(displayItem)
         statusItemMenu.setSubmenu(displaySubMenu, for: displayItem)
         
         // Display controll check provoleges
-        if  MediaKeyTapManager.shared.readPrivileges() && !DisplayManager.shared.displays.isEmpty && DisplayManager.shared.hasBrightnessControll() {
+        if !DisplayManager.shared.displays.isEmpty && DisplayManager.shared.hasBrightnessControll() {
             displayItem.state = .on
         } else {
             displayItem.state = .off
@@ -315,9 +312,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             remapItem.action = nil
             sHelper.remapKeysBacklight(toggle: false)
         }
-        
         statusItemMenu.addItem(remapItem)
-        
         statusItemMenu.addItem(NSMenuItem.separator())
         
         // update interval
@@ -353,26 +348,32 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItemMenu.addItem(NSMenuItem(title: "About", action: #selector(aboutWindow(sender:)), keyEquivalent: ""))
         statusItemMenu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: ""))
         
-        // System Hooks
-        NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(stopRunningNotify(_:)),
-                                                          name: NSWorkspace.willSleepNotification, object: nil)
-        NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(startRunningNotify(_:)),
-                                                          name: NSWorkspace.didWakeNotification, object: nil)
-        NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(stopRunningNotify(_:)),
-                                                          name: NSWorkspace.screensDidSleepNotification, object: nil)
-        NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(startRunningNotify(_:)),
-                                                          name: NSWorkspace.screensDidWakeNotification, object: nil)
+        // start spinning!
+        changeSpinner(spinnerName: spinnerActive, spinnerFrames: Int(spinners[spinnerActive]!))
+        
+        // if we wakup
+        NotificationCenter.default.addObserver(self, selector: #selector(WakeNotification), name: NSWorkspace.didWakeNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(WakeNotification), name: NSWorkspace.screensDidWakeNotification, object: nil)
+        
+        // if we go to sleep
+        NotificationCenter.default.addObserver(self, selector: #selector(stopRunning), name: NSWorkspace.willSleepNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(stopRunning), name: NSWorkspace.screensDidSleepNotification, object: nil)
+        
+        // mouse click event
         NSEvent.addGlobalMonitorForEvents(matching: [NSEvent.EventTypeMask.leftMouseDown,NSEvent.EventTypeMask.rightMouseDown], handler: { [self](event: NSEvent) in
             closePopoverMenu(sender: self)
         })
         
-        // end initialization
-        changeSpinner(spinnerName: spinnerActive, spinnerFrames: Int(spinners[spinnerActive]!))
+        // change audio device?
+        NotificationCenter.default.addObserver(self, selector: #selector(AppDelegate.doChangeDevice), name: Notification.Name.defaultOutputDeviceChanged, object: nil)
+        
+        // change monitor device?
+        CGDisplayRegisterReconfigurationCallback({ displayID, flags, userInfo in AppDelegate.doChangeDevice()}, nil)
+       
         sHelper.hasNewVersion()
     }
     
     func applicationWillTerminate(_ aNotification: Notification) {
-        closePopoverMenu(sender: self)
         stopRunning()
         UserDefaults.standard.set(spinnerActive, forKey: "group.spinnerActive")
         UserDefaults.standard.set(updateInterval, forKey: "group.spinnerUpdateInterval")
