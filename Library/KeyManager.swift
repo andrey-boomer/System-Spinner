@@ -11,12 +11,6 @@ class MediaKeyTapManager: MediaKeyTapDelegate {
     var mediaKeyTap: MediaKeyTap?
     var keyRepeatTimers: [MediaKey: Timer] = [:]
     
-    public func readPrivileges() -> Bool {
-        let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: true]
-        let status = AXIsProcessTrustedWithOptions(options)
-        return status
-    }
-    
     public func handle(mediaKey: MediaKey, event: KeyEvent?, modifiers: NSEvent.ModifierFlags?) {
         let isPressed = event?.keyPressed ?? true
         let isRepeat = event?.keyRepeat ?? false
@@ -104,30 +98,34 @@ class MediaKeyTapManager: MediaKeyTapDelegate {
     
     public func updateMediaKeyTap() {
         let device = simplyCA.defaultOutputDevice
+        let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: true]
         let keysAudio: [MediaKey] = [.volumeUp, .volumeDown, .mute]
         let keysBrightness: [MediaKey] = [.brightnessUp, .brightnessDown]
         var keys: [MediaKey] = keysAudio + keysBrightness
         
         mediaKeyTap?.stop()
-
-        if !DisplayManager.shared.hasBrightnessControll() {
-            keys.removeAll { keysBrightness.contains($0) }
-        }
         
-        var disengageVolume = true
-        for display in DisplayManager.shared.displays {
-            if display.name == device?.name {
-                disengageVolume = false
+        // ask for privileges
+        if AXIsProcessTrustedWithOptions(options) {
+            if !DisplayManager.shared.hasBrightnessControll() {
+                keys.removeAll { keysBrightness.contains($0) }
             }
-        }
-        
-        if disengageVolume {
-            keys.removeAll { keysAudio.contains($0) }
-        }
-        
-        if keys.count > 0 {
-            self.mediaKeyTap = MediaKeyTap(delegate: self, on: KeyPressMode.keyDownAndUp, for: keys, observeBuiltIn: true)
-            self.mediaKeyTap?.start()
+            
+            var disengageVolume = true
+            for display in DisplayManager.shared.displays {
+                if display.name == device?.name {
+                    disengageVolume = false
+                }
+            }
+            
+            if disengageVolume {
+                keys.removeAll { keysAudio.contains($0) }
+            }
+            
+            if keys.count > 0 {
+                self.mediaKeyTap = MediaKeyTap(delegate: self, on: KeyPressMode.keyDownAndUp, for: keys, observeBuiltIn: true)
+                self.mediaKeyTap?.start()
+            }
         }
     }
 }
