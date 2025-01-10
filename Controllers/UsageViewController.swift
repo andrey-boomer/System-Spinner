@@ -133,10 +133,18 @@ class UsageViewController: NSViewController {
         
         // Air is not present fan
         if !ioService.isAir {
-            if ioService.fanSpeed == 0 {
+            var fanSpeed: Int = 0
+            for (key, _) in ioService.fanSpeed.enumerated() {
+                if key == 0 {
+                    fanLabel.stringValue =  "fan " + String(ioService.fanSpeed[key])
+                } else {
+                    fanLabel.stringValue +=  " | " + String(ioService.fanSpeed[key])
+                }
+                fanSpeed += ioService.fanSpeed[key]
+            }
+            fanLabel.stringValue += " rpm"
+            if fanSpeed == 0 {
                 fanLabel.stringValue =  "fan is stoped"
-            } else {
-                fanLabel.stringValue =  "fan " + String(ioService.fan1Speed) + " | " + String(ioService.fan2Speed) + " rpm"
             }
         }
         

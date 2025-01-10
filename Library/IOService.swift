@@ -52,9 +52,7 @@ class IOServiceData {
     public var cpuTemp: Double = 0.0
     public var gpuTemp: Double = 0.0
     public var fanTemp: Double = 0.0
-    public var fanSpeed: Int = 0
-    public var fan1Speed: Int = 0
-    public var fan2Speed: Int = 0
+    public var fanSpeed: [Int] = []
     public var systemPower: Int = 0
     public var systemAdapter: Int = 0
     public var systemBattery: Int = 0
@@ -234,7 +232,6 @@ class IOServiceData {
                 }
             }
         }
-        
         self.update()
     }
     
@@ -291,11 +288,14 @@ class IOServiceData {
         cpuTemp = cpuTempKeys.reduce(0,{ result, sensor in max(result, self.read(sensor))})
         gpuTemp = gpuTempKeys.reduce(0,{ result, sensor in max(result, self.read(sensor))})
         
-        if fanSpeedKeys.count > 0 {
+        if fanTempKeys.count > 0 {
             fanTemp = fanTempKeys.reduce(0,{ result, sensor in max(result, self.read(sensor))})
-            fanSpeed = Int(fanSpeedKeys.reduce(0,{ result, sensor in max(result, self.read(sensor))}))
-            fan1Speed = Int(self.read(fanSpeedKeys[0]))
-            fan2Speed = Int(self.read(fanSpeedKeys[1]))
+        }
+        
+        fanSpeed = []
+        
+        for key in fanSpeedKeys {
+           fanSpeed.append(Int(self.read(key)))
         }
         
         systemPower = Int(systemPowerKeys.reduce(0, { sum, sensor in round(sum + self.read(sensor))}))
