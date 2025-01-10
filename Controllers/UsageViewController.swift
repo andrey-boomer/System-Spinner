@@ -70,6 +70,10 @@ class UsageViewController: NSViewController {
     }
     
     override func viewDidLoad() {
+        
+        //for autoresize
+        self.preferredContentSize = NSMakeSize(self.view.frame.width, 100);
+        
         // Air is not present fan
         if ioService.isAir {
             fanStack.removeFromSuperview()
