@@ -1,15 +1,17 @@
 # System Spinner
 
-System Spinner provides macOS system information in status bar. Minimal, small and light
+System Spinner provides macOS system information in status bar. Minimal, small and light!
+![GitHub Downloads](https://img.shields.io/github/downloads/andrey-boomer/System-spinner/total)
+![GitHub Release](https://img.shields.io/github/v/release/andrey-boomer/System-spinner)
 
 ## Features
 
-- Show CPU usage
+- Show CPU usage in system bar
 - Top CPU/MEM process in popup window
 - Memory statistics performance
-- Network connection
+- Network connection and ip adress
 - CMS Information for Cpu Temp and Fan
-- Audio and Brightness contoll DDC ove HDIM/DVI/USB-C
+- Audio and Brightness contoll DDC over HDMI/DVI/USB-C
 - Auto update
 
 ## Screenshots
