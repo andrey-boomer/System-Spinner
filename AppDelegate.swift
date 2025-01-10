@@ -133,6 +133,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
+    @objc private func doChangeAudioDevice() {
+        isDeviceChanged = true
+    }
+    
     @objc static func doChangeDevice() {
         isDeviceChanged = true
     }
@@ -209,11 +213,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             sender.action =  #selector(displayDeviceChanged(sender:))
             sender.state = .on
         } else {
-            sender.action =  nil
+            sender.action = nil
             sender.state = .off
         }
         MediaKeyTapManager.shared.updateMediaKeyTap()
-        
         // check for keyboadr blacklight controll
         for menuItem in statusItemMenu.items {
             if menuItem.title == "Keyboard backlight (F5/F6)" {
@@ -298,7 +301,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             displayItem.state = .on
         } else {
             displayItem.state = .off
-            displayItem.action = nil
         }
         
         MediaKeyTapManager.shared.updateMediaKeyTap()
@@ -365,7 +367,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         })
         
         // change audio device?
-        NotificationCenter.default.addObserver(self, selector: #selector(AppDelegate.doChangeDevice), name: Notification.Name.defaultOutputDeviceChanged, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(doChangeAudioDevice), name: Notification.Name.defaultOutputDeviceChanged, object: nil)
         
         // change monitor device?
         CGDisplayRegisterReconfigurationCallback({ displayID, flags, userInfo in AppDelegate.doChangeDevice()}, nil)
