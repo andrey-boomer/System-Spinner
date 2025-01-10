@@ -1,8 +1,9 @@
 # System Spinner
 
 System Spinner provides macOS system information in status bar. Minimal, small and light!
-![GitHub Downloads](https://img.shields.io/github/downloads/andrey-boomer/System-spinner/total)
-![GitHub Release](https://img.shields.io/github/v/release/andrey-boomer/System-spinner)
+
+[![Downloads](https://img.shields.io/github/downloads/andrey-boomer/System-spinner/total)](https://github.com/andrey-boomer/System-Spinner/releases)
+[![Release](https://img.shields.io/github/v/release/andrey-boomer/System-spinner)](https://github.com/andrey-boomer/System-Spinner/releases/latest)
 
 ## Features
 
@@ -41,5 +42,3 @@ Used dependencies:
 - [MediaKeyTap](https://github.com/the0neyouseek/MediaKeyTap)
 - [SimplyCoreAudio](https://github.com/rnine/SimplyCoreAudio)
 - [swift-atomics](https://github.com/apple/swift-atomics)
-
-You can download app from [releases](https://github.com/andrey-boomer/System-Spinner/releases)
