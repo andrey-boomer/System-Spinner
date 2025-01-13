@@ -278,9 +278,9 @@ class Arm64DDC: NSObject {
 class AppleDisplay: Display {
     private var displayQueue: DispatchQueue
     
-    override init(_ identifier: CGDirectDisplayID, name: String, vendorNumber: UInt32?, modelNumber: UInt32?, serialNumber: UInt32?) {
+    override init(_ identifier: CGDirectDisplayID, name: String, modelNumber: UInt32?, pixelHeight: CGFloat?, pixelWidth: CGFloat?) {
         self.displayQueue = DispatchQueue(label: String("displayQueue-\(identifier)"))
-        super.init(identifier, name: name, vendorNumber: vendorNumber, modelNumber: modelNumber, serialNumber: serialNumber)
+        super.init(identifier, name: name, modelNumber: modelNumber, pixelHeight: pixelHeight, pixelWidth: pixelWidth)
     }
     
     public func getAppleBrightness() -> Float {

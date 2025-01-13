@@ -15,12 +15,7 @@ class MediaKeyTapManager: MediaKeyTapDelegate {
         let isRepeat = event?.keyRepeat ?? false
         let isControl = modifiers?.isSuperset(of: NSEvent.ModifierFlags([.control])) ?? false
         let isCommand = modifiers?.isSuperset(of: NSEvent.ModifierFlags([.command])) ?? false
-        let isOption = modifiers?.isSuperset(of: NSEvent.ModifierFlags([.option])) ?? false
         if isPressed, isCommand, !isControl, mediaKey == .brightnessDown, DisplayManager.engageMirror() {
-            return
-        }
-        if isPressed, isControl, !isOption, mediaKey == .brightnessUp || mediaKey == .brightnessDown {
-            self.handleDirectedBrightness(isCommandModifier: isCommand, isUp: mediaKey == .brightnessUp)
             return
         }
         let oppositeKey: MediaKey? = self.oppositeMediaKey(mediaKey: mediaKey)
@@ -36,50 +31,33 @@ class MediaKeyTapManager: MediaKeyTapDelegate {
         self.sendDisplayCommand(mediaKey: mediaKey, isRepeat: isRepeat, isPressed: isPressed)
     }
     
-    private func handleDirectedBrightness(isCommandModifier: Bool, isUp: Bool) {
-        if isCommandModifier {
-            for otherDisplay in DisplayManager.shared.getOtherDisplays() {
-                otherDisplay.setBrightness(to: otherDisplay, isUp: true)
-            }
-            for appleDisplay in DisplayManager.shared.getAppleDisplays() where !appleDisplay.isBuiltIn() {
-                appleDisplay.setBrightness(to: appleDisplay, isUp: true)
-            }
-            return
-        } else if let internalDisplay = DisplayManager.shared.getBuiltInDisplay() as? AppleDisplay {
-            internalDisplay.setBrightness(to: internalDisplay, isUp: true)
-            return
-        }
-    }
-    
     private func sendDisplayCommand(mediaKey: MediaKey, isRepeat: Bool, isPressed: Bool) {
-        guard [.brightnessUp, .brightnessDown, .volumeUp, .volumeDown, .mute].contains(mediaKey), isPressed, let affectedDisplays = DisplayManager.shared.getAffectedDisplays() else {
+        guard [.brightnessUp, .brightnessDown, .volumeUp, .volumeDown, .mute].contains(mediaKey), isPressed else {
             return
         }
-        for display in affectedDisplays {
-            switch mediaKey {
-            case .brightnessUp:
-                display.setBrightness(to: display, isUp: true)
-            case .brightnessDown:
-                display.setBrightness(to: display, isUp: false)
-            default: continue
-            }
+
+        switch mediaKey {
+        case .brightnessUp:
+            DisplayManager.shared.setBrightness(isUp: true)
+        case .brightnessDown:
+            DisplayManager.shared.setBrightness(isUp: false)
+        default :
+            break
         }
         
-        for display in affectedDisplays {
-            switch mediaKey {
-            case .mute:
-                if !isRepeat, isPressed, let display = display as? OtherDisplay {
-                    display.toggleMute()
-                }
-            case .volumeUp, .volumeDown:
-                if let display = display as? OtherDisplay {
-                    if isPressed {
-                        display.stepVolume(isUp: mediaKey == .volumeUp)
-                    }
-                }
-            default: continue
+        switch mediaKey {
+        case .mute:
+            if !isRepeat, isPressed {
+                DisplayManager.shared.toggleMute()
             }
+        case .volumeUp, .volumeDown:
+            if isPressed {
+                DisplayManager.shared.setVolume(isUp: mediaKey == .volumeUp)
+            }
+        default :
+            break
         }
+        
     }
     
     private func oppositeMediaKey(mediaKey: MediaKey) -> MediaKey? {

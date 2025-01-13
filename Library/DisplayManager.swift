@@ -3,6 +3,7 @@
 
 import CoreGraphics
 import Foundation
+import OSLog
 
 enum Command: UInt8 {
     case none = 0
@@ -14,26 +15,23 @@ enum Command: UInt8 {
 }
 
 class Display: Equatable {
-    private let brValue: Double = 6.25
-    private let prefsId: String
     public let identifier: CGDirectDisplayID
     public var name: String
-    public var vendorNumber: UInt32?
     public var modelNumber: UInt32?
-    public var serialNumber: UInt32?
+    public var pixelHeight: CGFloat?
+    public var pixelWidth: CGFloat?
     public var displays: [Display] = []
     
     public static func == (lhs: Display, rhs: Display) -> Bool {
         lhs.identifier == rhs.identifier
     }
     
-    init(_ identifier: CGDirectDisplayID, name: String, vendorNumber: UInt32?, modelNumber: UInt32?, serialNumber: UInt32?) {
+    init(_ identifier: CGDirectDisplayID, name: String, modelNumber: UInt32?, pixelHeight: CGFloat?, pixelWidth: CGFloat?) {
         self.identifier = identifier
         self.name = name
-        self.vendorNumber = vendorNumber
         self.modelNumber = modelNumber
-        self.serialNumber = serialNumber
-        self.prefsId = "(\(name.filter { !$0.isWhitespace })\(vendorNumber ?? 0)\(modelNumber ?? 0)@\(identifier))"
+        self.pixelHeight = pixelHeight
+        self.pixelWidth = pixelWidth
     }
     
     public func isBuiltIn() -> Bool {
@@ -45,49 +43,11 @@ class Display: Equatable {
     }
     
     public func setDirectBrightness(valueBrightness: Float) {
-        // for override
+        os_log("Set direct brightness: \(valueBrightness)")
     }
     
     public func setDirectVolume(valueVolume: Float) {
-        // for override
-    }
-    
-    
-    public func toggleMute() {
-        let savedVolume = Double(UserDefaults.standard.string(forKey: "group.volumeValue") ?? String(volumeValue))!
-        if volumeValue == 0 {
-            volumeValue = savedVolume
-        } else {
-            volumeValue = 0
-        }
-        setDirectVolume(valueVolume: Float(volumeValue))
-    }
-    
-    public func stepVolume(isUp: Bool) {
-        volumeValue = volumeValue + (isUp ? brValue : -brValue)
-        if volumeValue < 0 {
-            volumeValue = 0
-        } else if volumeValue > 100 {
-            volumeValue = 100
-        } else if (volumeValue == 0 || (isUp && volumeValue == brValue)) {
-            volumeValue = brValue / 2
-        } else if (volumeValue > brValue && (isUp && volumeValue < brValue * 2)) {
-            volumeValue = brValue
-        }
-        setDirectVolume(valueVolume: Float(volumeValue))
-        UserDefaults.standard.set(volumeValue, forKey: "group.volumeValue")
-    }
-    
-    public func setBrightness(to: Display, isUp: Bool) {
-        let brvValue: Double = brValue / Double(DisplayManager.shared.displays.count)
-        brightnessValue = brightnessValue + (isUp ? brvValue : -brvValue)
-        if brightnessValue < 0 {
-            brightnessValue = 0
-        } else if brightnessValue > 100 {
-            brightnessValue = 100
-        }
-        setDirectBrightness(valueBrightness: Float(brightnessValue))
-        UserDefaults.standard.set(brightnessValue, forKey: "group.brightnessValue")
+        os_log("Set direct volume: \(valueVolume)")
     }
 }
 
@@ -96,9 +56,11 @@ class DisplayManager {
     public var displays: [Display] = []
     public let globalDDCQueue = DispatchQueue(label: "Global DDC queue")
     private var audioControlTargetDisplays: [OtherDisplay] = []
+    private let correctionValue: Double = 6.25
     
     static func getDisplayNameByID(displayID: CGDirectDisplayID) -> String {
         if let dictionary = (CoreDisplay_DisplayCreateInfoDictionary(displayID)?.takeRetainedValue() as NSDictionary?), let nameList = dictionary["DisplayProductName"] as? [String: String], var name = nameList[Locale.current.identifier] ?? nameList["en_US"] ?? nameList.first?.value {
+            print(dictionary)
             if CGDisplayIsInHWMirrorSet(displayID) != 0 || CGDisplayIsInMirrorSet(displayID) != 0 {
                 let mirroredDisplayID = CGDisplayMirrorsDisplay(displayID)
                 if mirroredDisplayID != 0, let dictionary = (CoreDisplay_DisplayCreateInfoDictionary(mirroredDisplayID)?.takeRetainedValue() as NSDictionary?), let nameList = dictionary["DisplayProductName"] as? [String: String], let mirroredName = nameList[Locale.current.identifier] ?? nameList["en_US"] ?? nameList.first?.value {
@@ -185,16 +147,16 @@ class DisplayManager {
         for onlineDisplayID in onlineDisplayIDs where onlineDisplayID != 0 {
             let name = DisplayManager.getDisplayNameByID(displayID: onlineDisplayID)
             let id = onlineDisplayID
-            let vendorNumber = CGDisplayVendorNumber(onlineDisplayID)
             let modelNumber = CGDisplayModelNumber(onlineDisplayID)
-            let serialNumber = CGDisplaySerialNumber(onlineDisplayID)
+            let pixelHeight = CGDisplayScreenSize(onlineDisplayID).height
+            let pixelWidth = CGDisplayScreenSize(onlineDisplayID).width
             
             if !DisplayManager.isDummy(displayID: onlineDisplayID) && !DisplayManager.isVirtual(displayID: onlineDisplayID) {
                 if DisplayManager.isAppleDisplay(displayID: onlineDisplayID) {
-                    let appleDisplay = AppleDisplay(id, name: "Apple " + name, vendorNumber: vendorNumber, modelNumber: modelNumber, serialNumber: serialNumber)
+                    let appleDisplay = AppleDisplay(id, name: "Apple " + name, modelNumber: modelNumber, pixelHeight: pixelHeight, pixelWidth: pixelWidth)
                     self.displays.append(appleDisplay)
                 } else {
-                    let otherDisplay = OtherDisplay(id, name: name, vendorNumber: vendorNumber, modelNumber: modelNumber, serialNumber: serialNumber)
+                    let otherDisplay = OtherDisplay(id, name: name, modelNumber: modelNumber, pixelHeight: pixelHeight, pixelWidth: pixelWidth)
                     self.displays.append(otherDisplay)
                 }
             }
@@ -204,18 +166,6 @@ class DisplayManager {
     
     public func getOtherDisplays() -> [OtherDisplay] {
         self.displays.compactMap { $0 as? OtherDisplay }
-    }
-    
-    public func getAppleDisplays() -> [AppleDisplay] {
-        self.displays.compactMap { $0 as? AppleDisplay }
-    }
-    
-    public func getBuiltInDisplay() -> Display? {
-        self.displays.first { CGDisplayIsBuiltin($0.identifier) != 0 }
-    }
-    
-    public func getAffectedDisplays() -> [Display]? {
-        return self.displays
     }
     
     private func normalizedName(_ name: String) -> String {
@@ -248,26 +198,60 @@ class DisplayManager {
         }
     }
     
+    public func toggleMute() {
+        let savedVolume = Double(UserDefaults.standard.string(forKey: "group.volumeValue") ?? String(volumeValue))!
+        if volumeValue == 0 {
+            volumeValue = savedVolume
+        } else {
+            volumeValue = 0
+        }
+        
+        for display in displays {
+            display.setDirectVolume(valueVolume: Float(volumeValue))
+        }
+        
+    }
+    
+    public func setVolume(isUp: Bool) {
+        volumeValue = volumeValue + (isUp ? correctionValue : -correctionValue)
+        if volumeValue < 0 {
+            volumeValue = 0
+        } else if volumeValue > 100 {
+            volumeValue = 100
+        } else if (volumeValue == 0 || (isUp && volumeValue == correctionValue)) {
+            volumeValue = correctionValue / 2
+        } else if (volumeValue > correctionValue && (isUp && volumeValue < correctionValue * 2)) {
+            volumeValue = correctionValue
+        }
+        
+        for display in displays {
+            display.setDirectVolume(valueVolume: Float(volumeValue))
+        }
+        
+        UserDefaults.standard.set(volumeValue, forKey: "group.volumeValue")
+    }
+    
+    public func setBrightness(isUp: Bool) {
+        brightnessValue = brightnessValue + (isUp ? correctionValue : -correctionValue)
+        if brightnessValue < 0 {
+            brightnessValue = 0
+        } else if brightnessValue > 100 {
+            brightnessValue = 100
+        }
+        
+        for display in displays {
+            display.setDirectBrightness(valueBrightness: Float(brightnessValue))
+        }
+        
+        UserDefaults.standard.set(brightnessValue, forKey: "group.brightnessValue")
+    }
+    
     private func getDdcCapableDisplays() -> [OtherDisplay] {
         self.displays.compactMap { display -> OtherDisplay? in
             if let otherDisplay = display as? OtherDisplay {
                 return otherDisplay
             } else { return nil }
         }
-    }
-    
-    private func updateAudioControlTargetDisplays(deviceName: String) -> Int {
-        self.audioControlTargetDisplays.removeAll()
-        var numOfAddedDisplays = 0
-        var displayAudioDeviceName = ""
-        for ddcCapableDisplay in self.getDdcCapableDisplays() {
-            displayAudioDeviceName = DisplayManager.getDisplayRawNameByID(displayID: ddcCapableDisplay.identifier)
-            if self.normalizedName(displayAudioDeviceName) == self.normalizedName(deviceName) {
-                self.audioControlTargetDisplays.append(ddcCapableDisplay)
-                numOfAddedDisplays += 1
-            }
-        }
-        return numOfAddedDisplays
     }
     
     public static func engageMirror() -> Bool {
