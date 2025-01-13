@@ -1,5 +1,4 @@
-//  Copyright © MonitorControl. @JoniVR, @theOneyouseek, @waydabber and others
-//  Adapted @Andrey Lysikov
+//  Copyright © MonitorControl. @JoniVR, @theOneyouseek, @waydabber and others, Andrey Lysikov
 //  SPDX-License-Identifier: Apache-2.0
 
 import Foundation
