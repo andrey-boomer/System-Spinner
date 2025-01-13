@@ -239,8 +239,8 @@ class OtherDisplay: Display {
     var writeDDCNextValue: [Command: UInt16] = [:]
     var writeDDCLastSavedValue: [Command: UInt16] = [:]
     
-    override init(_ identifier: CGDirectDisplayID, name: String, modelNumber: UInt32?, pixelHeight: CGFloat?, pixelWidth: CGFloat?)  {
-        super.init(identifier, name: name, modelNumber: modelNumber, pixelHeight: pixelHeight, pixelWidth: pixelWidth)
+    override init(_ identifier: CGDirectDisplayID, name: String)  {
+        super.init(identifier, name: name)
         if !Arm64DDC.isArm64 {
             self.ddc = IntelDDC(for: identifier)
         }
