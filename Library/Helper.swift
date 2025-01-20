@@ -42,6 +42,18 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
                                            completionHandler: nil)
     }
     
+    public func checkPrivileges() -> Bool {
+      let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: false]
+        if !AXIsProcessTrustedWithOptions(options) { sendSystemNotification(title: "System Spinner need special privileges!",
+                                                                            body: "For complite work you need to allow System Spinner to use special privileges for keydoard mapping.",
+                                                                            action: "Allow")
+            return false
+        } else {
+            return true
+        }
+        
+    }
+    
     public func remapKeysBacklight(toggle: Bool) {
         let task = Process()
         task.launchPath = "/usr/bin/env"
@@ -83,6 +95,9 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
                 return
             }
             NSWorkspace.shared.open(url)
+        } else if response.actionIdentifier == "Allow" {
+            let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: true]
+            AXIsProcessTrustedWithOptions(options)
         }
         completionHandler()
     }

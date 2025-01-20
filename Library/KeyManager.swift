@@ -75,34 +75,29 @@ class MediaKeyTapManager: MediaKeyTapDelegate {
     
     public func updateMediaKeyTap() {
         let device = simplyCA.defaultOutputDevice
-        let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: true]
         let keysAudio: [MediaKey] = [.volumeUp, .volumeDown, .mute]
         let keysBrightness: [MediaKey] = [.brightnessUp, .brightnessDown]
         var keys: [MediaKey] = keysAudio + keysBrightness
         
         mediaKeyTap?.stop()
+        if !DisplayManager.shared.hasBrightnessControll() {
+            keys.removeAll { keysBrightness.contains($0) }
+        }
         
-        // ask for privileges
-        if AXIsProcessTrustedWithOptions(options) {
-            if !DisplayManager.shared.hasBrightnessControll() {
-                keys.removeAll { keysBrightness.contains($0) }
+        var disengageVolume = true
+        for display in DisplayManager.shared.displays {
+            if display.name == device?.name {
+                disengageVolume = false
             }
-            
-            var disengageVolume = true
-            for display in DisplayManager.shared.displays {
-                if display.name == device?.name {
-                    disengageVolume = false
-                }
-            }
-            
-            if disengageVolume {
-                keys.removeAll { keysAudio.contains($0) }
-            }
-            
-            if keys.count > 0 {
-                self.mediaKeyTap = MediaKeyTap(delegate: self, on: KeyPressMode.keyDownAndUp, for: keys, observeBuiltIn: true)
-                self.mediaKeyTap?.start()
-            }
+        }
+        
+        if disengageVolume {
+            keys.removeAll { keysAudio.contains($0) }
+        }
+        
+        if keys.count > 0 {
+            self.mediaKeyTap = MediaKeyTap(delegate: self, on: KeyPressMode.keyDownAndUp, for: keys, observeBuiltIn: true)
+            self.mediaKeyTap?.start()
         }
     }
 }

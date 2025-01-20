@@ -212,19 +212,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         for displayItem in DisplayManager.shared.displays {
             let newItem = NSMenuItem(title: "[" + String(displayItem.identifier) + "] " + displayItem.name, action: #selector(WakeNotification), keyEquivalent: "")
+            
+            if !displayItem.isBuiltIn() {
+                newItem.state = .on
+            } else {
+                newItem.action = nil
+            }
+            
             displaySubMenu.addItem(newItem)
         }
         
         displayMenuItem.submenu = displaySubMenu
-        if (DisplayManager.shared.hasBrightnessControll()) {
-            displayMenuItem.action =  #selector(WakeNotification)
-            displayMenuItem.state = .on
-        } else {
-            displayMenuItem.action = nil
-            displayMenuItem.state = .off
-        }
         
-        MediaKeyTapManager.shared.updateMediaKeyTap()
+        if sHelper.checkPrivileges() {
+            MediaKeyTapManager.shared.updateMediaKeyTap()
+        }
         
         // check for keyboadr blacklight controll
         for menuItem in statusItemMenu.items {
@@ -294,7 +296,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItemMenu.addItem(NSMenuItem.separator())
         
         // Display controll support Menu
-        let displayItem = NSMenuItem(title: "HDMI/DVI DDC enabled", action: nil, keyEquivalent: "")
+        let displayItem = NSMenuItem(title: "HDMI/DVI DDC enabled", action:  #selector(WakeNotification), keyEquivalent: "")
         statusItemMenu.addItem(displayItem)
         statusItemMenu.setSubmenu(NSMenu(), for: displayItem)
         
@@ -364,7 +366,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         // change monitor device?
         CGDisplayRegisterReconfigurationCallback({ displayID, flags, userInfo in AppDelegate.doChangeDevice()}, nil)
-       
+
         sHelper.hasNewVersion()
     }
     
