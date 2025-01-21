@@ -211,11 +211,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         
         for displayItem in DisplayManager.shared.displays {
-            let newItem = NSMenuItem(title: "[" + String(displayItem.identifier) + "] " + displayItem.name, action: #selector(WakeNotification), keyEquivalent: "")
+            let newItem = NSMenuItem(title: displayItem.name, action: #selector(WakeNotification), keyEquivalent: "")
             
-            if !displayItem.isBuiltIn() {
-                newItem.state = .on
-            } else {
+            if displayItem.isBuiltIn() {
                 newItem.action = nil
             }
             
