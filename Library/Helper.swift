@@ -131,10 +131,11 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
                     do {
                         let decoder = JSONDecoder()
                         decoder.keyDecodingStrategy = .convertFromSnakeCase
-                        let versionGit = try trimCharacter(val: decoder.decode(versionEntry.self, from: data).tagName)
+                        let versionString = try decoder.decode(versionEntry.self, from: data).tagName
+                        let versionGit = trimCharacter(val: versionString)
                         if versionGit > 0 && appCurrentVersion > 0 && versionGit > appCurrentVersion {
                             self.sendSystemNotification(title: "System Spinner has updated!",
-                                                        body: "An new version is available. Would you like to update?",
+                                                        body: "An new version " + versionString + " is available. Would you like download to update?",
                                                         action: "Download")
                         }
                     } catch {
