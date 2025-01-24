@@ -78,7 +78,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func WakeNotification() {
         isDeviceChanged = true // maybe devices changed?
         startRunning()
-        sHelper.hasNewVersion()
     }
     
     @objc private func startRunning() {
@@ -127,10 +126,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             isDeviceChanged = false
             displayDeviceChanged()
         }
-    }
-    
-    @objc private func doChangeAudioDevice() {
-        isDeviceChanged = true
     }
     
     @objc static func doChangeDevice() {
@@ -243,6 +238,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
         }
+        
+        // Check new version?
+        sHelper.hasNewVersion()
     }
     
     @objc private func changeStatusMenuClick(sender: NSMenuItem) {
@@ -360,12 +358,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         })
         
         // change audio device?
-        NotificationCenter.default.addObserver(self, selector: #selector(doChangeAudioDevice), name: Notification.Name.defaultOutputDeviceChanged, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(WakeNotification), name: Notification.Name.defaultOutputDeviceChanged, object: nil)
         
         // change monitor device?
         CGDisplayRegisterReconfigurationCallback({ displayID, flags, userInfo in AppDelegate.doChangeDevice()}, nil)
-
-        sHelper.hasNewVersion()
     }
     
     func applicationWillTerminate(_ aNotification: Notification) {

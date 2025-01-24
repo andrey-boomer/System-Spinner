@@ -11,7 +11,7 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
     public let appApiUrl = "https://api.github.com/repos/andrey-boomer/System-Spinner/releases/latest"
     public let appLastestUrl = "https://github.com/andrey-boomer/System-Spinner/releases/latest"
     public let appAboutUrl = "https://github.com/andrey-boomer/System-Spinner"
-    private var isCheckNewVersionStarted: Bool = false
+    private var lastCheckNewVersion: TimeInterval = 0
     
     public var isAutoLaunch: Bool {
         get { SMAppService.mainApp.status == .enabled }
@@ -103,7 +103,6 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
     }
     
     public func hasNewVersion() {
-        
         struct versionEntry: Codable {
             let id: Int
             var tagName: String
@@ -121,10 +120,9 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
         guard let url = URL(string: appApiUrl) else {
             return
         }
-        if !isCheckNewVersionStarted {
-            // start check new version after 30 second from execute function
-            isCheckNewVersionStarted = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 30) {
+        if lastCheckNewVersion < Date().timeIntervalSince1970 - 86400  { // only once in 1 day
+            // start check new version after 10 minuts from execute function
+            DispatchQueue.main.asyncAfter(deadline: .now() + 600) {
                 URLSession.shared.dataTask(with: url) { (data, res, err) in
                     guard let data = data else {
                         return
@@ -139,9 +137,7 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
                                                         body: "An new version is available. Would you like to update?",
                                                         action: "Download")
                         }
-                        self.isCheckNewVersionStarted = false
                     } catch {
-                        self.isCheckNewVersionStarted = false
                         return
                     }
                 }.resume()
