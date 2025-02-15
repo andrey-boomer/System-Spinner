@@ -20,10 +20,10 @@ class IOServiceData {
     public var presentSMC: Bool = true
     
     private let SensorsList: [String: [String:[String]]]  = [
-        // imported from https://github.com/exelban/stats/blob/df1a0a8bacb9a9a6c23afa3c5faaabae2fc15890/Modules/Sensors/values.swift
+        // imported from https://raw.githubusercontent.com/exelban/stats/refs/heads/master/Modules/Sensors/values.swift
         "DEFAULT": [
-            "CPU": ["TC1c","TC2c","TC3c","TC4c"],
-            "GPU": ["TCGC"],
+            "CPU": ["TC0D","TC0E","TC0F","TC0H","TC0P","TCAD"],
+            "GPU": ["TCGC","TG0D","TGDD","TG0H","TG0P","PCPG","PCGC","PCGM"],
             "FAN": ["TaLP", "TaRF"],
             "FAN SPEED": ["F0Ac", "F1Ac"],
             "POWER": ["PSTR"],
@@ -31,20 +31,20 @@ class IOServiceData {
             "ADAPTER": ["PDTR"]
         ],
         "M1": [
-            "CPU": ["TC0P", "Tp09", "Tp0T", "Tp01", "Tp05", "Tp0D", "Tp0H", "Tp0L", "Tp0P", "Tp0X", "Tp0b", "Tg0H"],
+            "CPU": ["Tp09", "Tp0T", "Tp01", "Tp05", "Tp0D", "Tp0H", "Tp0L", "Tp0P", "Tp0X", "Tp0b"],
             "GPU": ["Tg05", "Tg0D", "Tg0L" ,"Tg0T"],
         ],
         "M2": [
-            "CPU": ["TC0P", "Tp0A", "Tp0D", "Tp0E", "Tp01", "Tp02", "Tp05", "Tp06", "Tp09"],
+            "CPU": ["Tp1h", "Tp1t", "Tp1p", "Tp1l", "Tp01", "Tp05", "Tp09", "Tp0D", "Tp0X", "Tp0b", "Tp0f", "Tp0j"],
             "GPU": ["Tg0f", "Tg0j"],
         ],
         "M3": [
-            "CPU": ["TC0P", "Te05", "Te0L", "Te0P", "Te0S", "Tf04", "Tf09", "Tf0A", "Tf0B", "Tf0D", "Tf0E", "Tf44", "Tf49", "Tf4A", "Tf4B", "Tf4D", "Tf4E"],
+            "CPU": ["Te05", "Te0L", "Te0P", "Te0S", "Tf04", "Tf09", "Tf0A", "Tf0B", "Tf0D", "Tf0E", "Tf44", "Tf49", "Tf4A", "Tf4B", "Tf4D", "Tf4E"],
             "GPU": ["Tf14", "Tf18", "Tf19", "Tf1A", "Tf24", "Tf28", "Tf29", "Tf2A"],
         ],
         "M4": [
-            "CPU": ["TC0P", "Te05", "Te0L", "Te0P", "Te0S", "Tf04", "Tf09", "Tf0A", "Tf0B", "Tf0D", "Tf0E", "Tf44", "Tf49", "Tf4A", "Tf4B", "Tf4D", "Tf4E"],
-            "GPU": ["Tf14", "Tf18", "Tf19", "Tf1A", "Tf24", "Tf28", "Tf29", "Tf2A"],
+            "CPU": ["Te05", "Te0S", "Te09", "Te0H", "Tp01", "Tp05", "Tp09", "Tp0D", "Tp0V", "Tp0Y", "Tp0b", "Tp0e"],
+            "GPU": ["Tg0G", "Tg0H", "Tg1U", "Tg1k", "Tg0K", "Tg0L", "Tg0d", "Tg0e", "Tg0j", "Tg0k"],
         ]
     ]
     
