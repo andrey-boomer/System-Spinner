@@ -199,17 +199,24 @@ class DisplayManager {
     }
     
     public func setVolume(isUp: Bool) {
-        volumeValue = volumeValue + (isUp ? correctionValue : -correctionValue)
+        if isUp && volumeValue < correctionValue {
+            if volumeValue == 0 {
+                volumeValue = correctionValue / 8
+            } else {
+                volumeValue = volumeValue * 2
+            }
+        } else if !isUp && volumeValue <= correctionValue && volumeValue > correctionValue / 8 {
+            volumeValue = volumeValue / 2
+        } else {
+            volumeValue = volumeValue + (isUp ? correctionValue : -correctionValue)
+        }
+        
         if volumeValue < 0 {
             volumeValue = 0
         } else if volumeValue > 100 {
             volumeValue = 100
-        } else if (volumeValue == 0 || (isUp && volumeValue == correctionValue)) {
-            volumeValue = correctionValue / 2
-        } else if (volumeValue > correctionValue && (isUp && volumeValue < correctionValue * 2)) {
-            volumeValue = correctionValue
         }
-        
+         
         for display in displays {
             display.setDirectVolume(valueVolume: Float(volumeValue))
         }
