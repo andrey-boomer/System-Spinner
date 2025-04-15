@@ -44,9 +44,9 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
     
     public func checkPrivileges() -> Bool {
       let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: false]
-        if !AXIsProcessTrustedWithOptions(options) { sendSystemNotification(title: String(localized: "Privileges title"),
-                                                                            body: String(localized: "Privileges body"),
-                                                                            action: String(localized: "Allow"))
+        if !AXIsProcessTrustedWithOptions(options) { sendSystemNotification(title: localizedString("System Spinner need special privileges"),
+                                                                            body: localizedString("For complite work you need to allow System Spinner to use special privileges for keydoard mapping."),
+                                                                            action: localizedString("Allow"))
             return false
         } else {
             return true
@@ -90,12 +90,12 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
     }
         
     public func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        if  response.actionIdentifier == String(localized: "Download") {
+        if  response.actionIdentifier == localizedString("Download") {
             guard let url = URL(string: appLastestUrl) else {
                 return
             }
             NSWorkspace.shared.open(url)
-        } else if response.actionIdentifier == String(localized: "Allow") {
+        } else if response.actionIdentifier == localizedString("Allow") {
             let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: true]
             AXIsProcessTrustedWithOptions(options)
         }
@@ -134,9 +134,9 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
                         let versionString = try decoder.decode(versionEntry.self, from: data).tagName
                         let versionGit = trimCharacter(val: versionString)
                         if versionGit > 0 && appCurrentVersion > 0 && versionGit > appCurrentVersion {
-                            self.sendSystemNotification(title: String(localized: "Updated title"),
-                                                        body: String(localized: "Updated body \(versionString)"),
-                                                        action: String(localized: "Download"))
+                            self.sendSystemNotification(title: localizedString("System Spinner has updated"),
+                                                        body: localizedString("An new version \(versionString) is available. Would you like download to update?"),
+                                                        action: localizedString("Download"))
                         }
                     } catch {
                         return

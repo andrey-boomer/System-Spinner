@@ -10,8 +10,17 @@ var enableStatusText: Bool = false
 var updateInterval: Double = 1.0
 var keyRemap: Bool = false
 var isDeviceChanged: Bool = true // update display menu on application start
+var useLocalization: Bool = true
 let ActivityData = AKservice()
 let simplyCA = SimplyCoreAudio()
+
+func localizedString(_ key: String.LocalizationValue) -> String {
+    if useLocalization {
+        return String(localized: key)
+    } else {
+        return String(localized: key, table: "English")
+    }
+}
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -34,10 +43,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let appCurrentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
         let anAbout = NSAlert()
         anAbout.messageText = "System Spinner " + appCurrentVersion!
-        anAbout.informativeText = String(localized: "AboutText")
+        anAbout.informativeText = localizedString("System Spinner provides macOS system information in status bar. Minimal, small and light")
         anAbout.alertStyle = .informational
-        anAbout.addButton(withTitle: String(localized:"Goto site"))
-        anAbout.addButton(withTitle: String(localized:"Close"))
+        anAbout.addButton(withTitle: localizedString("Goto site"))
+        anAbout.addButton(withTitle: localizedString("Close"))
         if anAbout.runModal() == .alertFirstButtonReturn {
             NSWorkspace.shared.open(URL(string: sHelper.appAboutUrl)!)
         }
@@ -189,6 +198,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         sHelper.remapKeysBacklight(toggle: keyRemap)
     }
     
+    @objc private func changelocalizeClick(sender: NSMenuItem) {
+        let alert = NSAlert()
+        alert.messageText = localizedString("Please restart application")
+        alert.informativeText = localizedString("For this parameter to take effect, you need to restart the application")
+        
+        if useLocalization {
+            sender.state = .off
+            useLocalization = false
+        } else {
+            sender.state = .on
+            useLocalization = true
+        }
+        
+        alert.runModal()
+    }
+    
     @objc private func displayDeviceChanged() {
         var displayMenuItem: NSMenuItem = NSMenuItem()
         let displaySubMenu = NSMenu()
@@ -198,7 +223,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         // let find menu intem
         for menuItem in statusItemMenu.items {
-            if menuItem.title == String(localized: "HDMI/DVI DDC enabled") {
+            if menuItem.title == localizedString("HDMI/DVI DDC enabled") {
                 displayMenuItem = menuItem
             }
         }
@@ -221,7 +246,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         // check for keyboadr blacklight controll
         for menuItem in statusItemMenu.items {
-            if menuItem.title == String(localized: "Keyboard backlight (F5/F6)") {
+            if menuItem.title == localizedString("Keyboard backlight (F5/F6)") {
                 if keyRemap {
                     menuItem.state = .on
                 } else {
@@ -259,6 +284,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         updateInterval = Double(UserDefaults.standard.string(forKey: "group.spinnerUpdateInterval") ?? String(updateInterval))!
         keyRemap = Bool(UserDefaults.standard.bool(forKey: "group.keyRemap"))
         enableStatusText = Bool(UserDefaults.standard.bool(forKey: "group.enableStatusText"))
+        useLocalization = Bool(UserDefaults.standard.bool(forKey: "group.useLocalization"))
         
         if let button = statusItem.button {
             button.action = #selector(togglePopover(sender:))
@@ -273,17 +299,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItemMenu = NSMenu()
         
         // open Analytics
-        statusItemMenu.addItem(NSMenuItem(title: String(localized: "Activity Monitor"), action: #selector(analitycstApp(sender:)), keyEquivalent: ""))
+        statusItemMenu.addItem(NSMenuItem(title: localizedString("Activity Monitor"), action: #selector(analitycstApp(sender:)), keyEquivalent: ""))
         
         // Text status in Menu
-        let statusItem = NSMenuItem(title: String(localized: "Show CPU usage in menu"), action: #selector(changeStatusMenuClick(sender:)), keyEquivalent: "")
+        let statusItem = NSMenuItem(title: localizedString("Show CPU usage in menu"), action: #selector(changeStatusMenuClick(sender:)), keyEquivalent: "")
         if enableStatusText {
             statusItem.state = .on
         }
         statusItemMenu.addItem(statusItem)
         
         // launch At Login
-        let launchAtLoginItem = NSMenuItem(title: String(localized: "Enable Autostart"), action: #selector(changeLaunchAtLogin(sender:)), keyEquivalent: "")
+        let launchAtLoginItem = NSMenuItem(title: localizedString("Enable Autostart"), action: #selector(changeLaunchAtLogin(sender:)), keyEquivalent: "")
         if sHelper.isAutoLaunch {
             launchAtLoginItem.state = .on
         }
@@ -291,12 +317,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItemMenu.addItem(NSMenuItem.separator())
         
         // Display controll support Menu
-        let displayItem = NSMenuItem(title: String(localized: "HDMI/DVI DDC enabled"), action:  #selector(WakeNotification), keyEquivalent: "")
+        let displayItem = NSMenuItem(title: localizedString("HDMI/DVI DDC enabled"), action:  #selector(WakeNotification), keyEquivalent: "")
         statusItemMenu.addItem(displayItem)
         statusItemMenu.setSubmenu(NSMenu(), for: displayItem)
         
         // Remap Menu
-        let remapItem = NSMenuItem(title: String(localized: "Keyboard backlight (F5/F6)"), action: #selector(changeRemapClick(sender:)), keyEquivalent: "")
+        let remapItem = NSMenuItem(title: localizedString("Keyboard backlight (F5/F6)"), action: #selector(changeRemapClick(sender:)), keyEquivalent: "")
         if keyRemap && DisplayManager.shared.isAppleDisplayPresent() {
             remapItem.state = .on
             sHelper.remapKeysBacklight(toggle: keyRemap)
@@ -305,11 +331,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             sHelper.remapKeysBacklight(toggle: false)
         }
         statusItemMenu.addItem(remapItem)
+        
+        // Localize Item
+        let localizeItem = NSMenuItem(title: localizedString("Use system language"), action: #selector(changelocalizeClick(sender:)), keyEquivalent: "")
+        if useLocalization {
+            localizeItem.state = .on
+        }
+        statusItemMenu.addItem(localizeItem)
         statusItemMenu.addItem(NSMenuItem.separator())
         
         // update interval
         let updateSubMenu = NSMenu()
-        let updateMenu = NSMenuItem(title: String(localized: "Update speed (s)"), action: nil, keyEquivalent: "")
+        let updateMenu = NSMenuItem(title: localizedString("Update speed (s)"), action: nil, keyEquivalent: "")
         
         for updateItem in updateIntervalName {
             let newItem = NSMenuItem(title: updateItem, action: #selector(changeUpdateSpeedClick(sender:)), keyEquivalent: "")
@@ -324,7 +357,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItemMenu.setSubmenu(updateSubMenu, for: updateMenu)
         
         let spinnersSubMenu = NSMenu()
-        let spinnersMenu = NSMenuItem(title: String(localized: "Spinners"), action: nil, keyEquivalent: "")
+        let spinnersMenu = NSMenuItem(title: localizedString("Spinners"), action: nil, keyEquivalent: "")
         
         for spinnersItem in spinners.keys {
             let newItem = NSMenuItem(title: spinnersItem, action: #selector(changeSpinnerClick(sender:)), keyEquivalent: "")
@@ -337,8 +370,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItemMenu.setSubmenu(spinnersSubMenu, for: spinnersMenu)
         
         statusItemMenu.addItem(NSMenuItem.separator())
-        statusItemMenu.addItem(NSMenuItem(title: String(localized: "About"), action: #selector(aboutWindow(sender:)), keyEquivalent: ""))
-        statusItemMenu.addItem(NSMenuItem(title: String(localized: "Quit"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: ""))
+        statusItemMenu.addItem(NSMenuItem(title: localizedString("About"), action: #selector(aboutWindow(sender:)), keyEquivalent: ""))
+        statusItemMenu.addItem(NSMenuItem(title: localizedString("Quit"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: ""))
         
         // start spinning!
         changeSpinner(spinnerName: spinnerActive, spinnerFrames: Int(spinners[spinnerActive]!))
@@ -370,7 +403,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         UserDefaults.standard.set(updateInterval, forKey: "group.spinnerUpdateInterval")
         UserDefaults.standard.set(keyRemap, forKey: "group.keyRemap")
         UserDefaults.standard.set(enableStatusText, forKey: "group.enableStatusText")
-        sHelper.remapKeysBacklight(toggle: false) // stop keys remap
+        UserDefaults.standard.set(useLocalization, forKey: "group.useLocalization")
+        sHelper.remapKeysBacklight(toggle: false)
     }
     
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {

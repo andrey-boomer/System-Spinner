@@ -12,23 +12,6 @@
         }
       }
     },
-    "AboutText" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Spinner provides macOS system information in status bar. Minimal, small and light"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Spinner программа которая показывает утилизацию ресурсов вашего компьютера, небольшая и легкая"
-          }
-        }
-      }
-    },
     "Activity Monitor" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -47,6 +30,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Разрешить"
+          }
+        }
+      }
+    },
+    "An new version %@ is available. Would you like download to update?" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Доступна новая версия%@ программы, хотите загрузить ее сейчас?"
           }
         }
       }
@@ -110,6 +103,27 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "кулер остановлен"
+          }
+        }
+      }
+    },
+    "For complite work you need to allow System Spinner to use special privileges for keydoard mapping." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для корректной работы программе нужны дополнительные разрешения, чтобы можно было управлять подсветкой экрана и громкостью динамиков через HDMI/DVI."
+          }
+        }
+      }
+    },
+    "For this parameter to take effect, you need to restart the application" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Данный параметр может быть применен только после перезапуска приложения."
           }
         }
       }
@@ -201,46 +215,22 @@
         }
       }
     },
+    "Please restart application" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Необходимо перезапустить приложение"
+          }
+        }
+      }
+    },
     "Pressure %lld%%" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Занято %lld%%"
-          }
-        }
-      }
-    },
-    "Privileges body" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "For complite work you need to allow System Spinner to use special privileges for keydoard mapping."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Для корректной работы программе нужны дополнительные разрешения, чтобы можно было управлять подсветкой экрана и громкостью динамиков через HDMI/DVI."
-          }
-        }
-      }
-    },
-    "Privileges title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Spinner need special privileges!"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Нужны дополнительные разрешения"
           }
         }
       }
@@ -278,6 +268,39 @@
         }
       }
     },
+    "System Spinner has updated" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "System Spinner обновился"
+          }
+        }
+      }
+    },
+    "System Spinner need special privileges" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нужны дополнительные разрешения"
+          }
+        }
+      }
+    },
+    "System Spinner provides macOS system information in status bar. Minimal, small and light" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "System Spinner программа которая показывает утилизацию ресурсов вашего компьютера, небольшая и легкая"
+          }
+        }
+      }
+    },
     "TB/s" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -300,35 +323,13 @@
         }
       }
     },
-    "Updated body %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "An new version %1s is available. Would you like download to update?"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Версия под номером %1s доступна для загрузки и обновления, желаете загрузить?"
-          }
-        }
-      }
-    },
-    "Updated title" : {
+    "Use system language" : {
       "extractionState" : "manual",
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Spinner has updated"
-          }
-        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "System Spinner обновился"
+            "value" : "Использовать язык системы"
           }
         }
       }

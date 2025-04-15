@@ -50,9 +50,9 @@ class AKservice {
     public var memApp: Double = 0.0
     public var memWired: Double = 0.0
     public var memCompressed: Double = 0.0
-    public var netIp: String = String(localized: "no ip found")
-    public var netIn = netPacketData(value: 0.0, unit: String(localized: "KB/s"))
-    public var netOut = netPacketData(value: 0.0, unit: String(localized: "KB/s"))
+    public var netIp: String = localizedString("no ip found")
+    public var netIn = netPacketData(value: 0.0, unit: localizedString("KB/s"))
+    public var netOut = netPacketData(value: 0.0, unit: localizedString("KB/s"))
     
     private func round(In: Double) -> Double {
         return Double(ceil(In * 10) / 10.0)
@@ -175,13 +175,13 @@ class AKservice {
         let GB: Double = pow(KB, 3)
         let TB: Double = pow(KB, 4)
         if TB <= byte {
-            return netPacketData(value: round(In: byte / TB), unit: String(localized: "TB/s"))
+            return netPacketData(value: round(In: byte / TB), unit: localizedString("TB/s"))
         } else if GB <= byte {
-            return netPacketData(value: round(In: byte / GB), unit: String(localized: "GB/s"))
+            return netPacketData(value: round(In: byte / GB), unit: localizedString("GB/s"))
         } else if MB <= byte {
-            return netPacketData(value: round(In: byte / MB), unit: String(localized: "MB/s"))
+            return netPacketData(value: round(In: byte / MB), unit: localizedString("MB/s"))
         } else {
-            return netPacketData(value: round(In: byte / KB), unit: String(localized: "KB/s"))
+            return netPacketData(value: round(In: byte / KB), unit: localizedString("KB/s"))
         }
     }
     
@@ -229,9 +229,9 @@ class AKservice {
         // Update NET Data
         let netId = getDefaultNetworkDevice()
         if netId.isEmpty {
-            netIp = String(localized: "no ip found")
-            netIn = netPacketData(value: 0.0, unit: String(localized: "KB/s"))
-            netOut = netPacketData(value: 0.0, unit: String(localized: "KB/s"))
+            netIp = localizedString("no ip found")
+            netIn = netPacketData(value: 0.0, unit: localizedString("KB/s"))
+            netOut = netPacketData(value: 0.0, unit: localizedString("KB/s"))
         } else {
             var ifaddr: UnsafeMutablePointer<ifaddrs>? = nil
             getifaddrs(&ifaddr)
