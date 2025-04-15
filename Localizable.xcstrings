@@ -70,7 +70,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "CPU %lld%%"
+            "value" : "Процессор %lld%%"
           }
         }
       }
