@@ -80,6 +80,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         curFrame = 0
         maxFrame = spinnerFrames
         startRunning()
+        saveParams()
     }
     
     @objc private func WakeNotification() {
@@ -185,6 +186,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             sender.state = .on
             sHelper.isAutoLaunch = true
         }
+        saveParams()
     }
     
     @objc private func changeRemapClick(sender: NSMenuItem) {
@@ -196,6 +198,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             keyRemap = true
         }
         sHelper.remapKeysBacklight(toggle: keyRemap)
+        saveParams()
     }
     
     @objc private func changelocalizeClick(sender: NSMenuItem) {
@@ -212,6 +215,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         
         alert.runModal()
+        saveParams()
     }
     
     @objc private func displayDeviceChanged() {
@@ -277,6 +281,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             sender.state = .on
             enableStatusText = true
         }
+        saveParams()
+    }
+    
+    private func saveParams() {
+        UserDefaults.standard.set(spinnerActive, forKey: "group.spinnerActive")
+        UserDefaults.standard.set(updateInterval, forKey: "group.spinnerUpdateInterval")
+        UserDefaults.standard.set(keyRemap, forKey: "group.keyRemap")
+        UserDefaults.standard.set(enableStatusText, forKey: "group.enableStatusText")
+        UserDefaults.standard.set(useLocalization, forKey: "group.useLocalization")
+        DisplayManager.shared.saveBrightnessVolumeValue()
     }
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
@@ -398,12 +412,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func applicationWillTerminate(_ aNotification: Notification) {
         stopRunning()
-        DisplayManager.shared.saveBrightnessVolumeValue()
-        UserDefaults.standard.set(spinnerActive, forKey: "group.spinnerActive")
-        UserDefaults.standard.set(updateInterval, forKey: "group.spinnerUpdateInterval")
-        UserDefaults.standard.set(keyRemap, forKey: "group.keyRemap")
-        UserDefaults.standard.set(enableStatusText, forKey: "group.enableStatusText")
-        UserDefaults.standard.set(useLocalization, forKey: "group.useLocalization")
+        saveParams()
         sHelper.remapKeysBacklight(toggle: false)
     }
     
