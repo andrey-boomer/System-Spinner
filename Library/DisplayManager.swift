@@ -51,6 +51,8 @@ class DisplayManager {
     private var audioControlTargetDisplays: [OtherDisplay] = []
     private var savedVolume: Double = 0
     private let correctionValue: Double = 6.25
+    private var brightnessValue: Double = 50.0
+    private var volumeValue: Double = 50.0
     
     static func getDisplayNameByID(displayID: CGDirectDisplayID) -> String {
         if let dictionary = (CoreDisplay_DisplayCreateInfoDictionary(displayID)?.takeRetainedValue() as NSDictionary?), let nameList = dictionary["DisplayProductName"] as? [String: String], var name = nameList[Locale.current.identifier] ?? nameList["en_US"] ?? nameList.first?.value {
@@ -274,5 +276,24 @@ class DisplayManager {
         }
         CGCompleteDisplayConfiguration(displayConfigRef, CGConfigureOption.permanently)
         return true
+    }
+    
+    // Save Brightness and Volume
+    public func saveBrightnessVolumeValue() {
+        for display in DisplayManager.shared.displays where !display.isBuiltIn() {
+            UserDefaults.standard.set(brightnessValue, forKey: "group.brightness_" + display.name)
+            UserDefaults.standard.set(volumeValue, forKey: "group.volume_" + display.name)
+        }
+    }
+    
+    // Load Brightness and Volume from saved value
+    public func loadBrightnessVolumeValue() {
+        for display in DisplayManager.shared.displays where !display.isBuiltIn() {
+            brightnessValue = Double(UserDefaults.standard.string(forKey: "group.brightness_" + display.name) ?? String(brightnessValue))!
+            display.setDirectBrightness(valueBrightness: Float(brightnessValue))
+            
+            volumeValue = Double(UserDefaults.standard.string(forKey: "group.volume_" + display.name) ?? String(volumeValue))!
+            display.setDirectVolume(valueVolume: Float(volumeValue))
+        }
     }
 }

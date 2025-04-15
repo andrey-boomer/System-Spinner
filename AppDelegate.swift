@@ -9,8 +9,6 @@ var spinnerActive: String!
 var enableStatusText: Bool = false
 var updateInterval: Double = 1.0
 var keyRemap: Bool = false
-var brightnessValue: Double = 50.0
-var volumeValue: Double = 50.0
 var isDeviceChanged: Bool = true // update display menu on application start
 let ActivityData = AKservice()
 let simplyCA = SimplyCoreAudio()
@@ -196,6 +194,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         var displayMenuItem: NSMenuItem = NSMenuItem()
         let displaySubMenu = NSMenu()
         
+        DisplayManager.shared.saveBrightnessVolumeValue()
         DisplayManager.shared.configureDisplays()
         
         // let find menu intem
@@ -239,6 +238,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
         
+        // Load saved values
+        DisplayManager.shared.loadBrightnessVolumeValue()
+        
         // Check new version?
         sHelper.hasNewVersion()
     }
@@ -258,8 +260,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         updateInterval = Double(UserDefaults.standard.string(forKey: "group.spinnerUpdateInterval") ?? String(updateInterval))!
         keyRemap = Bool(UserDefaults.standard.bool(forKey: "group.keyRemap"))
         enableStatusText = Bool(UserDefaults.standard.bool(forKey: "group.enableStatusText"))
-        brightnessValue = Double(UserDefaults.standard.string(forKey: "group.brightnessValue") ?? String(brightnessValue))!
-        volumeValue = Double(UserDefaults.standard.string(forKey: "group.volumeValue") ?? String(volumeValue))!
         
         if let button = statusItem.button {
             button.action = #selector(togglePopover(sender:))
@@ -366,12 +366,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func applicationWillTerminate(_ aNotification: Notification) {
         stopRunning()
+        DisplayManager.shared.saveBrightnessVolumeValue()
         UserDefaults.standard.set(spinnerActive, forKey: "group.spinnerActive")
         UserDefaults.standard.set(updateInterval, forKey: "group.spinnerUpdateInterval")
         UserDefaults.standard.set(keyRemap, forKey: "group.keyRemap")
         UserDefaults.standard.set(enableStatusText, forKey: "group.enableStatusText")
-        UserDefaults.standard.set(brightnessValue, forKey: "group.brightnessValue")
-        UserDefaults.standard.set(volumeValue, forKey: "group.volumeValue")
         sHelper.remapKeysBacklight(toggle: false) // stop keys remap
     }
     
