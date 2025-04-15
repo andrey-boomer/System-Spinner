@@ -44,9 +44,9 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
     
     public func checkPrivileges() -> Bool {
       let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: false]
-        if !AXIsProcessTrustedWithOptions(options) { sendSystemNotification(title: "System Spinner need special privileges!",
-                                                                            body: "For complite work you need to allow System Spinner to use special privileges for keydoard mapping.",
-                                                                            action: "Allow")
+        if !AXIsProcessTrustedWithOptions(options) { sendSystemNotification(title: String(localized: "Privileges title"),
+                                                                            body: String(localized: "Privileges body"),
+                                                                            action: String(localized: "Allow"))
             return false
         } else {
             return true
@@ -90,12 +90,12 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
     }
         
     public func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        if  response.actionIdentifier == "Download" {
+        if  response.actionIdentifier == String(localized: "Download") {
             guard let url = URL(string: appLastestUrl) else {
                 return
             }
             NSWorkspace.shared.open(url)
-        } else if response.actionIdentifier == "Allow" {
+        } else if response.actionIdentifier == String(localized: "Allow") {
             let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: true]
             AXIsProcessTrustedWithOptions(options)
         }
@@ -134,9 +134,9 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
                         let versionString = try decoder.decode(versionEntry.self, from: data).tagName
                         let versionGit = trimCharacter(val: versionString)
                         if versionGit > 0 && appCurrentVersion > 0 && versionGit > appCurrentVersion {
-                            self.sendSystemNotification(title: "System Spinner has updated!",
-                                                        body: "An new version " + versionString + " is available. Would you like download to update?",
-                                                        action: "Download")
+                            self.sendSystemNotification(title: String(localized: "Updated title"),
+                                                        body: String(localized: "Updated body \(versionString)"),
+                                                        action: String(localized: "Download"))
                         }
                     } catch {
                         return

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		7F26224A2D2FFD3600863B33 /* SimplyCoreAudio in Frameworks */ = {isa = PBXBuildFile; productRef = 7F2622492D2FFD3600863B33 /* SimplyCoreAudio */; };
+		7F65A9522DAEAD3C0052875D /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 7F65A9512DAEAD3C0052875D /* Localizable.xcstrings */; };
 		7F80E7972BD815270006AD44 /* Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F80E7962BD815270006AD44 /* Helper.swift */; };
 		7F8124E92B96DC8600B05107 /* AKservice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8124E82B96DC8600B05107 /* AKservice.swift */; };
 		7F866E292D1ECAFC00F20488 /* DisplayServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F0D02722D1ECADD0029C507 /* DisplayServices.framework */; };
@@ -28,6 +29,7 @@
 		7F0D02722D1ECADD0029C507 /* DisplayServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DisplayServices.framework; path = ../../../../System/Library/PrivateFrameworks/DisplayServices.framework; sourceTree = "<group>"; };
 		7F35E5922B847EBC0032163E /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		7F35E5932B847F230032163E /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		7F65A9512DAEAD3C0052875D /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		7F80E7962BD815270006AD44 /* Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helper.swift; sourceTree = "<group>"; };
 		7F8124E82B96DC8600B05107 /* AKservice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AKservice.swift; sourceTree = "<group>"; };
 		7F866E2E2D1ECB1600F20488 /* OSD.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OSD.framework; path = ../../../../System/Library/PrivateFrameworks/OSD.framework; sourceTree = "<group>"; };
@@ -88,6 +90,7 @@
 		7FB9089E2B67B9A400E9EE24 = {
 			isa = PBXGroup;
 			children = (
+				7F65A9512DAEAD3C0052875D /* Localizable.xcstrings */,
 				7FB908BE2B67B9FD00E9EE24 /* AppDelegate.swift */,
 				7FB908B32B67B9A500E9EE24 /* System_Spinner.entitlements */,
 				7F35E5932B847F230032163E /* README.md */,
@@ -173,6 +176,8 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
+				ru,
 			);
 			mainGroup = 7FB9089E2B67B9A400E9EE24;
 			packageReferences = (
@@ -193,6 +198,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7F65A9522DAEAD3C0052875D /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -252,6 +258,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -292,6 +299,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;

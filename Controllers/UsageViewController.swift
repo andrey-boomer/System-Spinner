@@ -119,7 +119,7 @@ class UsageViewController: NSViewController {
         ActivityData.updateAll()
         
         // CPU data
-        cpuLabel.stringValue = "CPU Usage " + String(Int(ActivityData.cpuPercentage)) + "%"
+        cpuLabel.stringValue = String(localized: "CPU Usage \(Int(ActivityData.cpuPercentage))%")
         cpuLevel.doubleValue = ActivityData.cpuPercentage / 5
         
         // power data
@@ -144,22 +144,22 @@ class UsageViewController: NSViewController {
             }
             fanLabel.stringValue += " rpm"
             if fanSpeed == 0 {
-                fanLabel.stringValue =  "fan is stoped"
+                fanLabel.stringValue =  String(localized: "fan is stoped")
             }
         }
         
         // if presentSMC
         if ioService.presentSMC {
             // temp data
-            cpuTempLabel.stringValue = "CPU Temp " + String(ioService.cpuTemp)  + " °С"
+            cpuTempLabel.stringValue = String(localized: "CPU Temp \(String(ioService.cpuTemp))°С")
             tempLevel.doubleValue = ioService.cpuTemp / 5
         }
         
         // memory data
-        memPercentage.stringValue = "Memory Usage " + String(Int(ActivityData.memPercentage)) + "%"
+        memPercentage.stringValue =  String(localized: "Memory Usage \(Int(ActivityData.memPercentage))%")
         memLevel.doubleValue = ActivityData.memPercentage / 5
         
-        memPressure.stringValue = "Pressure " + String(Int(ActivityData.memPressure)) + "%"
+        memPressure.stringValue = String(localized: "Pressure \(Int(ActivityData.memPressure))%")
         pressureLevel.doubleValue = ActivityData.memPressure / 5
         
         memApp.stringValue = String(Int(ActivityData.memApp)) + "% (App)"
