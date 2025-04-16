@@ -105,7 +105,7 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
             let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: true]
             AXIsProcessTrustedWithOptions(options)
         } else if response.actionIdentifier == localizedString("Quit") {
-            NSApplication.terminate(_:)
+            exit(0)
         }
         completionHandler()
     }
