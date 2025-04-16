@@ -227,3 +227,32 @@ class OSDUtils: NSObject {
         abs(chiclet.rounded(.towardZero) - chiclet)
     }
 }
+
+func localizedString(_ key: String.LocalizationValue) -> String {
+    if useLocalization {
+        return String(localized: key)
+    } else {
+        return String(localized: key, table: "English")
+    }
+}
+
+extension NSImage {
+    func image(with tintColor: NSColor) -> NSImage {
+        if self.isTemplate == false {
+            return self
+        }
+        
+        let image = self.copy() as! NSImage
+        image.lockFocus()
+        
+        tintColor.set()
+        
+        let imageRect = NSRect(origin: .zero, size: image.size)
+        imageRect.fill(using: .sourceIn)
+        
+        image.unlockFocus()
+        image.isTemplate = false
+        
+        return image
+    }
+}
