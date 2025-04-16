@@ -14,6 +14,7 @@ System Spinner provides macOS system information in status bar. Minimal, small a
 - CMS Information for Cpu Temp and Fan
 - Audio and Brightness contoll DDC over HDMI/DVI/USB-C
 - Auto update
+- Spinner overlay effects
 - Localization
 
 ## Screenshots
