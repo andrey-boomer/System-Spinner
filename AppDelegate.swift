@@ -37,7 +37,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var maxFrame: Int = 0
     private let popover = NSPopover()
     private var updateIntervalName = ["0.5", "1.0", "1.5", "2.0"]
-    private var spinners = ["Loader" : 8, "Grey Loader" : 18, "Cirrcles": 8, "Dots": 12, "Pie": 6, "Rainbow Pie": 15, "Recharges": 8, "Cat": 5]
+    private var spinners = [
+        "Blue Ball" : 19,
+        "Cat" : 5,
+        "Circles Two" : 9,
+        "Cirrcles" : 8,
+        "Color Balls" : 17,
+        "Color Well" : 20,
+        "Dots" : 12,
+        "Delay" : 17,
+        "Grey Loader" : 18,
+        "Loader" : 8,
+        "Pie" : 6,
+        "Rainbow Pie" : 15,
+        "Recharges" : 8,
+        "Rotation Color Well" : 24,
+        "Waves" : 17
+    ]
     
     @objc private func aboutWindow(sender: NSStatusItem) {
         let appCurrentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
@@ -74,6 +90,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return (0 ..< spinnerFrames).map { n in
                 let image = NSImage(named: spinnerName + " \(n)")!
                 image.size = NSSize(width: 19 / image.size.height * image.size.width, height: 19)
+                
+                // May need mask?
                 return image
             }
         }()
