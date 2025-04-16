@@ -282,18 +282,25 @@ class DisplayManager {
     public func saveBrightnessVolumeValue() {
         for display in DisplayManager.shared.displays where !display.isBuiltIn() {
             UserDefaults.standard.set(brightnessValue, forKey: "group.brightness_" + display.name)
-            UserDefaults.standard.set(volumeValue, forKey: "group.volume_" + display.name)
+            UserDefaults.standard.set(volumeValue, forKey: "group.volume_" + simplyCA.defaultOutputDevice!.name)
         }
     }
     
     // Load Brightness and Volume from saved value
     public func loadBrightnessVolumeValue() {
         for display in DisplayManager.shared.displays where !display.isBuiltIn() {
-            brightnessValue = Double(UserDefaults.standard.string(forKey: "group.brightness_" + display.name) ?? String(brightnessValue))!
-            display.setDirectBrightness(valueBrightness: Float(brightnessValue))
+            let brightnessValue_new = Double(UserDefaults.standard.string(forKey: "group.brightness_" + display.name) ?? String(brightnessValue))!
+            if brightnessValue_new != brightnessValue {
+                brightnessValue = brightnessValue_new
+                display.setDirectBrightness(valueBrightness: Float(brightnessValue))
+            }
             
-            volumeValue = Double(UserDefaults.standard.string(forKey: "group.volume_" + display.name) ?? String(volumeValue))!
-            display.setDirectVolume(valueVolume: Float(volumeValue))
+            let volumeValue_new = Double(UserDefaults.standard.string(forKey: "group.volume_" + simplyCA.defaultOutputDevice!.name) ?? String(volumeValue))!
+            if volumeValue_new != volumeValue {
+                volumeValue = volumeValue_new
+                display.setDirectVolume(valueVolume: Float(volumeValue))
+            }
+            
         }
     }
 }
