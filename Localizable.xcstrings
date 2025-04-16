@@ -44,6 +44,26 @@
         }
       }
     },
+    "Black" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Темный"
+          }
+        }
+      }
+    },
+    "Black opage 80%" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Темный, прозрачность 80%"
+          }
+        }
+      }
+    },
     "Close" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -150,6 +170,16 @@
         }
       }
     },
+    "Grayscale" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Серый"
+          }
+        }
+      }
+    },
     "HDMI/DVI DDC enabled" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -215,6 +245,16 @@
         }
       }
     },
+    "Original" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Без эффекта"
+          }
+        }
+      }
+    },
     "Please restart application" : {
       "localizations" : {
         "ru" : {
@@ -264,6 +304,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Спиннеры"
+          }
+        }
+      }
+    },
+    "Spinners Effects" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Применить эффект"
           }
         }
       }
@@ -330,6 +380,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Использовать язык системы"
+          }
+        }
+      }
+    },
+    "White" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Белый"
+          }
+        }
+      }
+    },
+    "White opage 80%" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Белый, прозрачность 80%"
           }
         }
       }

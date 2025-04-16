@@ -11,16 +11,9 @@ var updateInterval: Double = 1.0
 var keyRemap: Bool = false
 var isDeviceChanged: Bool = true // update display menu on application start
 var useLocalization: Bool = true
+var spinnersEffectSelected : Int = 1
 let ActivityData = AKservice()
 let simplyCA = SimplyCoreAudio()
-
-func localizedString(_ key: String.LocalizationValue) -> String {
-    if useLocalization {
-        return String(localized: key)
-    } else {
-        return String(localized: key, table: "English")
-    }
-}
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -37,6 +30,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var maxFrame: Int = 0
     private let popover = NSPopover()
     private var updateIntervalName = ["0.5", "1.0", "1.5", "2.0"]
+    private var spinnersEffect = [
+        localizedString("Original")  : 1,
+        localizedString("Grayscale") : 2,
+        localizedString("White") : 3,
+        localizedString("Black") : 5,
+        localizedString("White opage 80%") : 4,
+        localizedString("Black opage 80%") : 6
+    ]
     private var spinners = [
         "Blue Ball" : 19,
         "Cat" : 5,
@@ -88,10 +89,34 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // load spinner
         frames = {
             return (0 ..< spinnerFrames).map { n in
-                let image = NSImage(named: spinnerName + " \(n)")!
+                var image = NSImage(named: spinnerName + " \(n)")!
                 image.size = NSSize(width: 19 / image.size.height * image.size.width, height: 19)
-                
-                // May need mask?
+                // Apply image effect
+                switch spinnersEffectSelected {
+                case 2: // Grayscale
+                    image.isTemplate = true
+                    image = image.image(with: NSColor(red: 0.5, green: 0.5, blue: 0.5, alpha: 1.0))
+                    break
+                case 3: // White
+                    image.isTemplate = true
+                    image = image.image(with: NSColor(red: 1, green: 1, blue: 1, alpha: 1.0))
+                    break
+                case 4: // White opage 80%
+                    image.isTemplate = true
+                    image = image.image(with: NSColor(red: 1, green: 1, blue: 1, alpha: 0.8))
+                    break
+                case 5: // Black
+                    image.isTemplate = true
+                    image = image.image(with: NSColor(red: 0, green: 0, blue: 0, alpha: 1.0))
+                    break
+                case 6: // Black opage 80%
+                    image.isTemplate = true
+                    image = image.image(with: NSColor(red: 0, green: 0, blue: 0, alpha: 0.8))
+                    break
+                default:
+                    image.isTemplate = false
+                    break
+                }
                 return image
             }
         }()
@@ -194,6 +219,27 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         updateInterval = Double(sender.title)!
         sender.state = .on
         startRunning()
+    }
+    
+    @objc private func changeSpinnerEffectClick(sender: NSMenuItem) {
+        stopRunning()
+        
+        for menuItem in statusItemMenu.items { // set all submenu state off
+            if menuItem.hasSubmenu && menuItem.title == sender.parent?.title {
+                for subMenuItem in menuItem.submenu!.items {
+                    subMenuItem.state = .off
+                }
+            }
+        }
+        
+        for (_, value) in spinnersEffect.enumerated() {
+            if value.key == sender.title {
+                spinnersEffectSelected = value.value
+            }
+        }
+            
+        sender.state = .on
+        changeSpinner(spinnerName: spinnerActive, spinnerFrames: Int(spinners[spinnerActive]!))
     }
     
     @objc private func changeLaunchAtLogin(sender: NSMenuItem) {
@@ -303,6 +349,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         UserDefaults.standard.set(keyRemap, forKey: "group.keyRemap")
         UserDefaults.standard.set(enableStatusText, forKey: "group.enableStatusText")
         UserDefaults.standard.set(useLocalization, forKey: "group.useLocalization")
+        UserDefaults.standard.set(spinnersEffectSelected, forKey: "group.spinnersEffectSelected")
         DisplayManager.shared.saveBrightnessVolumeValue()
     }
     
@@ -312,6 +359,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         keyRemap = Bool(UserDefaults.standard.bool(forKey: "group.keyRemap"))
         enableStatusText = Bool(UserDefaults.standard.bool(forKey: "group.enableStatusText"))
         useLocalization = Bool(UserDefaults.standard.bool(forKey: "group.useLocalization"))
+        spinnersEffectSelected = Int(UserDefaults.standard.string(forKey: "group.spinnersEffectSelected") ?? String(spinnersEffectSelected))!
         
         if let button = statusItem.button {
             button.action = #selector(togglePopover(sender:))
@@ -395,6 +443,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         statusItemMenu.addItem(spinnersMenu)
         statusItemMenu.setSubmenu(spinnersSubMenu, for: spinnersMenu)
+        
+        let spinnersEffectSubMenu = NSMenu()
+        let spinnersEffectMenu = NSMenuItem(title: localizedString("Spinners Effects"), action: nil, keyEquivalent: "")
+
+        for (_, value) in spinnersEffect.enumerated() {
+            let newItem = NSMenuItem(title: value.key, action: #selector(changeSpinnerEffectClick(sender:)), keyEquivalent: "")
+            if value.value == spinnersEffectSelected {
+                newItem.state = .on
+            }
+            spinnersEffectSubMenu.addItem(newItem)
+        }
+        statusItemMenu.addItem(spinnersEffectMenu)
+        statusItemMenu.setSubmenu(spinnersEffectSubMenu, for: spinnersEffectMenu)
         
         statusItemMenu.addItem(NSMenuItem.separator())
         statusItemMenu.addItem(NSMenuItem(title: localizedString("About"), action: #selector(aboutWindow(sender:)), keyEquivalent: ""))
