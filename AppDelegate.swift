@@ -202,10 +202,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @objc private func changelocalizeClick(sender: NSMenuItem) {
-        let alert = NSAlert()
-        alert.messageText = localizedString("Please restart application")
-        alert.informativeText = localizedString("For this parameter to take effect, you need to restart the application")
-        
+        sHelper.needRestart()
         if useLocalization {
             sender.state = .off
             useLocalization = false
@@ -213,8 +210,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             sender.state = .on
             useLocalization = true
         }
-        
-        alert.runModal()
         saveParams()
     }
     

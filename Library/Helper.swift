@@ -54,6 +54,12 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
         
     }
     
+    public func needRestart() {
+       sendSystemNotification(title: localizedString("Please restart application"),
+                               body: localizedString("For this parameter to take effect, you need to restart the application"),
+                               action: localizedString("Quit"))
+    }
+    
     public func remapKeysBacklight(toggle: Bool) {
         let task = Process()
         task.launchPath = "/usr/bin/env"
@@ -98,6 +104,8 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
         } else if response.actionIdentifier == localizedString("Allow") {
             let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: true]
             AXIsProcessTrustedWithOptions(options)
+        } else if response.actionIdentifier == localizedString("Quit") {
+            NSApplication.terminate(_:)
         }
         completionHandler()
     }
