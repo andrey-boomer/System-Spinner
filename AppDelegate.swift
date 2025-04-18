@@ -32,11 +32,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var updateIntervalName = ["0.5", "1.0", "1.5", "2.0"]
     private var spinnersEffect = [
         localizedString("Original")  : 1,
-        localizedString("Grayscale") : 2,
-        localizedString("White") : 3,
-        localizedString("Black") : 5,
-        localizedString("White opage 80%") : 4,
-        localizedString("Black opage 80%") : 6
+        localizedString("White opage 80%") : 2,
+        localizedString("Black opage 80%") : 3,
+        localizedString("Automatic Dark/White mode") : 4
     ]
     private var spinners = [
         "Blue Ball" : 19,
@@ -90,28 +88,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         frames = {
             return (0 ..< spinnerFrames).map { n in
                 var image = NSImage(named: spinnerName + " \(n)")!
-                image.size = NSSize(width: 19 / image.size.height * image.size.width, height: 19)
+                image.size = NSSize(width: (NSStatusBar.system.thickness - 2) / image.size.height * image.size.width, height: (NSStatusBar.system.thickness - 2))
                 // Apply image effect
                 switch spinnersEffectSelected {
-                case 2: // Grayscale
-                    image.isTemplate = true
-                    image = image.image(with: NSColor(red: 0.5, green: 0.5, blue: 0.5, alpha: 1.0))
-                    break
-                case 3: // White
-                    image.isTemplate = true
-                    image = image.image(with: NSColor(red: 1, green: 1, blue: 1, alpha: 1.0))
-                    break
-                case 4: // White opage 80%
+                case 2: // White opage 80%
                     image.isTemplate = true
                     image = image.image(with: NSColor(red: 1, green: 1, blue: 1, alpha: 0.8))
                     break
-                case 5: // Black
-                    image.isTemplate = true
-                    image = image.image(with: NSColor(red: 0, green: 0, blue: 0, alpha: 1.0))
-                    break
-                case 6: // Black opage 80%
+                case 3: // Black opage 80%
                     image.isTemplate = true
                     image = image.image(with: NSColor(red: 0, green: 0, blue: 0, alpha: 0.8))
+                    break
+                case 4: // Automatic
+                    image.isTemplate = true
                     break
                 default:
                     image.isTemplate = false
@@ -471,7 +460,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // if we go to sleep
         NotificationCenter.default.addObserver(self, selector: #selector(stopRunning), name: NSWorkspace.willSleepNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(stopRunning), name: NSWorkspace.screensDidSleepNotification, object: nil)
-        
+   
         // mouse click event
         NSEvent.addGlobalMonitorForEvents(matching: [NSEvent.EventTypeMask.leftMouseDown,NSEvent.EventTypeMask.rightMouseDown], handler: { [self](event: NSEvent) in
             closePopoverMenu(sender: self)

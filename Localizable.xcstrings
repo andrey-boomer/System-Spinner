@@ -44,12 +44,12 @@
         }
       }
     },
-    "Black" : {
+    "Automatic Dark/White mode" : {
       "localizations" : {
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Темный"
+            "value" : "Автоматическая подстройка под цвет статус бара"
           }
         }
       }
@@ -166,16 +166,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Перейти на сайт"
-          }
-        }
-      }
-    },
-    "Grayscale" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Серый"
           }
         }
       }
@@ -380,16 +370,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Использовать язык системы"
-          }
-        }
-      }
-    },
-    "White" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Белый"
           }
         }
       }
