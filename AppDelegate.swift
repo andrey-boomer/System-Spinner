@@ -12,6 +12,7 @@ var keyRemap: Bool = false
 var isDeviceChanged: Bool = true // update display menu on application start
 var useLocalization: Bool = true
 var spinnersEffectSelected : Int = 1
+var spinnersRotationInvert: Bool = false
 let ActivityData = AKservice()
 let simplyCA = SimplyCoreAudio()
 
@@ -137,9 +138,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     private func updateUsage() {
         ActivityData.updateCpuOnly()
-        curFrame =  curFrame + 1
+        curFrame = curFrame + (spinnersRotationInvert ? -1 : 1)
         if curFrame > maxFrame - 1 {
             curFrame = 0
+        } else if curFrame < 0 {
+            curFrame = maxFrame - 1
         }
         statusItem.button?.image = frames[curFrame]
         
@@ -152,9 +155,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let interval = 0.25 / max(1.0, min(100.0, ActivityData.cpuPercentage / Double(maxFrame)))
         spinnerTimer?.invalidate()
         spinnerTimer = Timer(timeInterval: interval, repeats: true, block: { [weak self] _ in
-            self!.curFrame =  self!.curFrame + 1
+            self!.curFrame = self!.curFrame + (spinnersRotationInvert ? -1 : 1)
             if self!.curFrame == self!.maxFrame {
                 self!.curFrame = 0
+            } else if self!.curFrame < 0 {
+                self!.curFrame = self!.maxFrame - 1
             }
             self?.statusItem.button?.image = self?.frames[self!.curFrame]
             
@@ -238,6 +243,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         } else {
             sender.state = .on
             sHelper.isAutoLaunch = true
+        }
+        saveParams()
+    }
+    
+    @objc private func changeSpinnersRotationInvert(sender: NSMenuItem) {
+        if spinnersRotationInvert {
+            sender.state = .off
+            spinnersRotationInvert = false
+        } else {
+            sender.state = .on
+            spinnersRotationInvert = true
         }
         saveParams()
     }
@@ -339,6 +355,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         UserDefaults.standard.set(enableStatusText, forKey: "group.enableStatusText")
         UserDefaults.standard.set(useLocalization, forKey: "group.useLocalization")
         UserDefaults.standard.set(spinnersEffectSelected, forKey: "group.spinnersEffectSelected")
+        UserDefaults.standard.set(spinnersRotationInvert, forKey: "group.spinnersRotationInvert")
+        
         DisplayManager.shared.saveBrightnessVolumeValue()
     }
     
@@ -349,6 +367,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         enableStatusText = Bool(UserDefaults.standard.bool(forKey: "group.enableStatusText"))
         useLocalization = Bool(UserDefaults.standard.bool(forKey: "group.useLocalization"))
         spinnersEffectSelected = Int(UserDefaults.standard.string(forKey: "group.spinnersEffectSelected") ?? String(spinnersEffectSelected))!
+        spinnersRotationInvert = Bool(UserDefaults.standard.bool(forKey: "group.spinnersRotationInvert"))
         
         if let button = statusItem.button {
             button.action = #selector(togglePopover(sender:))
@@ -380,7 +399,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItemMenu.addItem(launchAtLoginItem)
         statusItemMenu.addItem(NSMenuItem.separator())
         
-        // Display controll support Menu
+        // ---------------------------- Display controll Section ----------------------------
         let displayItem = NSMenuItem(title: localizedString("HDMI/DVI DDC enabled"), action:  #selector(WakeNotification), keyEquivalent: "")
         statusItemMenu.addItem(displayItem)
         statusItemMenu.setSubmenu(NSMenu(), for: displayItem)
@@ -404,7 +423,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItemMenu.addItem(localizeItem)
         statusItemMenu.addItem(NSMenuItem.separator())
         
-        // update interval
+        // ---------------------------- Spinner Section ----------------------------
+        let spinnersSubMenu = NSMenu()
+        let spinnersMenu = NSMenuItem(title: localizedString("Spinners"), action: nil, keyEquivalent: "")
+        
+        for spinnersItem in spinners.keys {
+            let newItem = NSMenuItem(title: spinnersItem, action: #selector(changeSpinnerClick(sender:)), keyEquivalent: "")
+            let image = NSImage(named: spinnersItem + " 1")!
+            image.size = NSSize(width: 19 / image.size.height * image.size.width, height: 19)
+            newItem.image = image
+            spinnersSubMenu.addItem(newItem)
+        }
+        statusItemMenu.addItem(spinnersMenu)
+        statusItemMenu.setSubmenu(spinnersSubMenu, for: spinnersMenu)
+        
         let updateSubMenu = NSMenu()
         let updateMenu = NSMenuItem(title: localizedString("Update speed (s)"), action: nil, keyEquivalent: "")
         
@@ -420,19 +452,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItemMenu.addItem(updateMenu)
         statusItemMenu.setSubmenu(updateSubMenu, for: updateMenu)
         
-        let spinnersSubMenu = NSMenu()
-        let spinnersMenu = NSMenuItem(title: localizedString("Spinners"), action: nil, keyEquivalent: "")
-        
-        for spinnersItem in spinners.keys {
-            let newItem = NSMenuItem(title: spinnersItem, action: #selector(changeSpinnerClick(sender:)), keyEquivalent: "")
-            let image = NSImage(named: spinnersItem + " 1")!
-            image.size = NSSize(width: 19 / image.size.height * image.size.width, height: 19)
-            newItem.image = image
-            spinnersSubMenu.addItem(newItem)
-        }
-        statusItemMenu.addItem(spinnersMenu)
-        statusItemMenu.setSubmenu(spinnersSubMenu, for: spinnersMenu)
-        
         let spinnersEffectSubMenu = NSMenu()
         let spinnersEffectMenu = NSMenuItem(title: localizedString("Spinners Effects"), action: nil, keyEquivalent: "")
 
@@ -445,6 +464,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         statusItemMenu.addItem(spinnersEffectMenu)
         statusItemMenu.setSubmenu(spinnersEffectSubMenu, for: spinnersEffectMenu)
+        
+        let invertedItem = NSMenuItem(title: localizedString("Invert rotation"), action: #selector(changeSpinnersRotationInvert(sender:)), keyEquivalent: "")
+        if spinnersRotationInvert {
+            invertedItem.state = .on
+        }
+        statusItemMenu.addItem(invertedItem)
         
         statusItemMenu.addItem(NSMenuItem.separator())
         statusItemMenu.addItem(NSMenuItem(title: localizedString("About"), action: #selector(aboutWindow(sender:)), keyEquivalent: ""))

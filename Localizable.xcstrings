@@ -181,6 +181,16 @@
         }
       }
     },
+    "Invert rotation" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Инвертировать вращение"
+          }
+        }
+      }
+    },
     "KB/s" : {
       "extractionState" : "manual",
       "localizations" : {
