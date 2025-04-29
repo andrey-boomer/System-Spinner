@@ -138,16 +138,6 @@
         }
       }
     },
-    "For this parameter to take effect, you need to restart the application" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Данный параметр может быть применен только после перезапуска приложения. Прошу перезапустить!"
-          }
-        }
-      }
-    },
     "GB/s" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -251,16 +241,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Без эффекта"
-          }
-        }
-      }
-    },
-    "Please restart application" : {
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Необходимо перезапустить приложение"
           }
         }
       }

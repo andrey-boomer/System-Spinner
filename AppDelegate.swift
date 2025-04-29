@@ -271,7 +271,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @objc private func changelocalizeClick(sender: NSMenuItem) {
-        sHelper.needRestart()
         if useLocalization {
             sender.state = .off
             useLocalization = false
@@ -280,6 +279,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             useLocalization = true
         }
         saveParams()
+        updateStatusMenu()
     }
     
     @objc private func displayDeviceChanged() {
@@ -360,25 +360,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         DisplayManager.shared.saveBrightnessVolumeValue()
     }
     
-    func applicationDidFinishLaunching(_ aNotification: Notification) {
-        spinnerActive = UserDefaults.standard.string(forKey: "group.spinnerActive") ?? "Loader"
-        updateInterval = Double(UserDefaults.standard.string(forKey: "group.spinnerUpdateInterval") ?? String(updateInterval))!
-        keyRemap = Bool(UserDefaults.standard.bool(forKey: "group.keyRemap"))
-        enableStatusText = Bool(UserDefaults.standard.bool(forKey: "group.enableStatusText"))
-        useLocalization = Bool(UserDefaults.standard.bool(forKey: "group.useLocalization"))
-        spinnersEffectSelected = Int(UserDefaults.standard.string(forKey: "group.spinnersEffectSelected") ?? String(spinnersEffectSelected))!
-        spinnersRotationInvert = Bool(UserDefaults.standard.bool(forKey: "group.spinnersRotationInvert"))
-        
-        if let button = statusItem.button {
-            button.action = #selector(togglePopover(sender:))
-            button.sendAction(on: [.leftMouseUp, .rightMouseUp])
-            button.imagePosition = .imageLeading
-            button.font = NSFont.monospacedSystemFont(ofSize: 11, weight: .medium)
-        }
-        
-        popover.contentViewController = UsageViewController.freshController()
-        
-        // create pop up menu
+    private func updateStatusMenu() {
+        // create pop up menu if in not menu
         statusItemMenu = NSMenu()
         
         // open Analytics
@@ -474,6 +457,28 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItemMenu.addItem(NSMenuItem.separator())
         statusItemMenu.addItem(NSMenuItem(title: localizedString("About"), action: #selector(aboutWindow(sender:)), keyEquivalent: ""))
         statusItemMenu.addItem(NSMenuItem(title: localizedString("Quit"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: ""))
+    }
+    
+    func applicationDidFinishLaunching(_ aNotification: Notification) {
+        spinnerActive = UserDefaults.standard.string(forKey: "group.spinnerActive") ?? "Loader"
+        updateInterval = Double(UserDefaults.standard.string(forKey: "group.spinnerUpdateInterval") ?? String(updateInterval))!
+        keyRemap = Bool(UserDefaults.standard.bool(forKey: "group.keyRemap"))
+        enableStatusText = Bool(UserDefaults.standard.bool(forKey: "group.enableStatusText"))
+        useLocalization = Bool(UserDefaults.standard.bool(forKey: "group.useLocalization"))
+        spinnersEffectSelected = Int(UserDefaults.standard.string(forKey: "group.spinnersEffectSelected") ?? String(spinnersEffectSelected))!
+        spinnersRotationInvert = Bool(UserDefaults.standard.bool(forKey: "group.spinnersRotationInvert"))
+        
+        if let button = statusItem.button {
+            button.action = #selector(togglePopover(sender:))
+            button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+            button.imagePosition = .imageLeading
+            button.font = NSFont.monospacedSystemFont(ofSize: 11, weight: .medium)
+        }
+        
+        popover.contentViewController = UsageViewController.freshController()
+        
+        // create menu
+        updateStatusMenu()
         
         // start spinning!
         changeSpinner(spinnerName: spinnerActive, spinnerFrames: Int(spinners[spinnerActive]!))
