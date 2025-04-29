@@ -457,6 +457,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItemMenu.addItem(NSMenuItem.separator())
         statusItemMenu.addItem(NSMenuItem(title: localizedString("About"), action: #selector(aboutWindow(sender:)), keyEquivalent: ""))
         statusItemMenu.addItem(NSMenuItem(title: localizedString("Quit"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: ""))
+        
+        isDeviceChanged = true
     }
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
