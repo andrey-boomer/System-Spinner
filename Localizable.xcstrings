@@ -95,6 +95,17 @@
         }
       }
     },
+    "Data update every" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обновлять данные каждые"
+          }
+        }
+      }
+    },
     "Download" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -266,6 +277,22 @@
         }
       }
     },
+    "Second" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " s."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " сек."
+          }
+        }
+      }
+    },
     "Show CPU usage in menu" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -338,17 +365,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ТБ/с"
-          }
-        }
-      }
-    },
-    "Update speed (s)" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Скорость обновления (c)"
           }
         }
       }

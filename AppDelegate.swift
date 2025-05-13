@@ -37,22 +37,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         localizedString("Black opage 80%") : 3,
         localizedString("Automatic Dark/White mode") : 4
     ]
-    private var spinners = [
-        "Blue Ball" : 19,
-        "Cat" : 5,
-        "Circles Two" : 9,
-        "Cirrcles" : 8,
-        "Color Balls" : 17,
-        "Color Well" : 20,
-        "Dots" : 12,
-        "Delay" : 17,
-        "Grey Loader" : 18,
-        "Loader" : 8,
-        "Pie" : 6,
-        "Rainbow Pie" : 15,
-        "Recharges" : 8,
-        "Rotation Color Well" : 24,
-        "Waves" : 17
+    private let spinners: [String: [Int]] =  [ // [name: [item count, can use effect?]]
+        "Blue Ball" : [19, 1],
+        "Cat" : [5, 1],
+        "Circles Two" : [9, 1],
+        "Cirrcles" : [8, 0],
+        "Color Balls" : [17, 1],
+        "Color Well" : [20, 0],
+        "Dots" : [12, 0],
+        "Delay" : [17, 1],
+        "Grey Loader" : [18, 0],
+        "Loader" : [8, 0],
+        "Pie" : [6, 0],
+        "Rainbow Pie" : [15, 0],
+        "Recharges" : [ 8, 1],
+        "Rotation Color Well" : [24, 0],
+        "Waves" : [17, 1]
     ]
     
     @objc private func aboutWindow(sender: NSStatusItem) {
@@ -81,9 +81,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
-    private func changeSpinner(spinnerName: String, spinnerFrames: Int) {
+    private func changeSpinner(spinnerName: String) {
         stopRunning()
         spinnerActive = spinnerName
+        let spinnerFrames: Int = spinners[spinnerName]![0]
         
         // load spinner
         frames = {
@@ -91,28 +92,54 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 var image = NSImage(named: spinnerName + " \(n)")!
                 image.size = NSSize(width: (NSStatusBar.system.thickness - 2) / image.size.height * image.size.width, height: (NSStatusBar.system.thickness - 2))
                 // Apply image effect
-                switch spinnersEffectSelected {
-                case 2: // White opage 80%
-                    image.isTemplate = true
-                    image = image.image(with: NSColor(red: 1, green: 1, blue: 1, alpha: 0.8))
-                    break
-                case 3: // Black opage 80%
-                    image.isTemplate = true
-                    image = image.image(with: NSColor(red: 0, green: 0, blue: 0, alpha: 0.8))
-                    break
-                case 4: // Automatic
-                    image.isTemplate = true
-                    break
-                default:
-                    image.isTemplate = false
-                    break
+                if spinners[spinnerName]![1] > 0 { switch spinnersEffectSelected {
+                    case 2: // White opage 80%
+                        image.isTemplate = true
+                        image = image.image(with: NSColor(red: 1, green: 1, blue: 1, alpha: 0.8))
+                        break
+                    case 3: // Black opage 80%
+                        image.isTemplate = true
+                        image = image.image(with: NSColor(red: 0, green: 0, blue: 0, alpha: 0.8))
+                        break
+                    case 4: // Automatic
+                        image.isTemplate = true
+                        break
+                    default:
+                        image.isTemplate = false
+                        break
+                    }
                 }
-                return image
+             return image
             }
         }()
         curFrame = 0
         maxFrame = spinnerFrames
         startRunning()
+        
+        // update effect menu
+        for menuItem in statusItemMenu.items {
+            if menuItem.title == localizedString("Spinners Effects") {
+                if spinners[spinnerName]![1] > 0 {
+                    menuItem.action = #selector(changeSpinnerEffectClick(sender:))
+                } else {
+                    menuItem.action = nil
+                }
+            }
+        }
+        
+        // update spinners menu
+        for menuItem in statusItemMenu.items {
+            if menuItem.hasSubmenu && menuItem.title == localizedString("Spinners") {
+                for subMenuItem in menuItem.submenu!.items {
+                    if subMenuItem.title == spinnerName {
+                        subMenuItem.state = .on
+                    } else {
+                        subMenuItem.state = .off
+                    }
+                }
+            }
+        }
+        
         saveParams()
     }
     
@@ -193,7 +220,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @objc private func changeSpinnerClick(sender: NSMenuItem) {
-        changeSpinner(spinnerName: sender.title, spinnerFrames: Int(spinners[sender.title]!))
+        changeSpinner(spinnerName: sender.title)
     }
     
     @objc private func analitycstApp(sender: NSMenuItem) {
@@ -210,7 +237,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
         }
-        updateInterval = Double(sender.title)!
+        updateInterval = Double(sender.title.replacingOccurrences(of: localizedString("Second"), with: ""))!
         sender.state = .on
         startRunning()
     }
@@ -233,7 +260,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
             
         sender.state = .on
-        changeSpinner(spinnerName: spinnerActive, spinnerFrames: Int(spinners[spinnerActive]!))
+        changeSpinner(spinnerName: spinnerActive)
     }
     
     @objc private func changeLaunchAtLogin(sender: NSMenuItem) {
@@ -280,6 +307,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         saveParams()
         updateStatusMenu()
+        changeSpinner(spinnerName: spinnerActive)
     }
     
     @objc private func displayDeviceChanged() {
@@ -421,10 +449,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItemMenu.setSubmenu(spinnersSubMenu, for: spinnersMenu)
         
         let updateSubMenu = NSMenu()
-        let updateMenu = NSMenuItem(title: localizedString("Update speed (s)"), action: nil, keyEquivalent: "")
+        let updateMenu = NSMenuItem(title: localizedString("Data update every"), action: nil, keyEquivalent: "")
         
         for updateItem in updateIntervalName {
-            let newItem = NSMenuItem(title: updateItem, action: #selector(changeUpdateSpeedClick(sender:)), keyEquivalent: "")
+            let newItem = NSMenuItem(title: updateItem + localizedString("Second"), action: #selector(changeUpdateSpeedClick(sender:)), keyEquivalent: "")
             if updateItem == String(updateInterval) {
                 newItem.state = .on
             } else {
@@ -483,7 +511,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         updateStatusMenu()
         
         // start spinning!
-        changeSpinner(spinnerName: spinnerActive, spinnerFrames: Int(spinners[spinnerActive]!))
+        changeSpinner(spinnerName: spinnerActive)
         
         // if we wakup
         NotificationCenter.default.addObserver(self, selector: #selector(WakeNotification), name: NSWorkspace.didWakeNotification, object: nil)
