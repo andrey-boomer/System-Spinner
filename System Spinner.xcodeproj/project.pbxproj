@@ -50,10 +50,8 @@
 		7F6D12242D1D868C00C44FAC /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				main_menu.jpg,
 				main_window.jpg,
 				spin_menu.jpg,
-				spinner.jpg,
 			);
 			target = 7FB908A62B67B9A400E9EE24 /* System Spinner */;
 		};
