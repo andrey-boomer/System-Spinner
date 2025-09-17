@@ -1,4 +1,5 @@
-![spin_menu](Pictures/icon.jpg) # System Spinner
+![spin_menu](Pictures/icon.jpg)
+# System Spinner
 
 System Spinner provides macOS system information in status bar. Minimal, small and light!
 
