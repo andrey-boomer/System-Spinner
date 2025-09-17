@@ -13,28 +13,24 @@ System Spinner provides macOS system information in status bar. Minimal, small a
 - Network connection and ip adress
 - CMS Information for Cpu Temp and Fan
 - Audio and Brightness contoll DDC over HDMI/DVI/USB-C
-- Auto update
+- Full MacOS 26 Tahoe Liquid Glass support
 - Spinner overlay effects
-- Localization
+- Localization (English, Russian)
 
 ## Screenshots
-![spinner](Pictures/spinner.jpg)
+![spin_menu](Pictures/spin_menu.jpg)
 
 <details>
-  
+![spinner](Pictures/spinner.jpg)  
 ![menu](Pictures/main_menu.jpg)
-
-
 ![main_window](Pictures/main_window.jpg)
-
-
 ![spin_menu](Pictures/spin_menu.jpg)
 
 </details>
   
 ## Tech
 
-Written in Swift 5. Universal build.
+Written in Swift 5. Apple Silicon Only for MacOS 26 Tahoe, MacOS 15.6 Sequoia
 - Based on [menubar_runcat](https://github.com/Kyome22/menubar_runcat)
 - Based on [stats](https://github.com/exelban/stats)
 - Based on [ActivityKit](https://github.com/Kyome22/ActivityKit)
