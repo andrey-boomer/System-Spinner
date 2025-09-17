@@ -20,7 +20,7 @@ System Spinner provides macOS system information in status bar. Minimal, small a
 ## Screenshots
 ![spin_menu](Pictures/spin_menu.jpg)
 
-![menu](Pictures/main_menu.jpg)
+![menu](Pictures/main_window.jpg)
   
 ## Tech
 
