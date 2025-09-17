@@ -246,23 +246,6 @@ class OtherDisplay: Display {
         }
     }
     
-    func calcNewValue(currentValue: Float, isUp: Bool, half: Bool = false) -> Float {
-        let nextValue: Float
-        let osdChicletFromValue = OSDUtils.chiclet(fromValue: currentValue, maxValue: 1, half: half)
-        let distance = OSDUtils.getDistance(fromNearestChiclet: osdChicletFromValue)
-        var nextFilledChiclet = isUp ? ceil(osdChicletFromValue) : floor(osdChicletFromValue)
-        let distanceThreshold: Float = 0.25 // 25% of the distance between the edges of an osd box
-        if distance == 0 {
-            nextFilledChiclet += (isUp ? 1 : -1)
-        } else if !isUp, distance < distanceThreshold {
-            nextFilledChiclet -= 1
-        } else if isUp, distance > (1 - distanceThreshold) {
-            nextFilledChiclet += 1
-        }
-        nextValue = OSDUtils.value(fromChiclet: nextFilledChiclet, maxValue: 1, half: half)
-        return max(0, min(1, nextValue))
-    }
-    
     public func writeDDCValues(command: Command, value: UInt16) {
         self.writeDDCQueue.async(flags: .barrier) {
             self.writeDDCNextValue[command] = value

@@ -112,6 +112,7 @@ class UsageViewController: NSViewController {
         dataTimer?.fire()
         
         super.viewDidAppear()
+        view.window?.makeKey()
     }
     
     private func updateData() {

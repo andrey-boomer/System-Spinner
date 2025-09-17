@@ -203,17 +203,6 @@
         }
       }
     },
-    "Keyboard backlight (F5/F6)" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Подсветка клавиш (F5/F6)"
-          }
-        }
-      }
-    },
     "MB/s" : {
       "extractionState" : "manual",
       "localizations" : {

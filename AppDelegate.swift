@@ -8,7 +8,6 @@ import SimplyCoreAudio
 var spinnerActive: String!
 var enableStatusText: Bool = false
 var updateInterval: Double = 1.0
-var keyRemap: Bool = false
 var isDeviceChanged: Bool = true // update display menu on application start
 var useLocalization: Bool = true
 var spinnersEffectSelected : Int = 1
@@ -76,6 +75,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     private func closePopoverMenu(sender: Any?) {
         statusItem.menu = nil
+        
         if popover.isShown {
             popover.performClose(sender)
         }
@@ -285,18 +285,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         saveParams()
     }
     
-    @objc private func changeRemapClick(sender: NSMenuItem) {
-        if keyRemap {
-            sender.state = .off
-            keyRemap = false
-        } else {
-            sender.state = .on
-            keyRemap = true
-        }
-        sHelper.remapKeysBacklight(toggle: keyRemap)
-        saveParams()
-    }
-    
     @objc private func changelocalizeClick(sender: NSMenuItem) {
         if useLocalization {
             sender.state = .off
@@ -340,24 +328,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             MediaKeyTapManager.shared.updateMediaKeyTap()
         }
         
-        // check for keyboadr blacklight controll
-        for menuItem in statusItemMenu.items {
-            if menuItem.title == localizedString("Keyboard backlight (F5/F6)") {
-                if keyRemap {
-                    menuItem.state = .on
-                } else {
-                    menuItem.state = .off
-                }
-                if DisplayManager.shared.isAppleDisplayPresent() {
-                    menuItem.action = #selector(changeRemapClick(sender:))
-                    sHelper.remapKeysBacklight(toggle: keyRemap)
-                } else {
-                    menuItem.action = nil
-                    sHelper.remapKeysBacklight(toggle: false)
-                }
-            }
-        }
-        
         // Load saved values
         DisplayManager.shared.loadBrightnessVolumeValue()
         
@@ -379,7 +349,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func saveParams() {
         UserDefaults.standard.set(spinnerActive, forKey: "group.spinnerActive")
         UserDefaults.standard.set(updateInterval, forKey: "group.spinnerUpdateInterval")
-        UserDefaults.standard.set(keyRemap, forKey: "group.keyRemap")
         UserDefaults.standard.set(enableStatusText, forKey: "group.enableStatusText")
         UserDefaults.standard.set(useLocalization, forKey: "group.useLocalization")
         UserDefaults.standard.set(spinnersEffectSelected, forKey: "group.spinnersEffectSelected")
@@ -414,17 +383,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let displayItem = NSMenuItem(title: localizedString("HDMI/DVI DDC enabled"), action:  #selector(WakeNotification), keyEquivalent: "")
         statusItemMenu.addItem(displayItem)
         statusItemMenu.setSubmenu(NSMenu(), for: displayItem)
-        
-        // Remap Menu
-        let remapItem = NSMenuItem(title: localizedString("Keyboard backlight (F5/F6)"), action: #selector(changeRemapClick(sender:)), keyEquivalent: "")
-        if keyRemap && DisplayManager.shared.isAppleDisplayPresent() {
-            remapItem.state = .on
-            sHelper.remapKeysBacklight(toggle: keyRemap)
-        } else {
-            remapItem.action = nil
-            sHelper.remapKeysBacklight(toggle: false)
-        }
-        statusItemMenu.addItem(remapItem)
         
         // Localize Item
         let localizeItem = NSMenuItem(title: localizedString("Use system language"), action: #selector(changelocalizeClick(sender:)), keyEquivalent: "")
@@ -492,7 +450,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         spinnerActive = UserDefaults.standard.string(forKey: "group.spinnerActive") ?? "Loader"
         updateInterval = Double(UserDefaults.standard.string(forKey: "group.spinnerUpdateInterval") ?? String(updateInterval))!
-        keyRemap = Bool(UserDefaults.standard.bool(forKey: "group.keyRemap"))
         enableStatusText = Bool(UserDefaults.standard.bool(forKey: "group.enableStatusText"))
         useLocalization = Bool(UserDefaults.standard.bool(forKey: "group.useLocalization"))
         spinnersEffectSelected = Int(UserDefaults.standard.string(forKey: "group.spinnersEffectSelected") ?? String(spinnersEffectSelected))!
@@ -536,7 +493,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ aNotification: Notification) {
         stopRunning()
         saveParams()
-        sHelper.remapKeysBacklight(toggle: false)
     }
     
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {

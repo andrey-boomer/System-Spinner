@@ -54,22 +54,6 @@ class Helper: NSObject, UNUserNotificationCenterDelegate {
         
     }
     
-    public func remapKeysBacklight(toggle: Bool) {
-        let task = Process()
-        task.launchPath = "/usr/bin/env"
-        
-        if toggle {
-            task.arguments = ["hidutil", "property", "--set", "{\"UserKeyMapping\":[{\"HIDKeyboardModifierMappingSrc\": 0xC000000CF,\"HIDKeyboardModifierMappingDst\": 0xFF00000009},{\"HIDKeyboardModifierMappingSrc\": 0x10000009B,\"HIDKeyboardModifierMappingDst\": 0xFF00000008}]}"]
-            
-        } else {
-            task.arguments = ["hidutil", "property", "--set", "{\"UserKeyMapping\":[{\"HIDKeyboardModifierMappingSrc\": 0xFF00000009,\"HIDKeyboardModifierMappingDst\": 0xC000000CF},{\"HIDKeyboardModifierMappingSrc\": 0xFF00000008,\"HIDKeyboardModifierMappingDst\": 0x10000009B}]}"]
-            
-        }
-        task.standardOutput = nil
-        task.launch()
-        task.waitUntilExit()
-    }
-    
     public func sendSystemNotification(title: String, body: String = "", action: String) {
         let content = UNMutableNotificationContent()
         let notificationCenter = UNUserNotificationCenter.current()
@@ -159,7 +143,6 @@ class OSDUtils: NSObject {
         case brightness = 1
         case audioSpeaker = 3
         case audioSpeakerMuted = 4
-        case contrast = 0
     }
     
     static func getOSDImageByCommand(command: Command, value: Float = 1) -> OSDImage {
@@ -167,7 +150,6 @@ class OSDUtils: NSObject {
         switch command {
         case .audioSpeakerVolume: osdImage = value > 0 ? .audioSpeaker : .audioSpeakerMuted
         case .audioMuteScreenBlank: osdImage = .audioSpeakerMuted
-        case .contrast: osdImage = .contrast
         default: osdImage = .brightness
         }
         return osdImage
