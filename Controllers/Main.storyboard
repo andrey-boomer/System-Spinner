@@ -402,12 +402,12 @@
                         <outlet property="memAppBar" destination="mcU-Jz-gB3" id="Hmb-bv-DFl"/>
                         <outlet property="memComp" destination="zhz-4i-eqf" id="WRW-Qo-T1P"/>
                         <outlet property="memCompBar" destination="qWB-bf-6CP" id="Vbc-Q7-18g"/>
+                        <outlet property="memInactive" destination="3CD-CC-aQ5" id="CCi-gP-2U7"/>
+                        <outlet property="memInactiveBar" destination="gfz-pY-0xN" id="3pF-No-UD9"/>
                         <outlet property="memLevel" destination="9YX-qF-SoU" id="IuT-OK-ITv"/>
                         <outlet property="memPercentage" destination="NlV-oa-81H" id="MEZ-0T-k1C"/>
                         <outlet property="memPopupButton" destination="Mfy-lg-rGi" id="QXe-GE-8tv"/>
                         <outlet property="memPressure" destination="OvO-2T-Xut" id="Qwd-cR-LAb"/>
-                        <outlet property="memWired" destination="3CD-CC-aQ5" id="CyV-LL-hTV"/>
-                        <outlet property="memWiredBar" destination="gfz-pY-0xN" id="0pr-Hs-nkS"/>
                         <outlet property="netLabel" destination="lsQ-vN-vIM" id="k6l-ud-WCw"/>
                         <outlet property="powerComp" destination="HhM-HC-1yU" id="Bkj-Mt-KxU"/>
                         <outlet property="pressureLevel" destination="aua-ud-mmF" id="1Kx-VQ-umF"/>
@@ -420,6 +420,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="NSTouchBarGetInfoTemplate" width="19" height="19"/>
+        <image name="NSTouchBarGetInfoTemplate" width="20" height="20"/>
     </resources>
 </document>

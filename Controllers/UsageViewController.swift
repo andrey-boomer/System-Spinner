@@ -18,7 +18,7 @@ class UsageViewController: NSViewController {
     @IBOutlet var memPercentage: NSTextField!
     @IBOutlet var memPressure: NSTextField!
     @IBOutlet var memApp: NSTextField!
-    @IBOutlet var memWired: NSTextField!
+    @IBOutlet var memInactive: NSTextField!
     @IBOutlet var memComp: NSTextField!
     @IBOutlet var powerComp: NSTextField!
     
@@ -28,7 +28,7 @@ class UsageViewController: NSViewController {
     @IBOutlet var pressureLevel: NSLevelIndicator!
     
     @IBOutlet var memAppBar: NSProgressIndicator!
-    @IBOutlet var memWiredBar: NSProgressIndicator!
+    @IBOutlet var memInactiveBar: NSProgressIndicator!
     @IBOutlet var memCompBar: NSProgressIndicator!
     
     @IBOutlet var netLabel: NSTextField!
@@ -105,7 +105,7 @@ class UsageViewController: NSViewController {
     
     override func viewDidAppear() {
         dataTimer?.invalidate()
-        dataTimer = Timer(timeInterval: updateInterval, repeats: true, block: { [weak self] _ in
+        dataTimer = Timer(timeInterval: updateInterval / 2, repeats: true, block: { [weak self] _ in
             self?.updateData()
         })
         RunLoop.main.add(dataTimer!, forMode: .common)
@@ -152,24 +152,24 @@ class UsageViewController: NSViewController {
         // if presentSMC
         if ioService.presentSMC {
             // temp data
-            cpuTempLabel.stringValue = localizedString("CPU Temp \(String(ioService.cpuTemp))°С")
+            cpuTempLabel.stringValue = localizedString("CPU Temp \(String(Int(round(ioService.cpuTemp))))°С")
             tempLevel.doubleValue = ioService.cpuTemp / 5
         }
         
         // memory data
-        memPercentage.stringValue =  localizedString("Memory Usage \(Int(ActivityData.memPercentage))%")
+        memPercentage.stringValue =  localizedString("Memory Usage \(Int(round(ActivityData.memPercentage)))%")
         memLevel.doubleValue = ActivityData.memPercentage / 5
         
-        memPressure.stringValue = localizedString("Pressure \(Int(ActivityData.memPressure))%")
+        memPressure.stringValue = localizedString("Pressure \(Int(round(ActivityData.memPressure)))%")
         pressureLevel.doubleValue = ActivityData.memPressure / 5
         
-        memApp.stringValue = String(Int(ActivityData.memApp)) + "% (App)"
+        memApp.stringValue = String(Int(round(ActivityData.memApp))) + "% (Appl)"
         memAppBar.doubleValue = ActivityData.memApp
         
-        memWired.stringValue = String(Int(ActivityData.memWired)) + "% (Wrd)"
-        memWiredBar.doubleValue = ActivityData.memWired
+        memInactive.stringValue = String(Int(round(ActivityData.memInactive))) + "% (NAct)"
+        memInactiveBar.doubleValue = ActivityData.memInactive
         
-        memComp.stringValue = String(Int(ActivityData.memCompressed)) + "% (Zip)"
+        memComp.stringValue = String(Int(round(ActivityData.memCompressed))) + "% (Comp)"
         memCompBar.doubleValue = ActivityData.memCompressed
         
         netLabel.stringValue = ActivityData.netIp + "\n↓ " + String(Int(ActivityData.netIn.value)) + ActivityData.netIn.unit + " | ↑ " + String(Int(ActivityData.netOut.value)) + ActivityData.netOut.unit

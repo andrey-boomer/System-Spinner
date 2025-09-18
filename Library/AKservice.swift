@@ -50,6 +50,7 @@ class AKservice {
     public var memApp: Double = 0.0
     public var memWired: Double = 0.0
     public var memCompressed: Double = 0.0
+    public var memInactive: Double = 0.0
     public var netIp: String = localizedString("no ip found")
     public var netIn = netPacketData(value: 0.0, unit: localizedString("KB/s"))
     public var netOut = netPacketData(value: 0.0, unit: localizedString("KB/s"))
@@ -222,9 +223,11 @@ class AKservice {
         
         memPercentage = round(In: min(99.9, (100.0 * using / maxMem)))
         memPressure   = round(In: 100.0 * (wired + compressed) / maxMem)
-        memApp        = round(In: using - wired - compressed)
+        memApp        = round(In: 100.0 * (using - wired - compressed) / maxMem)
         memWired      = round(In: wired)
         memCompressed = round(In: compressed)
+        memInactive = round(In: 100.0 * (inactive) / maxMem)
+        
         
         // Update NET Data
         let netId = getDefaultNetworkDevice()

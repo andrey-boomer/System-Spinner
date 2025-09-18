@@ -454,7 +454,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         useLocalization = Bool(UserDefaults.standard.bool(forKey: "group.useLocalization"))
         spinnersEffectSelected = Int(UserDefaults.standard.string(forKey: "group.spinnersEffectSelected") ?? String(spinnersEffectSelected))!
         spinnersRotationInvert = Bool(UserDefaults.standard.bool(forKey: "group.spinnersRotationInvert"))
-        
+        print(updateInterval)
         if let button = statusItem.button {
             button.action = #selector(togglePopover(sender:))
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
