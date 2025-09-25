@@ -105,7 +105,7 @@ class UsageViewController: NSViewController {
     
     override func viewDidAppear() {
         dataTimer?.invalidate()
-        dataTimer = Timer(timeInterval: updateInterval / 2, repeats: true, block: { [weak self] _ in
+        dataTimer = Timer(timeInterval: updateInterval * 2, repeats: true, block: { [weak self] _ in
             self?.updateData()
         })
         RunLoop.main.add(dataTimer!, forMode: .common)
