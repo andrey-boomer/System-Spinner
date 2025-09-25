@@ -25,11 +25,11 @@ System Spinner provides macOS system information in status bar. Minimal, small a
   
 ## Tech
 
-Written in Swift 5. Apple Silicon Only for MacOS 26 Tahoe, MacOS 15.6 Sequoia
-- Based on [menubar_runcat](https://github.com/Kyome22/menubar_runcat)
-- Based on [stats](https://github.com/exelban/stats)
-- Based on [ActivityKit](https://github.com/Kyome22/ActivityKit)
-- Based on [MonitorControl](https://github.com/MonitorControl/MonitorControl)
+Written in Swift 5. Apple Silicon Only for MacOS 26 Tahoe, MacOS 15.6 Sequoia, and based on%
+- [menubar_runcat](https://github.com/Kyome22/menubar_runcat)
+- [stats](https://github.com/exelban/stats)
+- [ActivityKit](https://github.com/Kyome22/ActivityKit)
+- [MonitorControl](https://github.com/MonitorControl/MonitorControl)
 
 Used dependencies:
 - [MediaKeyTap](https://github.com/the0neyouseek/MediaKeyTap)
