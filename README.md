@@ -3,8 +3,6 @@
 
 System Spinner provides macOS system information in status bar. Minimal, small and light!
 
-https://img.shields.io/github/downloads/andrey-lysikov/System-Spinner/total
-
 [![Downloads](https://img.shields.io/github/downloads/andrey-lysikov/System-Spinner/total)](https://github.com/andrey-lysikov/System-Spinner/releases)
 [![Release](https://img.shields.io/github/v/release/andrey-lysikov/System-Spinner)](https://github.com/andrey-lysikov/System-Spinner/releases/latest)
 
