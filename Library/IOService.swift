@@ -232,6 +232,7 @@ class IOServiceData {
                 }
             }
         }
+        
         self.update()
     }
     
