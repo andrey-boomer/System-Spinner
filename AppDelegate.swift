@@ -362,10 +362,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItemMenu = NSMenu()
         
         // open Analytics
-        statusItemMenu.addItem(NSMenuItem(title: localizedString("Activity Monitor"), action: #selector(analitycstApp(sender:)), keyEquivalent: ""))
+        let analyticsItem = NSMenuItem(title: localizedString("Activity Monitor"), action: #selector(analitycstApp(sender:)), keyEquivalent: "")
+        analyticsItem.image = NSImage(systemSymbolName: "ellipsis.curlybraces", accessibilityDescription: localizedString("Activity Monitor"))
+        statusItemMenu.addItem(analyticsItem)
         
         // Text status in Menu
         let statusItem = NSMenuItem(title: localizedString("Show CPU usage in menu"), action: #selector(changeStatusMenuClick(sender:)), keyEquivalent: "")
+        statusItem.image = NSImage(systemSymbolName: "cpu", accessibilityDescription: localizedString("Show CPU usage in menu"))
         if enableStatusText {
             statusItem.state = .on
         }
@@ -376,11 +379,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if sHelper.isAutoLaunch {
             launchAtLoginItem.state = .on
         }
+        launchAtLoginItem.image = NSImage(systemSymbolName: "character", accessibilityDescription: localizedString("Enable Autostart"))
         statusItemMenu.addItem(launchAtLoginItem)
         statusItemMenu.addItem(NSMenuItem.separator())
         
         // ---------------------------- Display controll Section ----------------------------
         let displayItem = NSMenuItem(title: localizedString("HDMI/DVI DDC enabled"), action:  #selector(WakeNotification), keyEquivalent: "")
+        displayItem.image = NSImage(systemSymbolName: "display.2", accessibilityDescription: localizedString("HDMI/DVI DDC enabled"))
         statusItemMenu.addItem(displayItem)
         statusItemMenu.setSubmenu(NSMenu(), for: displayItem)
         
@@ -389,6 +394,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if useLocalization {
             localizeItem.state = .on
         }
+        localizeItem.image = NSImage(systemSymbolName: "translate", accessibilityDescription: localizedString("Use system language"))
         statusItemMenu.addItem(localizeItem)
         statusItemMenu.addItem(NSMenuItem.separator())
         
@@ -403,6 +409,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             newItem.image = image
             spinnersSubMenu.addItem(newItem)
         }
+        spinnersMenu.image = NSImage(systemSymbolName: "checklist.unchecked", accessibilityDescription: localizedString("Spinners"))
         statusItemMenu.addItem(spinnersMenu)
         statusItemMenu.setSubmenu(spinnersSubMenu, for: spinnersMenu)
         
@@ -418,6 +425,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
             updateSubMenu.addItem(newItem)
         }
+        updateMenu.image = NSImage(systemSymbolName: "progress.indicator", accessibilityDescription: localizedString("Data update every"))
         statusItemMenu.addItem(updateMenu)
         statusItemMenu.setSubmenu(updateSubMenu, for: updateMenu)
         
@@ -431,6 +439,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
             spinnersEffectSubMenu.addItem(newItem)
         }
+        spinnersEffectMenu.image = NSImage(systemSymbolName: "wand.and.sparkles.inverse", accessibilityDescription: localizedString("Spinners Effects"))
         statusItemMenu.addItem(spinnersEffectMenu)
         statusItemMenu.setSubmenu(spinnersEffectSubMenu, for: spinnersEffectMenu)
         
@@ -438,11 +447,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if spinnersRotationInvert {
             invertedItem.state = .on
         }
+        invertedItem.image = NSImage(systemSymbolName: "circle.righthalf.filled.inverse", accessibilityDescription: localizedString("Invert rotation"))
         statusItemMenu.addItem(invertedItem)
         
         statusItemMenu.addItem(NSMenuItem.separator())
-        statusItemMenu.addItem(NSMenuItem(title: localizedString("About"), action: #selector(aboutWindow(sender:)), keyEquivalent: ""))
-        statusItemMenu.addItem(NSMenuItem(title: localizedString("Quit"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: ""))
+        
+        let aboutItem = NSMenuItem(title: localizedString("About"), action: #selector(aboutWindow(sender:)), keyEquivalent: "")
+        aboutItem.image = NSImage(systemSymbolName: "info", accessibilityDescription: localizedString("About"))
+        statusItemMenu.addItem(aboutItem)
+        
+        let quitItem = NSMenuItem(title: localizedString("Quit"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "")
+        quitItem.image = NSImage(systemSymbolName: "xmark", accessibilityDescription: localizedString("Quit"))
+        statusItemMenu.addItem(quitItem)
         
         isDeviceChanged = true
     }
