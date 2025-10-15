@@ -163,7 +163,7 @@ class UsageViewController: NSViewController {
         memPressure.stringValue = localizedString("Pressure \(Int(round(ActivityData.memPressure)))%")
         pressureLevel.doubleValue = ActivityData.memPressure / 5
         
-        memApp.stringValue = String(Int(round(ActivityData.memApp))) + "% (Appl)"
+        memApp.stringValue = String(Int(round(ActivityData.memApp))) + "% (App)"
         memAppBar.doubleValue = ActivityData.memApp
         
         memInactive.stringValue = String(Int(round(ActivityData.memInactive))) + "% (NAct)"
