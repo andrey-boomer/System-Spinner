@@ -67,6 +67,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
+    @objc private func donationImageAlert(sender: NSStatusItem) {
+        let donationAlert = NSAlert()
+        donationAlert.messageText = localizedString("Donate")
+        donationAlert.informativeText = localizedString("You can donate via QR code.")
+        let customView = NSView(frame: NSRect(x: 0, y: 0, width: 256, height: 256))
+        let imageView = NSImageView(frame: NSRect(x: 0, y: 0, width: 256, height: 256))
+        
+        if let image = NSImage(named: "aDonation") {
+            imageView.image = image
+        }
+
+        customView.addSubview(imageView)
+        donationAlert.accessoryView = customView
+        
+        donationAlert.addButton(withTitle: localizedString("Thanks!"))
+        donationAlert.runModal()
+    }
+    
     private func showPopover(sender: Any?) {
         if let button = statusItem.button {
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: NSRectEdge.minY)
@@ -455,6 +473,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let aboutItem = NSMenuItem(title: localizedString("About"), action: #selector(aboutWindow(sender:)), keyEquivalent: "")
         aboutItem.image = NSImage(systemSymbolName: "info", accessibilityDescription: localizedString("About"))
         statusItemMenu.addItem(aboutItem)
+        
+        let donateItem = NSMenuItem(title: localizedString("Donate"), action: #selector(donationImageAlert(sender:)), keyEquivalent: "")
+        donateItem.image = NSImage(systemSymbolName: "dollarsign", accessibilityDescription: localizedString("Donate"))
+        statusItemMenu.addItem(donateItem)
         
         let quitItem = NSMenuItem(title: localizedString("Quit"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "")
         quitItem.image = NSImage(systemSymbolName: "xmark", accessibilityDescription: localizedString("Quit"))
