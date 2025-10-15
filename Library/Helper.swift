@@ -143,6 +143,15 @@ class OSDUtils: NSObject {
         case brightness = 1
         case audioSpeaker = 3
         case audioSpeakerMuted = 4
+        case ejectDisk = 6
+    }
+
+    @objc protocol OSDUIHelperProtocol {
+        @objc func showImage(_ img: OSDImage.RawValue,
+                             onDisplayID: CGDirectDisplayID,
+                             priority: CUnsignedInt,
+                             msecUntilFade: CUnsignedInt,
+                             withText: String?)
     }
     
     static func getOSDImageByCommand(command: Command, value: Float = 1) -> OSDImage {
@@ -155,52 +164,23 @@ class OSDUtils: NSObject {
         return osdImage
     }
     
-    static func showOsd(displayID: CGDirectDisplayID, command: Command, value: Float, maxValue: Float = 1, lock: Bool = false) {
+    static func showOsd(displayID: CGDirectDisplayID, command: Command, value: Float, maxValue: Float = 1) {
         guard let manager = OSDManager.sharedManager() as? OSDManager else {
             return
         }
         let osdImage = self.getOSDImageByCommand(command: command, value: value)
-        let filledChiclets: Int
-        let totalChiclets: Int
-        filledChiclets = Int(value * 100)
-        totalChiclets = Int(maxValue * 100)
-        manager.showImage(osdImage.rawValue, onDisplayID: displayID, priority: 0x1F4, msecUntilFade: 1000, filledChiclets: UInt32(filledChiclets), totalChiclets: UInt32(totalChiclets), locked: lock)
-    }
-    
-    static func showOsdVolumeDisabled(displayID: CGDirectDisplayID) {
-        guard let manager = OSDManager.sharedManager() as? OSDManager else {
-            return
+        let filledChiclets: Int = Int(value * 100)
+        let totalChiclets: Int = Int(maxValue * 100)
+        if #unavailable(macOS 26) {
+            manager.showImage(osdImage.rawValue, onDisplayID: displayID, priority: 0x1F4, msecUntilFade: 1000, filledChiclets: UInt32(filledChiclets), totalChiclets: UInt32(totalChiclets))
+        } else {
+            let conn = NSXPCConnection(machServiceName: "com.apple.OSDUIHelper", options: [])
+            conn.remoteObjectInterface = NSXPCInterface(with: OSDUIHelperProtocol.self)
+            conn.resume()
+            let target = conn.remoteObjectProxyWithErrorHandler {_ in } as? OSDUIHelperProtocol
+            target!.showImage(0, onDisplayID: displayID, priority: 0x1f4, msecUntilFade: 1000, withText: nil)
+            target!.showImage(osdImage.rawValue, onDisplayID: displayID, priority: 0x1f4, msecUntilFade: 1000, withText: String(Int(filledChiclets / 100)) + "%")
         }
-        manager.showImage(22, onDisplayID: displayID, priority: 0x1F4, msecUntilFade: 1000)
-    }
-    
-    static func showOsdMuteDisabled(displayID: CGDirectDisplayID) {
-        guard let manager = OSDManager.sharedManager() as? OSDManager else {
-            return
-        }
-        manager.showImage(21, onDisplayID: displayID, priority: 0x1F4, msecUntilFade: 1000)
-    }
-    
-    static func popEmptyOsd(displayID: CGDirectDisplayID, command: Command) {
-        guard let manager = OSDManager.sharedManager() as? OSDManager else {
-            return
-        }
-        let osdImage = self.getOSDImageByCommand(command: command)
-        manager.showImage(osdImage.rawValue, onDisplayID: displayID, priority: 0x1F4, msecUntilFade: 0)
-    }
-    
-    static let chicletCount: Float = 16
-    
-    static func chiclet(fromValue value: Float, maxValue: Float, half: Bool = false) -> Float {
-        (value * self.chicletCount * (half ? 2 : 1)) / maxValue
-    }
-    
-    static func value(fromChiclet chiclet: Float, maxValue: Float, half: Bool = false) -> Float {
-        (chiclet * maxValue) / (self.chicletCount * (half ? 2 : 1))
-    }
-    
-    static func getDistance(fromNearestChiclet chiclet: Float) -> Float {
-        abs(chiclet.rounded(.towardZero) - chiclet)
     }
 }
 

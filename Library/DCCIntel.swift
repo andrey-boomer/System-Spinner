@@ -257,16 +257,12 @@ class OtherDisplay: Display {
     
     override func setDirectBrightness(valueBrightness: Float) {
         self.writeDDCValues(command: .brightness, value: UInt16(valueBrightness))
-        if #unavailable(macOS 26) {
-            OSDUtils.showOsd(displayID: self.identifier, command: .brightness, value: Float(valueBrightness), maxValue: Float(100))
-        }
+        OSDUtils.showOsd(displayID: self.identifier, command: .brightness, value: Float(valueBrightness), maxValue: Float(100))
     }
     
     override func setDirectVolume(valueVolume: Float) {
         self.writeDDCValues(command: .audioSpeakerVolume, value: UInt16(valueVolume))
-        if #unavailable(macOS 26) {
-            OSDUtils.showOsd(displayID: self.identifier, command: .audioSpeakerVolume, value: Float(valueVolume), maxValue: Float(100))
-        }
+        OSDUtils.showOsd(displayID: self.identifier, command: .audioSpeakerVolume, value: Float(valueVolume), maxValue: Float(100))
     }
     
     func asyncPerformWriteDDCValues(command: Command) {
