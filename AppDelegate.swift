@@ -30,12 +30,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var maxFrame: Int = 0
     private let popover = NSPopover()
     private var updateIntervalName = ["0.5", "1.0", "1.5", "2.0"]
-    private var spinnersEffect = [
-        localizedString("Original")  : 1,
-        localizedString("White opage 80%") : 2,
-        localizedString("Black opage 80%") : 3,
-        localizedString("Automatic Dark/White mode") : 4
-    ]
+    private var spinnersEffect: [String:Int] = [:]
     private let spinners: [String: [Int]] =  [ // [name: [item count, can use effect?]]
         "Blue Ball" : [19, 1],
         "Cat" : [5, 1],
@@ -332,7 +327,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         for displayItem in DisplayManager.shared.displays {
             let newItem = NSMenuItem(title: displayItem.name, action: #selector(WakeNotification), keyEquivalent: "")
-            
+            newItem.image = NSImage(systemSymbolName: "display", accessibilityDescription: displayItem.name)
             if displayItem.isBuiltIn() {
                 newItem.action = nil
             }
@@ -435,7 +430,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let updateMenu = NSMenuItem(title: localizedString("Data update every"), action: nil, keyEquivalent: "")
         
         for updateItem in updateIntervalName {
-            let newItem = NSMenuItem(title: updateItem + localizedString("Second"), action: #selector(changeUpdateSpeedClick(sender:)), keyEquivalent: "")
+            let newItem = NSMenuItem(title: updateItem + " " + localizedString("Second"), action: #selector(changeUpdateSpeedClick(sender:)), keyEquivalent: "")
             if updateItem == String(updateInterval) {
                 newItem.state = .on
             } else {
@@ -449,7 +444,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         let spinnersEffectSubMenu = NSMenu()
         let spinnersEffectMenu = NSMenuItem(title: localizedString("Spinners Effects"), action: nil, keyEquivalent: "")
-
+        
+        spinnersEffect = [
+            localizedString("Original")  : 1,
+            localizedString("White opage 80%") : 2,
+            localizedString("Black opage 80%") : 3,
+            localizedString("Automatic Dark/White mode") : 4
+        ]
+        
         for (_, value) in spinnersEffect.enumerated() {
             let newItem = NSMenuItem(title: value.key, action: #selector(changeSpinnerEffectClick(sender:)), keyEquivalent: "")
             if value.value == spinnersEffectSelected {

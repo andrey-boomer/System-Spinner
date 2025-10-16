@@ -278,16 +278,10 @@
     },
     "Second" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : " s."
-          }
-        },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : " сек."
+            "value" : "сек."
           }
         }
       }
