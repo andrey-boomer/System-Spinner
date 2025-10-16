@@ -178,7 +178,7 @@ class OSDUtils: NSObject {
             conn.remoteObjectInterface = NSXPCInterface(with: OSDUIHelperProtocol.self)
             conn.resume()
             let target = conn.remoteObjectProxyWithErrorHandler {_ in } as? OSDUIHelperProtocol
-            target!.showImage(0, onDisplayID: displayID, priority: 0x1f4, msecUntilFade: 1000, withText: nil)
+            target!.showImage(0, onDisplayID: displayID, priority: 0x1f4, msecUntilFade: 0, withText: nil)
             target!.showImage(osdImage.rawValue, onDisplayID: displayID, priority: 0x1f4, msecUntilFade: 1000, withText: String(Int(filledChiclets / 100)) + "%")
         }
     }
