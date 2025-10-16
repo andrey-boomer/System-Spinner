@@ -9,7 +9,7 @@ System Spinner provides macOS system information in status bar. Minimal, small a
 ## Features
 
 - Show CPU usage in system bar
-- Audio and Brightness contoll DDC over HDMI/DVI/USB-C (with standart keys)
+- Audio and brightness external monitor contol (over HDMI/DVI/USB-C with standart keys)
 - Top CPU/MEM process in popup window
 - Memory statistics performance
 - Network utilisation and ip adress
