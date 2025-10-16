@@ -9,11 +9,11 @@ System Spinner provides macOS system information in status bar. Minimal, small a
 ## Features
 
 - Show CPU usage in system bar
+- Audio and Brightness contoll DDC over HDMI/DVI/USB-C (with standart keys)
 - Top CPU/MEM process in popup window
 - Memory statistics performance
-- Network connection and ip adress
+- Network utilisation and ip adress
 - CMS Information for Cpu Temp and Fan
-- Audio and Brightness contoll DDC over HDMI/DVI/USB-C
 - Full MacOS 26 Tahoe Liquid Glass support
 - Spinner overlay effects
 - Localization (English, Russian)
