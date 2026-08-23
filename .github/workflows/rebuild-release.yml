@@ -2,8 +2,8 @@ name: Rebuild release dmg
 
 # Rebuilds the dmg of a release that is already published, using the current
 # state of the branch instead of the code the tag points at, and replaces the
-# asset in place. The release text is left alone — only the generated commit
-# list is rewritten, and only when asked for.
+# asset in place. The release text is left alone — only the link to the list
+# of changes is repointed at the rebuilt commit, and only when asked for.
 on:
   workflow_dispatch:
     inputs:
@@ -12,7 +12,7 @@ on:
         required: false
         default: ''
       update_notes:
-        description: 'Rewrite the commit list in the release notes'
+        description: 'Repoint the list of changes at the rebuilt commit'
         type: boolean
         default: false
 
@@ -105,31 +105,34 @@ jobs:
         run: |
           gh release upload "$TAG" "$ASSET" --clobber
 
-      - name: Rewrite the commit list
+      - name: Repoint the list of changes
         if: inputs.update_notes
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.release.outputs.tag }}
+          REPO_URL: ${{ github.server_url }}/${{ github.repository }}
         run: |
-          # Everything above the generated section was written by hand — it is
-          # kept verbatim and only the list below it is replaced.
-          marker="## What's Changed"
+          # Everything above the generated part was written by hand — it is kept
+          # verbatim. Below it goes a compare link instead of a list of commits,
+          # which GitHub renders as "<previous tag>...<commit>". Both the section
+          # produced by --generate-notes and a link left by an earlier run are
+          # cut off, so this can be repeated without piling lines up.
           gh release view "$TAG" --json body -q .body > body.md
-          awk -v marker="$marker" '$0 == marker { exit } { print }' body.md > notes.md
+          awk '
+            $0 == "## What'\''s Changed" { exit }
+            /^\*\*Full list of changes\*\*:/ { exit }
+            { print }
+          ' body.md | awk '
+            /^[[:space:]]*$/ { blank = blank $0 "\n"; next }
+            { printf "%s", blank; blank = ""; print }
+          ' > notes.md
 
-          previous=$(git describe --tags --abbrev=0 "$TAG^" 2>/dev/null || true)
-          if [ -n "$previous" ]; then
-            range="$previous..HEAD"
-          else
-            range="HEAD"
-          fi
+          # The dmg is built from the branch, not from the tag, so the range ends
+          # at the commit that was actually built.
+          sha=$(git rev-parse --short HEAD)
+          previous=$(git describe --tags --abbrev=0 "$TAG^" 2>/dev/null || echo "$TAG")
 
-          {
-            echo "$marker"
-            echo
-            git log --no-merges --pretty='* %s (%h)' "$range"
-            echo
-            echo "Built from ${GITHUB_SHA}."
-          } >> notes.md
+          echo >> notes.md
+          echo "**Full list of changes**: $REPO_URL/compare/$previous...$sha" >> notes.md
 
           gh release edit "$TAG" --notes-file notes.md
