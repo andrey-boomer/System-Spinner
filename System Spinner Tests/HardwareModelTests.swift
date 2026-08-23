@@ -50,13 +50,23 @@ struct HardwareModelTests {
     @Test("Every family has sensor keys")
     func sensorKeys() {
         for family in ChipFamily.allCases {
-            #expect(!SMCKeys.cpuTemperature(for: family).isEmpty, "\(family.rawValue) has no CPU keys")
+            #expect(!SMCKeys.keys(.temperature, for: family).isEmpty, "\(family.rawValue) has no CPU keys")
+            #expect(!SMCKeys.keys(.systemPower, for: family).isEmpty, "\(family.rawValue) has no power keys")
+            #expect(!SMCKeys.keys(.adapterPower, for: family).isEmpty, "\(family.rawValue) has no adapter keys")
+        }
+    }
+
+    @Test("The sensor table holds nothing but SMC keys")
+    func sensorTableIsWellFormed() {
+        for sensor in SMCKeys.all {
+            #expect(sensor.key.count == 4, "\(sensor.key) is not a four-character SMC key")
+            #expect(!sensor.platforms.isEmpty, "\(sensor.key) answers for no chip at all")
         }
     }
 
     @Test("Fan keys follow the number of fans", arguments: [0, 1, 2, 4])
     func fanKeys(count: Int) {
-        let keys = SMCKeys.fanSpeed(count: count)
+        let keys = SMCKeys.fanSpeed(count: count, for: .m3)
 
         #expect(keys.count == count)
         #expect(keys.allSatisfy { $0.count == 4 }, "SMC keys are always four characters")

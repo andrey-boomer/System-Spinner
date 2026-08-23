@@ -68,11 +68,6 @@ final class SMCService {
         }
     }
 
-    var fanCount: Int {
-        guard let count = optionalValue(forKey: "FNum") else { return 0 }
-        return max(0, Int(count))
-    }
-
     private func call(_ input: inout ParamStruct) throws -> ParamStruct {
         var output = ParamStruct()
         var outputSize = MemoryLayout<ParamStruct>.size

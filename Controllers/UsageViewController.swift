@@ -165,10 +165,12 @@ class UsageViewController: NSViewController {
 
     private func applySensors(_ sensors: SensorsSnapshot) {
         let power: String
-        if sensors.adapterPower > 0  {
-            power = localizedString("Power on adapter: \(sensors.systemPower) w")
+        if sensors.isOnBattery {
+            power = localizedString("Power on battery: \(sensors.power) w")
+        } else if sensors.isCharging {
+            power = localizedString("Charging on adapter: \(sensors.power) w")
         } else {
-            power = localizedString("Power on battery: \(sensors.batteryPower) w")
+            power = localizedString("Power on adapter: \(sensors.power) w")
         }
 
         if forcesFullRefresh || powerHistory != power {

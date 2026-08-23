@@ -35,7 +35,7 @@ struct MetricsSnapshotTests {
 
         #expect(sensors.cpuTemperature == 0)
         #expect(sensors.fanSpeeds.isEmpty)
-        #expect(sensors.systemPower == 0)
+        #expect(sensors.power == 0)
     }
 
     @Test("Total memory is a sane number")
