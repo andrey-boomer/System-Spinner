@@ -1,0 +1,135 @@
+name: Rebuild release dmg
+
+# Rebuilds the dmg of a release that is already published, using the current
+# state of the branch instead of the code the tag points at, and replaces the
+# asset in place. The release text is left alone — only the generated commit
+# list is rewritten, and only when asked for.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release to rebuild (empty — the latest one)'
+        required: false
+        default: ''
+      update_notes:
+        description: 'Rewrite the commit list in the release notes'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  rebuild:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Target release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          tag="$INPUT_TAG"
+          if [ -z "$tag" ]; then
+            tag=$(gh release view --json tagName -q .tagName)
+          fi
+
+          if ! gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release \"$tag\" not found" >&2
+            exit 1
+          fi
+
+          # The asset keeps the name it was published under, so that the
+          # download links in the release stay valid.
+          asset=$(gh release view "$tag" --json assets -q '.assets[].name' \
+                  | grep -i '\.dmg$' | head -1)
+          if [ -z "$asset" ]; then
+            asset="System-Spinner-$tag.dmg"
+            echo "No dmg in \"$tag\" — the rebuilt one will be added as $asset"
+          fi
+
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "asset=$asset" >> "$GITHUB_OUTPUT"
+          echo "Rebuilding $asset in release $tag from ${GITHUB_SHA:0:7}"
+
+      # Failing tests stop the job, so a broken build never replaces a good dmg.
+      - name: Test
+        run: |
+          xcodebuild -project "System Spinner.xcodeproj" \
+                     -scheme "System Spinner" \
+                     -configuration Debug \
+                     -derivedDataPath build-tests \
+                     CODE_SIGNING_ALLOWED=NO \
+                     test
+
+      - name: Build and export the app
+        run: |
+          xcodebuild -project "System Spinner.xcodeproj" \
+                     -scheme "System Spinner" \
+                     -configuration Release \
+                     -archivePath "build/System Spinner.xcarchive" \
+                     archive
+
+          xcodebuild -exportArchive \
+                     -archivePath "build/System Spinner.xcarchive" \
+                     -exportPath build \
+                     -exportOptionsPlist ExportOptions.plist
+
+      - name: Package dmg
+        env:
+          ASSET: ${{ steps.release.outputs.asset }}
+        run: |
+          # create-dmg renders the window background and icon layout
+          brew list graphicsmagick >/dev/null 2>&1 || brew install graphicsmagick
+          brew list imagemagick >/dev/null 2>&1 || brew install imagemagick
+
+          cd build
+          npx --yes create-dmg "System Spinner.app" . --overwrite --no-code-sign
+
+          # create-dmg names the file after the app and its MARKETING_VERSION,
+          # which need not match the tag any more, so the file is picked up by
+          # extension and renamed to whatever the release already serves.
+          built=$(ls -t *.dmg | head -1)
+          mv "$built" "../$ASSET"
+
+      - name: Replace the asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag }}
+          ASSET: ${{ steps.release.outputs.asset }}
+        run: |
+          gh release upload "$TAG" "$ASSET" --clobber
+
+      - name: Rewrite the commit list
+        if: inputs.update_notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          # Everything above the generated section was written by hand — it is
+          # kept verbatim and only the list below it is replaced.
+          marker="## What's Changed"
+          gh release view "$TAG" --json body -q .body > body.md
+          awk -v marker="$marker" '$0 == marker { exit } { print }' body.md > notes.md
+
+          previous=$(git describe --tags --abbrev=0 "$TAG^" 2>/dev/null || true)
+          if [ -n "$previous" ]; then
+            range="$previous..HEAD"
+          else
+            range="HEAD"
+          fi
+
+          {
+            echo "$marker"
+            echo
+            git log --no-merges --pretty='* %s (%h)' "$range"
+            echo
+            echo "Built from ${GITHUB_SHA}."
+          } >> notes.md
+
+          gh release edit "$TAG" --notes-file notes.md
