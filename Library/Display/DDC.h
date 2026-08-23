@@ -1,8 +1,6 @@
 //  Copyright © MonitorControl. JoniVR, theOneyouseek, waydabber, AndreyLysikov and others
 //  SPDX-License-Identifier: Apache-2.0
 
-#pragma once
-
 #import <Foundation/Foundation.h>
 #import <IOKit/i2c/IOI2CInterface.h>
 #import <CoreGraphics/CoreGraphics.h>
