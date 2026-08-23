@@ -12,9 +12,11 @@ final class StatusItemController: NSObject {
     private let metrics = MetricsService.shared
     private let preferences = Preferences.shared
 
+    private let usageController = UsageViewController.freshController()
+
     private var metricsObserver: UUID?
     private var lastUsage: Double = 0
-    private var clickMonitor: Any?
+    private var clickMonitors: [Any] = []
 
     func start() {
         if let button = statusItem.button {
@@ -25,7 +27,7 @@ final class StatusItemController: NSObject {
             button.font = NSFont.monospacedSystemFont(ofSize: 11, weight: .medium)
         }
 
-        popover.contentViewController = UsageViewController.freshController()
+        popover.contentViewController = usageController
 
         animator.onFrame = { [weak self] image in
             self?.statusItem.button?.image = image
@@ -40,9 +42,6 @@ final class StatusItemController: NSObject {
         DisplayCoordinator.shared.start()
 
         observeWorkspace()
-        clickMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
-            self?.closePopover()
-        }
 
         reloadSpinner()
         resume()
@@ -50,10 +49,7 @@ final class StatusItemController: NSObject {
 
     func stop() {
         pause()
-        if let clickMonitor {
-            NSEvent.removeMonitor(clickMonitor)
-        }
-        clickMonitor = nil
+        stopClickMonitoring()
     }
     
     @objc private func resume() {
@@ -110,11 +106,12 @@ final class StatusItemController: NSObject {
             if popover.isShown {
                 closePopover()
             } else {
-                statusItem.menu = nil
                 showPopover()
             }
         } else {
-            statusItem.menu = menuController.menu
+            let menu = menuController.menu
+            menu.delegate = self
+            statusItem.menu = menu
             statusItem.button?.performClick(nil)
         }
     }
@@ -124,13 +121,51 @@ final class StatusItemController: NSObject {
         popover.animates = preferences.usesPopUpAnimation
         button.window?.layoutIfNeeded()
         popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+        startClickMonitoring()
     }
 
     func closePopover() {
-        statusItem.menu = nil
+        usageController.closeDetail()
         if popover.isShown {
             popover.performClose(nil)
         }
+        stopClickMonitoring()
+    }
+
+    private func startClickMonitoring() {
+        guard clickMonitors.isEmpty else { return }
+        let clicks: NSEvent.EventTypeMask = [.leftMouseDown, .rightMouseDown]
+
+        let global = NSEvent.addGlobalMonitorForEvents(matching: clicks, handler: { [weak self] event in
+            self?.dismiss(for: event)
+        })
+        let local = NSEvent.addLocalMonitorForEvents(matching: clicks, handler: { [weak self] event in
+            self?.dismiss(for: event)
+            return event
+        })
+        clickMonitors = [global, local].compactMap { $0 }
+    }
+
+    private func stopClickMonitoring() {
+        clickMonitors.forEach(NSEvent.removeMonitor)
+        clickMonitors.removeAll()
+    }
+
+    private func dismiss(for event: NSEvent) {
+        guard popover.isShown else { return }
+        guard let window = event.window else {
+            closePopover()
+            return
+        }
+
+        if window === statusItem.button?.window { return }
+        if window === usageController.detailWindow { return }
+
+        if window === usageController.view.window {
+            usageController.dismissDetail(clickedAt: event.locationInWindow)
+            return
+        }
+        closePopover()
     }
 
     private func observeWorkspace() {
@@ -139,6 +174,12 @@ final class StatusItemController: NSObject {
         center.addObserver(self, selector: #selector(resume), name: NSWorkspace.screensDidWakeNotification, object: nil)
         center.addObserver(self, selector: #selector(pause), name: NSWorkspace.willSleepNotification, object: nil)
         center.addObserver(self, selector: #selector(pause), name: NSWorkspace.screensDidSleepNotification, object: nil)
+    }
+}
+
+extension StatusItemController: NSMenuDelegate {
+    func menuDidClose(_ menu: NSMenu) {
+        statusItem.menu = nil
     }
 }
 

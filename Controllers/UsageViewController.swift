@@ -78,7 +78,7 @@ class UsageViewController: NSViewController {
         let hostingController = NSHostingController(rootView: ChartContentView(chartItems: dataModel))
         hostingController.preferredContentSize = NSSize(width: 420, height: 400)
         popupChart.contentViewController = hostingController
-        popupChart.behavior = .transient
+        popupChart.behavior = .applicationDefined
     }
 
     override func viewDidAppear() {
@@ -114,6 +114,8 @@ class UsageViewController: NSViewController {
     }
 
     override func viewWillDisappear() {
+        closeDetail()
+
         let token = metricsObserver
         metricsObserver = nil
 
@@ -217,10 +219,30 @@ class UsageViewController: NSViewController {
         }
     }
 
+    var detailWindow: NSWindow? {
+        popupChart.isShown ? popupChart.contentViewController?.view.window : nil
+    }
+
+    func closeDetail() {
+        if popupChart.isShown {
+            popupChart.performClose(nil)
+        }
+    }
+
+    func dismissDetail(clickedAt point: NSPoint) {
+        guard popupChart.isShown else { return }
+
+        if let hit = view.window?.contentView?.hitTest(point),
+           hit.isDescendant(of: cpuChartPopupButton) || hit.isDescendant(of: memChartPopupButton) {
+            return
+        }
+        closeDetail()
+    }
 
     private func showChart(from sender: NSButton) {
         if popupChart.isShown {
             popupChart.performClose(sender)
+            if lastClickButton === sender { return }
         }
         lastClickButton = sender
         updatePopupData()
