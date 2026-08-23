@@ -1744,7 +1744,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Питание от адаптера %lld Вт"
+            "value" : "Работа от адаптера %lld Вт"
           }
         },
         "zh-Hans" : {
@@ -1798,7 +1798,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Питание от батареи %lld Вт"
+            "value" : "Работа от батареи %lld Вт"
           }
         },
         "zh-Hans" : {
@@ -1968,6 +1968,58 @@
         }
       }
     },
+    "Show external ip address" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إظهار عنوان IP الخارجي"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Externe IP-Adresse anzeigen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show external ip address"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afficher l’adresse IP externe"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra indirizzo IP esterno"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "外部IPアドレスを表示"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показывать внешний IP-адрес"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示外部 IP 地址"
+          }
+        }
+      }
+    },
     "Show load in menu" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2017,58 +2069,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "在菜单栏显示负载"
-          }
-        }
-      }
-    },
-    "Show external ip address" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "إظهار عنوان IP الخارجي"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Externe IP-Adresse anzeigen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Show external ip address"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Afficher l’adresse IP externe"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostra indirizzo IP esterno"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "外部IPアドレスを表示"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Показывать внешний IP-адрес"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "显示外部 IP 地址"
           }
         }
       }
