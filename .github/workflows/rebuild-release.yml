@@ -3,7 +3,7 @@ name: Rebuild release dmg
 # Rebuilds the dmg of a release that is already published, using the current
 # state of the branch instead of the code the tag points at, and replaces the
 # asset in place. The release text is left alone — only the link to the list
-# of changes is repointed at the rebuilt commit, and only when asked for.
+# of changes is repointed at the commit that was actually built.
 on:
   workflow_dispatch:
     inputs:
@@ -11,10 +11,6 @@ on:
         description: 'Release to rebuild (empty — the latest one)'
         required: false
         default: ''
-      update_notes:
-        description: 'Repoint the list of changes at the rebuilt commit'
-        type: boolean
-        default: false
 
 permissions:
   contents: write
@@ -106,7 +102,6 @@ jobs:
           gh release upload "$TAG" "$ASSET" --clobber
 
       - name: Repoint the list of changes
-        if: inputs.update_notes
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.release.outputs.tag }}
@@ -124,7 +119,7 @@ jobs:
             { print }
           ' body.md | awk '
             /^[[:space:]]*$/ { blank = blank $0 "\n"; next }
-            { printf "%s", blank; blank = ""; print }
+            { if (started) printf "%s", blank; blank = ""; started = 1; print }
           ' > notes.md
 
           # The dmg is built from the branch, not from the tag, so the range ends
@@ -132,7 +127,7 @@ jobs:
           sha=$(git rev-parse --short HEAD)
           previous=$(git describe --tags --abbrev=0 "$TAG^" 2>/dev/null || echo "$TAG")
 
-          echo >> notes.md
+          if [ -s notes.md ]; then echo >> notes.md; fi
           echo "**Full list of changes**: $REPO_URL/compare/$previous...$sha" >> notes.md
 
           gh release edit "$TAG" --notes-file notes.md

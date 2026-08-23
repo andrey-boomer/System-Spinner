@@ -56,14 +56,18 @@ jobs:
             exit 1
           fi
 
-          latest=$(gh release view --json tagName -q .tagName 2>/dev/null || echo "0.0.0")
+          # Empty rather than 0.0.0 when nothing is published yet: the notes below
+          # tell "no previous release" from "a release numbered 0.0.0".
+          latest=$(gh release view --json tagName -q .tagName 2>/dev/null || true)
 
           echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "Project: $version, latest release: $latest"
+          echo "previous=$latest" >> "$GITHUB_OUTPUT"
+          echo "Project: $version, latest release: ${latest:-none}"
 
           # publish only when the version is strictly greater than the released one
-          highest=$(printf '%s\n%s\n' "$latest" "$version" | sort -V | tail -1)
-          if [ "$version" != "$latest" ] && [ "$highest" = "$version" ]; then
+          released="${latest:-0.0.0}"
+          highest=$(printf '%s\n%s\n' "$released" "$version" | sort -V | tail -1)
+          if [ "$version" != "$released" ] && [ "$highest" = "$version" ]; then
             echo "release=yes" >> "$GITHUB_OUTPUT"
           else
             echo "release=no" >> "$GITHUB_OUTPUT"
@@ -100,18 +104,32 @@ jobs:
 
       - name: Release notes
         if: steps.version.outputs.release == 'yes'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          PREVIOUS: ${{ steps.version.outputs.previous }}
+          REPO_URL: ${{ github.server_url }}/${{ github.repository }}
         run: |
-          version="${{ steps.version.outputs.version }}"
-
-          # section for this version from Changelog.md; empty when there is none
-          awk -v v="## $version" '
+          # section for this version from Changelog.md, without the blank lines
+          # that separate it from the next one; empty when there is no section
+          awk -v v="## $VERSION" '
             $0 == v { found = 1; next }
             /^## / { found = 0 }
             found { print }
-          ' Changelog.md > notes.md || true
+          ' Changelog.md | awk '
+            /^[[:space:]]*$/ { blank = blank $0 "\n"; next }
+            { if (started) printf "%s", blank; blank = ""; started = 1; print }
+          ' > notes.md
 
           if [ ! -s notes.md ]; then
-            echo "No \"## $version\" section in Changelog.md — notes will contain the generated list only"
+            echo "No \"## $VERSION\" section in Changelog.md — the notes will be the link alone"
+          fi
+
+          # A link instead of a list of commits: GitHub renders it as
+          # "<previous tag>...<tag>", and the tag resolves once the release is
+          # created below. A first release has nothing to compare against.
+          if [ -n "$PREVIOUS" ]; then
+            if [ -s notes.md ]; then echo >> notes.md; fi
+            echo "**Full list of changes**: $REPO_URL/compare/$PREVIOUS...$VERSION" >> notes.md
           fi
 
       - name: Publish
@@ -122,5 +140,4 @@ jobs:
           version="${{ steps.version.outputs.version }}"
           gh release create "$version" "System-Spinner-$version.dmg" \
              --title "Version $version" \
-             --notes-file notes.md \
-             --generate-notes
+             --notes-file notes.md
