@@ -40,7 +40,8 @@ final class DisplayCoordinator {
 
             if AccessibilityPermission.check() {
                 MediaKeyMonitor.shared.start()
-                KeyboardBacklight.shared.restoreSavedBrightness()
+                KeyboardBacklight.shared.syncBrightness()
+                SmoothScroll.shared.setEnabled(Preferences.shared.usesSmoothScroll)
             }
 
             UpdateChecker.shared.check()

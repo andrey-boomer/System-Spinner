@@ -2,6 +2,7 @@
 //  SPDX-License-Identifier: Apache-2.0
 
 import AppKit
+import IOKit
 
 @MainActor
 final class KeyboardBacklight {
@@ -21,7 +22,7 @@ final class KeyboardBacklight {
     private let client: NSObject?
     private let osd = OSDController.shared
     private let preferences = Preferences.shared
-    private var didRestoreBrightness = false
+    private var lastKeyboardID: UInt64?
 
     private init() {
         dlopen(Self.frameworkPath, RTLD_LAZY)
@@ -53,17 +54,30 @@ final class KeyboardBacklight {
 
     @discardableResult
     public func setBrightness(_ value: Float) -> Bool {
-        guard applyBrightness(value) else { return false }
-
-        preferences.keyboardBacklight = value
+        guard let keyboardID, applyBrightness(value) else { return false }
+        preferences.setKeyboardBacklight(value, forKeyboard: keyboardID)
         return true
     }
 
-    public func restoreSavedBrightness() {
-        guard !didRestoreBrightness else { return }
-        didRestoreBrightness = true
+    public func syncBrightness() {
+        let current = keyboardID
+        defer { lastKeyboardID = current }
 
-        guard preferences.usesKeyboardBacklightKeys, let saved = preferences.keyboardBacklight else { return }
+        guard let current else { return }
+
+        guard current != lastKeyboardID else {
+            let level = brightness
+            if level > 0 {
+                preferences.setKeyboardBacklight(level, forKeyboard: current)
+            }
+            return
+        }
+
+        guard preferences.usesKeyboardBacklightKeys,
+              let saved = preferences.keyboardBacklight(forKeyboard: current)
+        else {
+            return
+        }
 
         applyBrightness(saved)
     }
@@ -108,13 +122,30 @@ final class KeyboardBacklight {
             return nil
         }
 
-        if let method = client.method(for: Self.isBuiltInSelector) {
-            let isBuiltIn = unsafeBitCast(method, to: BoolForKeyboard.self)
-            if let builtIn = identifiers.first(where: { isBuiltIn(client, Self.isBuiltInSelector, $0.uint64Value) }) {
-                return builtIn.uint64Value
-            }
+        let reachable = Self.isLidClosed
+            ? identifiers.filter { !isBuiltIn($0.uint64Value) }
+            : identifiers
+
+        if let builtIn = reachable.first(where: { isBuiltIn($0.uint64Value) }) {
+            return builtIn.uint64Value
         }
 
-        return identifiers.first?.uint64Value
+        return reachable.first?.uint64Value
+    }
+
+    private func isBuiltIn(_ identifier: UInt64) -> Bool {
+        guard let client, let method = client.method(for: Self.isBuiltInSelector) else { return false }
+
+        let check = unsafeBitCast(method, to: BoolForKeyboard.self)
+        return check(client, Self.isBuiltInSelector, identifier)
+    }
+
+    private static var isLidClosed: Bool {
+        let root = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("IOPMrootDomain"))
+        guard root != IO_OBJECT_NULL else { return false }
+        defer { IOObjectRelease(root) }
+
+        let state = IORegistryEntryCreateCFProperty(root, "AppleClamshellState" as CFString, kCFAllocatorDefault, 0)
+        return (state?.takeRetainedValue() as? Bool) ?? false
     }
 }

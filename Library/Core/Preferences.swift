@@ -74,6 +74,9 @@ final class Preferences: @unchecked Sendable {
     @Stored("keyboardBacklightKeys", false)
     var usesKeyboardBacklightKeys: Bool
 
+    @Stored("smoothMouseScroll", false)
+    var usesSmoothScroll: Bool
+
     @Stored("lastVersionCheckTime", 0.0)
     private var lastVersionCheckTime: TimeInterval
 
@@ -90,9 +93,13 @@ final class Preferences: @unchecked Sendable {
         UserDefaults.standard.set(value, forKey: "brightness." + name)
     }
 
-    var keyboardBacklight: Float? {
-        get { UserDefaults.standard.object(forKey: "keyboardBacklight") as? Float }
-        set { UserDefaults.standard.set(newValue, forKey: "keyboardBacklight") }
+    func keyboardBacklight(forKeyboard identifier: UInt64) -> Float? {
+        UserDefaults.standard.object(forKey: "keyboardBacklight.\(identifier)") as? Float
+            ?? UserDefaults.standard.object(forKey: "keyboardBacklight") as? Float
+    }
+
+    func setKeyboardBacklight(_ value: Float, forKeyboard identifier: UInt64) {
+        UserDefaults.standard.set(value, forKey: "keyboardBacklight.\(identifier)")
     }
 
     func volume(forDisplay name: String) -> Float? {

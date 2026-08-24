@@ -16,17 +16,13 @@ enum LoginItemService {
     static var isEnabled: Bool {
         get { SMAppService.mainApp.status == .enabled }
         set {
-            do {
-                if newValue {
-                    if SMAppService.mainApp.status == .enabled {
-                        try? SMAppService.mainApp.unregister()
-                    }
-                    try SMAppService.mainApp.register()
-                } else {
-                    try SMAppService.mainApp.unregister()
+            if newValue {
+                if SMAppService.mainApp.status == .enabled {
+                    try? SMAppService.mainApp.unregister()
                 }
-            } catch {
-                print("Can't use SMAppService: \(error)")
+                try? SMAppService.mainApp.register()
+            } else {
+                try? SMAppService.mainApp.unregister()
             }
         }
     }
@@ -42,6 +38,8 @@ final class AppMenuController: NSObject {
     private var displaysItem: NSMenuItem?
     private var effectsItem: NSMenuItem?
     private var rotationItem: NSMenuItem?
+    private var backlightItem: NSMenuItem?
+    private var smoothScrollItem: NSMenuItem?
 
     private let updateIntervals: [Double] = [0.5, 1.0, 1.5, 2.0]
     private let adjustmentSteps: [Int] = [8, 16, 24, 32]
@@ -82,25 +80,36 @@ final class AppMenuController: NSObject {
                           action: #selector(toggleCustomOSD),
                           state: preferences.alwaysUsesCustomOSD))
 
-        menu.addItem(item(localizedString("Keyboard backlight on F5/F6"),
-                          symbol: "keyboard",
-                          action: KeyboardBacklight.shared.isAvailable ? #selector(toggleKeyboardBacklightKeys) : nil,
-                          state: preferences.usesKeyboardBacklightKeys))
+        menu.addItem(item(localizedString("Use popup animation"),
+                          symbol: "lasso.badge.sparkles",
+                          action: #selector(togglePopUpAnimation),
+                          state: preferences.usesPopUpAnimation))
+
+        menu.addItem(.separator())
+
+        let backlight = item(localizedString("Keyboard backlight on F5/F6"),
+                             symbol: "keyboard",
+                             action: #selector(toggleKeyboardBacklightKeys),
+                             state: preferences.usesKeyboardBacklightKeys)
+        menu.addItem(backlight)
+        backlightItem = backlight
 
         menu.addItem(item(localizedString("Use system language"),
                           symbol: "translate",
                           action: #selector(toggleLocalization),
                           state: preferences.usesSystemLanguage))
 
-        menu.addItem(item(localizedString("Use popup animation"),
-                          symbol: "lasso.badge.sparkles",
-                          action: #selector(togglePopUpAnimation),
-                          state: preferences.usesPopUpAnimation))
-
         menu.addItem(item(localizedString("Show external ip address"),
                           symbol: "globe",
                           action: #selector(toggleExternalAddress),
                           state: preferences.showsExternalAddress))
+
+        let smoothScroll = item(localizedString("Smooth mouse scroll"),
+                                symbol: "computermouse",
+                                action: #selector(toggleSmoothScroll),
+                                state: preferences.usesSmoothScroll)
+        menu.addItem(smoothScroll)
+        smoothScrollItem = smoothScroll
 
         menu.addItem(.separator())
 
@@ -138,6 +147,7 @@ final class AppMenuController: NSObject {
 
         self.menu = menu
         refreshSpinnerState()
+        refreshDeviceItems()
     }
 
     func updateDisplays(_ displays: [Display]) {
@@ -245,6 +255,17 @@ final class AppMenuController: NSObject {
     @objc private func toggleExternalAddress(sender: NSMenuItem) {
         preferences.showsExternalAddress.toggle()
         sender.state = preferences.showsExternalAddress ? .on : .off
+    }
+
+    @objc private func toggleSmoothScroll(sender: NSMenuItem) {
+        preferences.usesSmoothScroll.toggle()
+        sender.state = preferences.usesSmoothScroll ? .on : .off
+        SmoothScroll.shared.setEnabled(preferences.usesSmoothScroll)
+    }
+
+    func refreshDeviceItems() {
+        backlightItem?.isHidden = !KeyboardBacklight.shared.isAvailable
+        smoothScrollItem?.isHidden = !PointingDevices.hasThirdPartyMouse
     }
 
     @objc private func toggleRotation(sender: NSMenuItem) {
