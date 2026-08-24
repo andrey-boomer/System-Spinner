@@ -1,5 +1,12 @@
 # Changelog
 
+## 5.1.2
+
+- Add an option for SmoothScroll (like MOS, but self-implemented) for other mice (non-Apple).
+- Check switches for applicability now; if they are not applicable, they are neither shown nor applied.
+- Exclude localhost IPv4/IPv6 addresses.
+- Fix power usage for Air.
+
 ## 5.1.1
 
 - Fix power text in Russian
