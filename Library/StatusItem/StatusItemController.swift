@@ -82,13 +82,14 @@ final class StatusItemController: NSObject {
     }
 
     private func apply(_ snapshot: MetricsSnapshot) {
+        lastUsage = max(snapshot.cpuUsage, snapshot.gpuUsage)
+        
         if preferences.showsCPUInMenuBar {
-            statusItem.button?.title = String(format: "%2d%%", Int(snapshot.cpuUsage))
+            statusItem.button?.title = String(format: "%2d%%", Int(lastUsage))
         } else if statusItem.button?.title != "" {
             statusItem.button?.title = ""
         }
-
-        lastUsage = max(snapshot.cpuUsage, snapshot.gpuUsage)
+        
         animator.updateSpeed(usage: lastUsage)
     }
 
@@ -178,6 +179,10 @@ final class StatusItemController: NSObject {
 }
 
 extension StatusItemController: NSMenuDelegate {
+    func menuWillOpen(_ menu: NSMenu) {
+        menuController.refreshDeviceItems()
+    }
+
     func menuDidClose(_ menu: NSMenu) {
         statusItem.menu = nil
     }
