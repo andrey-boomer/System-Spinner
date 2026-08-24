@@ -100,7 +100,8 @@ final class NetworkMonitor {
             }
 
             guard (flags & (IFF_UP | IFF_RUNNING | IFF_LOOPBACK)) == (IFF_UP | IFF_RUNNING),
-                  family == UInt8(AF_INET) || family == UInt8(AF_INET6) else { continue }
+                  family == UInt8(AF_INET) || family == UInt8(AF_INET6),
+                  Self.isRoutable(address) else { continue }
 
             var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
             guard getnameinfo(address, socklen_t(address.pointee.sa_len),
@@ -116,6 +117,34 @@ final class NetworkMonitor {
         }
 
         return (totalIn, totalOut, active)
+    }
+
+    private static func isRoutable(_ address: UnsafeMutablePointer<sockaddr>) -> Bool {
+        switch Int32(address.pointee.sa_family) {
+        case AF_INET:
+            let value = address.withMemoryRebound(to: sockaddr_in.self, capacity: 1) {
+                UInt32(bigEndian: $0.pointee.sin_addr.s_addr)
+            }
+            return isRoutable(ipv4: value)
+        case AF_INET6:
+            let bytes = address.withMemoryRebound(to: sockaddr_in6.self, capacity: 1) { pointer in
+                withUnsafeBytes(of: pointer.pointee.sin6_addr) { Array($0) }
+            }
+            return isRoutable(ipv6: bytes)
+        default:
+            return false
+        }
+    }
+
+    static func isRoutable(ipv4 address: UInt32) -> Bool {
+        address >> 24 != 127 && address >> 16 != 0xA9FE
+    }
+
+    static func isRoutable(ipv6 address: [UInt8]) -> Bool {
+        guard address.count == 16 else { return false }
+        guard !(address[0] == 0xFE && address[1] & 0xC0 == 0x80) else { return false }
+
+        return address != Array(repeating: 0, count: 15) + [1]
     }
 
     static func parseExternalAddress(from data: Data) -> String? {
