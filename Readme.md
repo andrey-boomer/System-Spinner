@@ -42,4 +42,4 @@ Written in Swift 6, Apple Silicon only, for macOS 26 Tahoe
 Thanks for language translate:
 - Japanese by [@1024jp](https://github.com/1024jp)
 
-Based on: [Menubar_runcat](https://github.com/Kyome22/menubar_runcat), [Stats](https://github.com/exelban/stats), [MonitorControl](https://github.com/MonitorControl/MonitorControl), [Better-osd](https://github.com/zmlabs/better-osd)
+Based on: [Menubar_runcat](https://github.com/Kyome22/menubar_runcat), [Stats](https://github.com/exelban/stats), [MonitorControl](https://github.com/MonitorControl/MonitorControl), [Better-osd](https://github.com/zmlabs/better-osd), [Mos](https://github.com/Caldis/Mos)
