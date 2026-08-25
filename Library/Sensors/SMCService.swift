@@ -1,6 +1,5 @@
-//  Copyright © Serhiy Mytrovtsiy, AndreyLysikov
+//  Copyright © AndreyLysikov
 //  SPDX-License-Identifier: Apache-2.0
-//  Основано на https://github.com/exelban/stats
 
 import Foundation
 import IOKit
@@ -19,6 +18,7 @@ final class SMCService {
     private static let kernelIndexSMC: UInt32 = 2
     private static let cmdReadBytes: UInt8 = 5
     private static let cmdReadKeyInfo: UInt8 = 9
+    private static let cmdKeyFromIndex: UInt8 = 8
 
     init() throws {
         guard let matching = IOServiceMatching("AppleSMC") else {
@@ -59,6 +59,24 @@ final class SMCService {
 
     func optionalValue(forKey key: String) -> Double? {
         try? value(forKey: key)
+    }
+
+    func allKeys() -> [String] {
+        guard let count = optionalValue(forKey: "#KEY").map({ Int($0) }), count > 0 else { return [] }
+
+        var keys: [String] = []
+        keys.reserveCapacity(count)
+
+        for index in 0 ..< count {
+            var input = ParamStruct()
+            input.data8 = Self.cmdKeyFromIndex
+            input.data32 = UInt32(index)
+            guard let output = try? call(&input) else { continue }
+
+            let key = output.key.stringValue
+            if key.count == 4 { keys.append(key) }
+        }
+        return keys
     }
 
     func readableKeys(among keys: [String]) -> [String] {

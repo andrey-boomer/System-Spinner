@@ -103,7 +103,7 @@ actor MetricsService {
     private init() {
         let service = SensorService()
         sensors = service
-        sensorsAvailable = service.isAvailable
+        sensorsAvailable = service.hasTemperature
         hasFans = service.hasFans
     }
 
