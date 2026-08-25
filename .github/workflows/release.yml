@@ -102,6 +102,20 @@ jobs:
           # create-dmg names the file after the app and its version
           mv "System Spinner $version.dmg" "../System-Spinner-$version.dmg"
 
+      - name: Package the diagnostic tools
+        if: steps.version.outputs.release == 'yes'
+        run: |
+          # Built here rather than taken from the repository, so the binary in a
+          # release comes from the same checkout as the app beside it.
+          swiftc -O -o Scripts/system-probe Scripts/system-probe.swift
+
+          # Flat on purpose: the launcher looks for the probe next to itself.
+          # The source goes along because the binary is unsigned, and anyone
+          # asked to run one of those should be able to see what it does and
+          # build it again.
+          cd Scripts
+          zip -j ../system-diagnostic.zip system-probe run-probe.sh system-probe.swift
+
       - name: Release notes
         if: steps.version.outputs.release == 'yes'
         env:
@@ -138,6 +152,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           version="${{ steps.version.outputs.version }}"
-          gh release create "$version" "System-Spinner-$version.dmg" \
+          gh release create "$version" "System-Spinner-$version.dmg" system-diagnostic.zip \
              --title "Version $version" \
              --notes-file notes.md

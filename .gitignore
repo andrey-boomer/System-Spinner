@@ -17,3 +17,7 @@ xcuserdata/
 *.ipa
 *.dSYM
 *.dSYM.zip
+system-diagnostic.zip
+
+# Diagnostic tables, Scripts/system-probe's among them
+*.tsv

@@ -16,6 +16,7 @@ This is the macOS version, if you are looking for Windows go to [System Spinner 
 - Animated and static spinners, with overlay effects
 - Audio and brightness control for external monitors (over HDMI/DVI/USB-C with the standard media keys)
 - Keyboard backlight control on F5/F6
+- Smooth scrolling for non-Apple mice (a wheel scrolls by whole lines, this glides)
 - Custom OSD for macOS Tahoe for volume and brightness control
 - Custom adjustment steps (more accurate volume and brightness control)
 - Top CPU/MEM processes in popup window
@@ -38,6 +39,14 @@ This is the macOS version, if you are looking for Windows go to [System Spinner 
 ## Tech
 Written in Swift 6, Apple Silicon only, for macOS 26 Tahoe
 
+## Troubleshooting
+
+If for some reason you don't see the temperature/battery and fan sensors, please run the diagnostics from the archive in the release, `system-diagnostic.zip`.
+Unzip it to any folder and run it in a terminal:
+
+    bash run-probe.sh
+
+It writes `probe-<model>.tsv` — please attach that file to an [issue](https://github.com/andrey-lysikov/System-Spinner/issues).
 
 Thanks for language translate:
 - Japanese by [@1024jp](https://github.com/1024jp)

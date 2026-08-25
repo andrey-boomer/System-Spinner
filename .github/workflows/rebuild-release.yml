@@ -93,13 +93,28 @@ jobs:
           built=$(ls -t *.dmg | head -1)
           mv "$built" "../$ASSET"
 
-      - name: Replace the asset
+      - name: Package the diagnostic tools
+        run: |
+          # Rebuilt along with the dmg: the two are published together and a
+          # release should not end up with one of them from another commit.
+          swiftc -O -o Scripts/system-probe Scripts/system-probe.swift
+
+          # Flat on purpose: the launcher looks for the probe next to itself.
+          # The source goes along because the binary is unsigned, and anyone
+          # asked to run one of those should be able to see what it does and
+          # build it again.
+          cd Scripts
+          zip -j ../system-diagnostic.zip system-probe run-probe.sh system-probe.swift
+
+      - name: Replace the assets
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.release.outputs.tag }}
           ASSET: ${{ steps.release.outputs.asset }}
         run: |
-          gh release upload "$TAG" "$ASSET" --clobber
+          # A release published before the diagnostics existed has no zip to
+          # replace, and upload simply adds one.
+          gh release upload "$TAG" "$ASSET" system-diagnostic.zip --clobber
 
       - name: Repoint the list of changes
         env:
