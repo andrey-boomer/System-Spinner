@@ -379,25 +379,25 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lädt über Netzteil %lld w"
+            "value" : "Lädt %lld w"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Charging on adapter: %lld w"
+            "value" : "Charging %lld w"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "En charge sur adaptateur %lld w"
+            "value" : "En charge %lld w"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "In carica da alimentatore %lld w"
+            "value" : "In carica %lld w"
           }
         },
         "ja" : {
@@ -409,7 +409,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Зарядка от адаптера %lld Вт"
+            "value" : "Зарядка %lld Вт"
           }
         },
         "zh-Hans" : {

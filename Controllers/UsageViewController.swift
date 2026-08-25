@@ -163,12 +163,26 @@ class UsageViewController: NSViewController {
         forcesFullRefresh = false
     }
 
+    private static let temperatureFormat: MeasurementFormatter = {
+        let formatter = MeasurementFormatter()
+        formatter.unitOptions = .naturalScale
+        formatter.numberFormatter.maximumFractionDigits = 0
+        return formatter
+    }()
+
+    private static func temperature(_ celsius: Double) -> String {
+        temperatureFormat.string(from: Measurement(value: celsius, unit: UnitTemperature.celsius))
+    }
+
     private func applySensors(_ sensors: SensorsSnapshot) {
         let power: String
         if sensors.isOnBattery {
             power = localizedString("Power on battery: \(sensors.power) w")
         } else if sensors.isCharging {
-            power = localizedString("Charging on adapter: \(sensors.power) w")
+            let battery = sensors.batteryTemperature > 0
+                ? " (" + Self.temperature(sensors.batteryTemperature) + ")"
+                : ""
+            power = localizedString("Charging on adapter: \(sensors.power) w") + battery
         } else {
             power = localizedString("Power on adapter: \(sensors.power) w")
         }
@@ -190,7 +204,7 @@ class UsageViewController: NSViewController {
         }
 
         if metrics.sensorsAvailable, forcesFullRefresh || round(tempLevel.value) != round(sensors.cpuTemperature) {
-            cpuTempLabel.stringValue = localizedString("CPU Temp") + " " + String(Int(sensors.cpuTemperature)) + "°С"
+            cpuTempLabel.stringValue = localizedString("CPU Temp") + " " + Self.temperature(sensors.cpuTemperature)
             tempLevel.value = sensors.cpuTemperature
         }
     }
