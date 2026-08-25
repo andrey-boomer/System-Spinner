@@ -28,14 +28,14 @@ final class OSDWindow: NSPanel {
         )
 
         isFloatingPanel = true
-        level = .statusBar
+        level = .screenSaver
         isOpaque = false
         backgroundColor = .clear
         hasShadow = false
         titleVisibility = .hidden
         titlebarAppearsTransparent = true
         isMovableByWindowBackground = false
-        collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+        collectionBehavior = [.canJoinAllSpaces, .stationary, .fullScreenAuxiliary]
         hidesOnDeactivate = false
         ignoresMouseEvents = true
 
