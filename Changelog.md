@@ -1,5 +1,12 @@
 # Changelog
 
+## 5.5.0
+
+- Scan SMC data on startup, no more fixed sensors
+- Add diagnostic tool (look troubleshooting)
+- Update OSD level, it not shown when video plaeyd on fullscreen
+- Fix power usage for Air.
+
 ## 5.1.2
 
 - Add an option for SmoothScroll (like MOS, but self-implemented) for other mice (non-Apple).
