@@ -35,7 +35,7 @@ final class OSDWindow: NSPanel {
         titleVisibility = .hidden
         titlebarAppearsTransparent = true
         isMovableByWindowBackground = false
-        collectionBehavior = [.canJoinAllSpaces, .stationary, .fullScreenAuxiliary]
+        collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         hidesOnDeactivate = false
         ignoresMouseEvents = true
 
@@ -103,7 +103,6 @@ final class OSDWindow: NSPanel {
         guard let screen = Self.activeScreen() else { return }
         let frame = screen.frame
         let size = Self.pointSize(of: screen)
-
         setFrame(NSRect(x: (frame.minX + (size.width - Self.windowSize.width) / 2).rounded(),
                         y: frame.minY + Self.bottomInset,
                         width: Self.windowSize.width,
