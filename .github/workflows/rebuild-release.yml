@@ -80,6 +80,14 @@ jobs:
         env:
           ASSET: ${{ steps.release.outputs.asset }}
         run: |
+          # The runner image comes with an aws/tap that Homebrew no longer
+          # trusts by default, and every brew call below would print a page
+          # about it. Nothing here uses that tap, and the runner is thrown
+          # away afterwards, so it goes rather than being silenced with
+          # HOMEBREW_NO_REQUIRE_TAP_TRUST — which Homebrew says it is about to
+          # remove.
+          brew untap aws/tap >/dev/null 2>&1 || true
+
           # create-dmg renders the window background and icon layout
           brew list graphicsmagick >/dev/null 2>&1 || brew install graphicsmagick
           brew list imagemagick >/dev/null 2>&1 || brew install imagemagick
