@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.5.1
+
+- Re check external ip adress in time
+
 ## 5.5.0
 
 - Scan SMC data on startup, no more fixed sensors
