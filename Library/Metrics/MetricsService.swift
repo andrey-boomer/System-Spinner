@@ -170,10 +170,13 @@ actor MetricsService {
 
     private func resolveExternalAddressIfNeeded() {
         guard network.needsExternalLookup, externalAddressTask == nil else { return }
+        let delay = network.pendingLookupDelay
         network.externalLookupStarted()
 
         externalAddressTask = Task { [weak self] in
-            try? await Task.sleep(for: .seconds(NetworkMonitor.externalLookupDelay))
+            if delay > 0 {
+                try? await Task.sleep(for: .seconds(delay))
+            }
             let address = await NetworkMonitor.fetchExternalAddress()
             await self?.finishExternalLookup(address: address)
         }

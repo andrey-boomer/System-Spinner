@@ -12,12 +12,16 @@ final class NetworkMonitor {
     private var externalAddress = ""
     private var isLookingUpExternalAddress = false
     private var wasResolvingExternalAddress = true
+    private var externalRetryAttempt = 0
+    private var externalRetryDate: Date?
 
     private(set) var usage: NetworkUsage = .empty
     private(set) var needsExternalLookup = false
 
+    private(set) var pendingLookupDelay: TimeInterval = NetworkMonitor.externalLookupDelays[0]
+
     private static let externalAddressURL = URL(string: "https://checkip.dyndns.org")!
-    static let externalLookupDelay: TimeInterval = 15
+    static let externalLookupDelays: [TimeInterval] = [15, 15 * 60, 30 * 60, 60 * 60]
 
     func update(interval: TimeInterval) {
         let counters = interfaceCounters()
@@ -25,14 +29,20 @@ final class NetworkMonitor {
 
         if !resolvesExternalAddress {
             externalAddress = ""
+            cancelExternalRetries()
         }
 
         if counters.address != localAddress {
             localAddress = counters.address
             externalAddress = ""
+            cancelExternalRetries()
             requestExternalLookup(if: resolvesExternalAddress)
         } else if resolvesExternalAddress, !wasResolvingExternalAddress {
+            cancelExternalRetries()
             requestExternalLookup(if: true)
+        } else if resolvesExternalAddress, let retryDate = externalRetryDate, Date() >= retryDate {
+            externalRetryDate = nil
+            requestExternalLookup(if: true, delay: 0)
         }
 
         wasResolvingExternalAddress = resolvesExternalAddress
@@ -54,10 +64,11 @@ final class NetworkMonitor {
         )
     }
 
-    private func requestExternalLookup(if enabled: Bool) {
+    private func requestExternalLookup(if enabled: Bool, delay: TimeInterval = NetworkMonitor.externalLookupDelays[0]) {
         guard enabled, !isLookingUpExternalAddress else { return }
         isLookingUpExternalAddress = true
         needsExternalLookup = true
+        pendingLookupDelay = delay
     }
 
     func externalLookupStarted() {
@@ -66,8 +77,30 @@ final class NetworkMonitor {
 
     func externalLookupFinished(address: String?) {
         isLookingUpExternalAddress = false
-        guard let address, Preferences.shared.showsExternalAddress else { return }
+
+        guard Preferences.shared.showsExternalAddress else {
+            cancelExternalRetries()
+            return
+        }
+
+        guard let address else {
+            scheduleExternalRetry()
+            return
+        }
+
+        cancelExternalRetries()
         externalAddress = address
+    }
+
+    private func scheduleExternalRetry() {
+        externalRetryAttempt += 1
+        guard externalRetryAttempt < Self.externalLookupDelays.count else { return }
+        externalRetryDate = Date().addingTimeInterval(Self.externalLookupDelays[externalRetryAttempt])
+    }
+
+    private func cancelExternalRetries() {
+        externalRetryAttempt = 0
+        externalRetryDate = nil
     }
 
     static func fetchExternalAddress() async -> String? {
