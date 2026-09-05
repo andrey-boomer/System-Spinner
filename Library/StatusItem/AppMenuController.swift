@@ -261,6 +261,7 @@ final class AppMenuController: NSObject {
         preferences.usesSmoothScroll.toggle()
         sender.state = preferences.usesSmoothScroll ? .on : .off
         SmoothScroll.shared.setEnabled(preferences.usesSmoothScroll)
+        MouseButtons.shared.setEnabled(preferences.usesSmoothScroll)
     }
 
     func refreshDeviceItems() {
