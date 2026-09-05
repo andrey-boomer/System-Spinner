@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.5.2
+
+- Remap 3/4 button on Logi mouse for spaces change
+
 ## 5.5.1
 
 - Re check external ip adress in time
