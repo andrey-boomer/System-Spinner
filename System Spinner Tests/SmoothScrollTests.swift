@@ -20,7 +20,7 @@ struct SmoothScrollTests {
         var peak = 0.0
 
         while remaining != 0, frames < 5000 {
-            let next = SmoothScroll.advance(remaining: remaining, emitted: emitted, frameDuration: frameDuration)
+            let next = MouseInput.advance(remaining: remaining, emitted: emitted, frameDuration: frameDuration)
             emitted = next.post
             remaining = next.remaining
             travelled += next.post
@@ -51,7 +51,7 @@ struct SmoothScrollTests {
         var frames = 0
 
         while remaining != 0, frames < 5000 {
-            let next = SmoothScroll.advance(remaining: remaining, emitted: emitted, frameDuration: frame170)
+            let next = MouseInput.advance(remaining: remaining, emitted: emitted, frameDuration: frame170)
 
             #expect(abs(next.remaining) <= abs(remaining), "the remainder grew back")
             #expect(next.remaining == 0 || next.remaining.sign == remaining.sign, "the remainder changed sign")
