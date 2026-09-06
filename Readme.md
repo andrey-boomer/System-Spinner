@@ -1,4 +1,5 @@
-![System Spinner](Pictures/icon.jpg)
+<img src="Pictures/icon.ico" width="128" alt="icon">
+
 # System Spinner
 
 System Spinner provides macOS system information in status bar. Minimal, small and light!
