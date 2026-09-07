@@ -5,9 +5,54 @@
 import AppKit
 import ApplicationServices
 import QuartzCore
+import Foundation
+import IOKit.hid
 
 @MainActor
 final class MouseInput {
+    private static let appleVendorIDs = [0x05AC, 0x004C]
+    private static let logitechVendorID = 0x046D
+    
+    private nonisolated static func getAllMice() -> Set<IOHIDDevice> {
+        let manager = IOHIDManagerCreate(kCFAllocatorDefault, IOOptionBits(kIOHIDOptionsTypeNone))
+        
+        let matching = [
+            [kIOHIDDeviceUsagePageKey: kHIDPage_GenericDesktop, kIOHIDDeviceUsageKey: kHIDUsage_GD_Mouse],
+            [kIOHIDDeviceUsagePageKey: kHIDPage_GenericDesktop, kIOHIDDeviceUsageKey: kHIDUsage_GD_Pointer],
+        ]
+        IOHIDManagerSetDeviceMatchingMultiple(manager, matching as CFArray)
+        
+        return IOHIDManagerCopyDevices(manager) as? Set<IOHIDDevice> ?? []
+    }
+    
+    private nonisolated static func isBuiltIn(_ device: IOHIDDevice) -> Bool {
+        guard let value = IOHIDDeviceGetProperty(device, kIOHIDBuiltInKey as CFString) else { return false }
+        return (value as? Bool) ?? false
+    }
+    
+    private nonisolated static func getVendorID(_ device: IOHIDDevice) -> Int? {
+        return IOHIDDeviceGetProperty(device, kIOHIDVendorIDKey as CFString) as? Int
+    }
+    
+    private nonisolated static func hasMouseWithVendor(_ vendorID: Int) -> Bool {
+        getAllMice().contains { device in
+            guard let vendor = getVendorID(device) else { return false }
+            return vendor == vendorID
+        }
+    }
+    
+    static var hasThirdPartyMouse: Bool {
+        getAllMice().contains { device in
+            if isBuiltIn(device) { return false }
+            guard let vendor = getVendorID(device) else { return true }
+            return !appleVendorIDs.contains(vendor)
+        }
+    }
+    
+    static var hasLogitechMouse: Bool {
+        hasMouseWithVendor(logitechVendorID)
+    }
+
     static let shared = MouseInput()
     private static let pixelsPerLine: Double = 16
     private static let linesPerNotch: Double = 4
@@ -41,7 +86,7 @@ final class MouseInput {
     nonisolated static func share(_ perFrame: Double, frameDuration: Double) -> Double {
         1 - pow(1 - perFrame, max(frameDuration, 1.0 / 240) * 60)
     }
-    
+
     nonisolated static let rearButton: Int64 = 3
     nonisolated static let frontButton: Int64 = 4
     nonisolated static let leftArrowKeyCode: CGKeyCode = 123
@@ -49,12 +94,19 @@ final class MouseInput {
     private static let controlKeyCode: CGKeyCode = 59
     private static let arrowFlags: CGEventFlags = [.maskControl, .maskSecondaryFn, .maskNumericPad]
     private static let chordHold: Duration = .milliseconds(80)
-    private static let deviceCheckLifetime: CFTimeInterval = 2
-    private static let systemDefinedEventType: UInt32 = 14
-    private static let auxMouseButtonsSubtype: Int16 = 7
-    private static let thumbButtonsMask: Int = (1 << Int(rearButton)) | (1 << Int(frontButton))
     private static let reservedFlags: CGEventFlags = [.maskCommand, .maskControl, .maskAlternate, .maskShift]
     private static let scrollReservedFlags: CGEventFlags = [.maskCommand, .maskControl, .maskAlternate]
+    private static let deviceCheckLifetime: CFTimeInterval = 2
+  
+    private struct ResultBox: @unchecked Sendable {
+        let value: Unmanaged<CGEvent>?
+    }
+    
+    private struct EventBox: @unchecked Sendable {
+        let event: CGEvent
+        let refcon: UnsafeMutableRawPointer
+    }
+    
     private enum Stage { case idle, began, tracking, coastBegan, coasting }
     
     private var eventTap: CFMachPort?
@@ -67,7 +119,7 @@ final class MouseInput {
     private var lastDelta = (x: 0.0, y: 0.0)
     private var stage: Stage = .idle
     private var lastInput: CFTimeInterval = 0
-    private var lastDeviceCheck: (time: CFTimeInterval, present: Bool)?
+    private var hasLogitechCache: (time: CFTimeInterval, value: Bool)?
 
     private init() {}
 
@@ -80,8 +132,7 @@ final class MouseInput {
         let mask = CGEventMask(
             (1 << CGEventType.otherMouseDown.rawValue) |
             (1 << CGEventType.otherMouseUp.rawValue) |
-            (1 << CGEventType.scrollWheel.rawValue) |
-            (1 << Self.systemDefinedEventType)
+            (1 << CGEventType.scrollWheel.rawValue)
         )
         
         let refcon = Unmanaged.passUnretained(self).toOpaque()
@@ -113,7 +164,7 @@ final class MouseInput {
         let tap = eventTap
         eventTap = nil
         eventTapSource = nil
-        lastDeviceCheck = nil
+        hasLogitechCache = nil
 
         if let source {
             CFRunLoopRemoveSource(CFRunLoopGetMain(), source, .commonModes)
@@ -125,11 +176,21 @@ final class MouseInput {
     }
 
     func setEnabled(_ enabled: Bool) {
-        if enabled {
+        if enabled && Self.hasThirdPartyMouse {
             self.start()
         } else {
             self.stop()
         }
+    }
+
+    private func hasLogitechMouse() -> Bool {
+        let now = CACurrentMediaTime()
+        if let cache = hasLogitechCache, now - cache.time < Self.deviceCheckLifetime {
+            return cache.value
+        }
+        let value = Self.hasLogitechMouse
+        hasLogitechCache = (time: now, value: value)
+        return value
     }
 
     private func enableEventTap() {
@@ -137,20 +198,11 @@ final class MouseInput {
         CGEvent.tapEnable(tap: tap, enable: true)
     }
 
-    private struct EventBox: @unchecked Sendable {
-        let event: CGEvent
-        let refcon: UnsafeMutableRawPointer
-    }
-
-    private struct ResultBox: @unchecked Sendable {
-        let value: Unmanaged<CGEvent>?
-    }
-
     private static let eventTapCallback: CGEventTapCallBack = { _, type, event, refcon in
         guard let refcon else {
             return Unmanaged.passUnretained(event)
         }
-
+        
         let box = EventBox(event: event, refcon: refcon)
 
         let result = MainActor.assumeIsolated { () -> ResultBox in
@@ -170,6 +222,10 @@ final class MouseInput {
     private func handle(_ event: CGEvent, type: CGEventType) -> Unmanaged<CGEvent>? {
         switch type {
         case .otherMouseDown, .otherMouseUp:
+            // Обрабатываем кнопки мыши только для Logitech
+            guard hasLogitechMouse() else {
+                return Unmanaged.passUnretained(event)
+            }
             guard !self.handleButtons(event, type: type) else { return nil }
             return Unmanaged.passUnretained(event)
             
@@ -177,7 +233,6 @@ final class MouseInput {
             return self.handleScroll(event)
             
         default:
-            guard !self.isThumbMirror(event, type: type) else { return nil }
             return Unmanaged.passUnretained(event)
         }
     }
@@ -191,7 +246,6 @@ final class MouseInput {
             return Unmanaged.passUnretained(event)
         }
 
-        // Используем специфичные флаги для скролла, чтобы не блокировать скролл при зажатом Shift
         if !event.flags.intersection(Self.scrollReservedFlags).isEmpty {
             return Unmanaged.passUnretained(event)
         }
@@ -310,8 +364,7 @@ final class MouseInput {
     private func handleButtons(_ event: CGEvent, type: CGEventType) -> Bool {
         let button = event.getIntegerValueField(.mouseEventButtonNumber)
         guard let keyCode = Self.keyCode(forButton: button),
-              event.flags.isDisjoint(with: Self.reservedFlags),
-              self.hasLogitechMouse() else {
+              event.flags.isDisjoint(with: Self.reservedFlags) else {
             return false
         }
 
@@ -322,29 +375,7 @@ final class MouseInput {
         }
         return true
     }
-
-    private func isThumbMirror(_ event: CGEvent, type: CGEventType) -> Bool {
-        guard type.rawValue == Self.systemDefinedEventType,
-              event.flags.isDisjoint(with: Self.reservedFlags),
-              let nsEvent = NSEvent(cgEvent: event),
-              nsEvent.subtype.rawValue == Self.auxMouseButtonsSubtype,
-              nsEvent.data1 & Self.thumbButtonsMask != 0 else {
-            return false
-        }
-        return self.hasLogitechMouse()
-    }
-
-    private func hasLogitechMouse() -> Bool {
-        let now = CACurrentMediaTime()
-        if let last = lastDeviceCheck, now - last.time < Self.deviceCheckLifetime {
-            return last.present
-        }
-
-        let present = PointingDevices.hasLogitechMouse
-        lastDeviceCheck = (now, present)
-        return present
-    }
-
+    
     private func pressKey(_ keyCode: CGKeyCode) async {
         let source = CGEventSource(stateID: .hidSystemState)
 

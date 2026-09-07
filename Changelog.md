@@ -1,5 +1,10 @@
 # Changelog
 
+
+## 5.5.3
+
+- Fix CGKeyCode
+
 ## 5.5.2
 
 - Remap 3/4 button on Logi mouse for spaces change

@@ -265,7 +265,7 @@ final class AppMenuController: NSObject {
 
     func refreshDeviceItems() {
         backlightItem?.isHidden = !KeyboardBacklight.shared.isAvailable
-        smoothScrollItem?.isHidden = !PointingDevices.hasThirdPartyMouse
+        smoothScrollItem?.isHidden = !MouseInput.hasThirdPartyMouse
     }
 
     @objc private func toggleRotation(sender: NSMenuItem) {
