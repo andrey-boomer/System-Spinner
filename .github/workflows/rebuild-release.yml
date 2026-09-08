@@ -1,11 +1,5 @@
 name: Rebuild release dmg
 
-# Rebuilds the dmg of a release that is already published, using the current
-# state of the branch instead of the code the tag points at, and replaces the
-# asset in place. The release text is left alone — only the link to the list
-# of changes is repointed at the commit that was actually built.
-# Tests come from the Test workflow: failing tests stop the job, so a broken
-# build never replaces a good dmg.
 on:
   workflow_dispatch:
     inputs:
@@ -46,8 +40,6 @@ jobs:
             exit 1
           fi
 
-          # The asset keeps the name it was published under, so that the
-          # download links in the release stay valid.
           asset=$(gh release view "$tag" --json assets -q '.assets[].name' \
                   | grep -i '\.dmg$' | head -1)
           if [ -z "$asset" ]; then
@@ -76,37 +68,21 @@ jobs:
         env:
           ASSET: ${{ steps.release.outputs.asset }}
         run: |
-          # The runner image comes with an aws/tap that Homebrew no longer
-          # trusts by default, and every brew call below would print a page
-          # about it. Nothing here uses that tap, and the runner is thrown
-          # away afterwards, so it goes rather than being silenced with
-          # HOMEBREW_NO_REQUIRE_TAP_TRUST — which Homebrew says it is about to
-          # remove.
           brew untap aws/tap >/dev/null 2>&1 || true
 
-          # create-dmg renders the window background and icon layout
           brew list graphicsmagick >/dev/null 2>&1 || brew install graphicsmagick
           brew list imagemagick >/dev/null 2>&1 || brew install imagemagick
 
           cd build
           npx --yes create-dmg "System Spinner.app" . --overwrite --no-code-sign
 
-          # create-dmg names the file after the app and its MARKETING_VERSION,
-          # which need not match the tag any more, so the file is picked up by
-          # extension and renamed to whatever the release already serves.
           built=$(ls -t *.dmg | head -1)
           mv "$built" "../$ASSET"
 
       - name: Package the diagnostic tools
         run: |
-          # Rebuilt along with the dmg: the two are published together and a
-          # release should not end up with one of them from another commit.
           swiftc -O -o Scripts/system-probe Scripts/system-probe.swift
 
-          # Flat on purpose: the launcher looks for the probe next to itself.
-          # The source goes along because the binary is unsigned, and anyone
-          # asked to run one of those should be able to see what it does and
-          # build it again.
           cd Scripts
           zip -j ../system-diagnostic.zip system-probe run-probe.sh system-probe.swift
 
@@ -116,8 +92,6 @@ jobs:
           TAG: ${{ steps.release.outputs.tag }}
           ASSET: ${{ steps.release.outputs.asset }}
         run: |
-          # A release published before the diagnostics existed has no zip to
-          # replace, and upload simply adds one.
           gh release upload "$TAG" "$ASSET" system-diagnostic.zip --clobber
 
       - name: Repoint the list of changes
@@ -126,11 +100,6 @@ jobs:
           TAG: ${{ steps.release.outputs.tag }}
           REPO_URL: ${{ github.server_url }}/${{ github.repository }}
         run: |
-          # Everything above the generated part was written by hand — it is kept
-          # verbatim. Below it goes a compare link instead of a list of commits,
-          # which GitHub renders as "<previous tag>...<commit>". Both the section
-          # produced by --generate-notes and a link left by an earlier run are
-          # cut off, so this can be repeated without piling lines up.
           gh release view "$TAG" --json body -q .body > body.md
           awk '
             $0 == "## What'\''s Changed" { exit }
@@ -141,8 +110,6 @@ jobs:
             { if (started) printf "%s", blank; blank = ""; started = 1; print }
           ' > notes.md
 
-          # The dmg is built from the branch, not from the tag, so the range ends
-          # at the commit that was actually built.
           sha=$(git rev-parse --short HEAD)
           previous=$(git describe --tags --abbrev=0 "$TAG^" 2>/dev/null || echo "$TAG")
 

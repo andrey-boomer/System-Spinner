@@ -1,36 +1,5 @@
 //  Copyright © AndreyLysikov
 //  SPDX-License-Identifier: Apache-2.0
-//
-//  Reads the SMC while it runs and writes two tables into the working
-//  directory. Run it, then move through the states — on battery, plug in while
-//  low so it charges, wait until it is full — and the columns show which
-//  reading follows which state.
-//
-//      swiftc -O -o system-probe system-probe.swift
-//      ./system-probe
-//
-//  Everything lands in probe-log.tsv as time, key, type, value — one shape for
-//  both halves of it, because the point is comparing them against each other.
-//
-//  Rows typed "app" are the power line as the app builds it: what it would put
-//  in the menu, next to the readings behind that answer. Written every sample.
-//
-
-//  The rest is the chip itself. The first sweep writes every key the machine
-//  admits to — a couple of thousand of them, and on a laptop nobody has mapped
-//  yet that list is the point of this tool. After it only what changed is
-//  written, so the keys that follow the battery stand out instead of drowning.
-//
-//  Rows typed "device" are the displays, mice and keyboards attached, with the
-//  verdicts the app draws from them — whether the smooth scroll is offered and
-//  whether the backlight can be reached. Written when they change, so plugging
-//  something in or shutting the lid shows up as a row of its own.
-//
-//  Which machine it is, what the app's tables get out of it, and what is
-//  attached:
-//      awk -F'\t' '$3 != "flt " && $3 != "app"' probe-*.tsv
-//
-//  Stop it with Ctrl+C. Each run appends, so several runs share the file.
 
 import CoreGraphics
 import Foundation
@@ -192,7 +161,7 @@ private final class SMC {
         case "ui64":
             return Double(b.prefix(8).reduce(UInt64(0)) { $0 << 8 | UInt64($1) })
         case "ioft":
-            // IOKit's fixed point: eight bytes with sixteen fraction bits.
+
             return Double(b.prefix(8).reduce(UInt64(0)) { $0 << 8 | UInt64($1) }) / 65536
         case "flag":
             return b[0] == 0 ? 0 : 1

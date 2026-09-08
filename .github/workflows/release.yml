@@ -1,10 +1,5 @@
 name: Release
 
-# A release is published when MARKETING_VERSION is raised in the project.
-# The workflow only runs for commits touching the project file, where that
-# version lives, and publishes only when the version is actually higher.
-# Tests come from the Test workflow: failing tests stop the job here too, so a
-# broken build never gets published.
 on:
   push:
     branches: [main]
@@ -38,9 +33,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # MARKETING_VERSION lives on the app target. Asking the target lets
-          # xcodebuild resolve it — a plain grep over the project file would
-          # depend on its layout.
           version=$(xcodebuild -project "System Spinner.xcodeproj" \
                                -target "System Spinner" \
                                -configuration Release \
@@ -52,15 +44,12 @@ jobs:
             exit 1
           fi
 
-          # Empty rather than 0.0.0 when nothing is published yet: the notes below
-          # tell "no previous release" from "a release numbered 0.0.0".
           latest=$(gh release view --json tagName -q .tagName 2>/dev/null || true)
 
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "previous=$latest" >> "$GITHUB_OUTPUT"
           echo "Project: $version, latest release: ${latest:-none}"
 
-          # publish only when the version is strictly greater than the released one
           released="${latest:-0.0.0}"
           highest=$(printf '%s\n%s\n' "$released" "$version" | sort -V | tail -1)
           if [ "$version" != "$released" ] && [ "$highest" = "$version" ]; then
@@ -88,35 +77,21 @@ jobs:
         run: |
           version="${{ steps.version.outputs.version }}"
 
-          # The runner image comes with an aws/tap that Homebrew no longer
-          # trusts by default, and every brew call below would print a page
-          # about it. Nothing here uses that tap, and the runner is thrown
-          # away afterwards, so it goes rather than being silenced with
-          # HOMEBREW_NO_REQUIRE_TAP_TRUST — which Homebrew says it is about to
-          # remove.
           brew untap aws/tap >/dev/null 2>&1 || true
 
-          # create-dmg renders the window background and icon layout
           brew list graphicsmagick >/dev/null 2>&1 || brew install graphicsmagick
           brew list imagemagick >/dev/null 2>&1 || brew install imagemagick
 
           cd build
           npx --yes create-dmg "System Spinner.app" . --overwrite --no-code-sign
 
-          # create-dmg names the file after the app and its version
           mv "System Spinner $version.dmg" "../System-Spinner-$version.dmg"
 
       - name: Package the diagnostic tools
         if: steps.version.outputs.release == 'yes'
         run: |
-          # Built here rather than taken from the repository, so the binary in a
-          # release comes from the same checkout as the app beside it.
           swiftc -O -o Scripts/system-probe Scripts/system-probe.swift
 
-          # Flat on purpose: the launcher looks for the probe next to itself.
-          # The source goes along because the binary is unsigned, and anyone
-          # asked to run one of those should be able to see what it does and
-          # build it again.
           cd Scripts
           zip -j ../system-diagnostic.zip system-probe run-probe.sh system-probe.swift
 
@@ -127,8 +102,6 @@ jobs:
           PREVIOUS: ${{ steps.version.outputs.previous }}
           REPO_URL: ${{ github.server_url }}/${{ github.repository }}
         run: |
-          # section for this version from Changelog.md, without the blank lines
-          # that separate it from the next one; empty when there is no section
           awk -v v="## $VERSION" '
             $0 == v { found = 1; next }
             /^## / { found = 0 }
@@ -142,9 +115,6 @@ jobs:
             echo "No \"## $VERSION\" section in Changelog.md — the notes will be the link alone"
           fi
 
-          # A link instead of a list of commits: GitHub renders it as
-          # "<previous tag>...<tag>", and the tag resolves once the release is
-          # created below. A first release has nothing to compare against.
           if [ -n "$PREVIOUS" ]; then
             if [ -s notes.md ]; then echo >> notes.md; fi
             echo "**Full list of changes**: $REPO_URL/compare/$PREVIOUS...$VERSION" >> notes.md
