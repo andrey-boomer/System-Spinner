@@ -3,6 +3,8 @@ name: Release
 # A release is published when MARKETING_VERSION is raised in the project.
 # The workflow only runs for commits touching the project file, where that
 # version lives, and publishes only when the version is actually higher.
+# Tests come from the Test workflow: failing tests stop the job here too, so a
+# broken build never gets published.
 on:
   push:
     branches: [main]
@@ -14,7 +16,11 @@ permissions:
   contents: write
 
 jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+
   build:
+    needs: test
     runs-on: macos-latest
 
     steps:
@@ -26,16 +32,6 @@ jobs:
         run: |
           xcodebuild -version
           xcodebuild -showsdks | grep macosx || true
-
-      # Failing tests stop the job, so a broken build never gets published.
-      - name: Test
-        run: |
-          xcodebuild -project "System Spinner.xcodeproj" \
-                     -scheme "System Spinner" \
-                     -configuration Debug \
-                     -derivedDataPath build-tests \
-                     CODE_SIGNING_ALLOWED=NO \
-                     test
 
       - name: Project version and latest release
         id: version

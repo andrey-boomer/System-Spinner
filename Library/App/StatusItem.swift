@@ -1,8 +1,113 @@
-//  Copyright © AndreyLysikov
+//  Copyright © Takuto Nakamura, AndreyLysikov
 //  SPDX-License-Identifier: Apache-2.0
 
 import Cocoa
 import ServiceManagement
+
+@MainActor
+final class SpinnerAnimator {
+    var onFrame: ((NSImage) -> Void)?
+
+    private let preferences = Preferences.shared
+    private var style = SpinnerCatalog.fallback
+    private var frames: [NSImage] = []
+    private var timer: Timer?
+    private var currentFrame = 0
+    private var currentInterval: Double = -1
+    private static let minimumInterval = 1.0 / 120.0
+    private static let speedTolerance = 0.15
+    private var lastFrameDate = Date.distantPast
+
+    func load(style: SpinnerStyle, effect: SpinnerEffect) {
+        self.style = style
+        frames = (0 ..< style.frameCount).compactMap { index in
+            guard var image = NSImage(named: style.frameName(at: index)) else { return nil }
+
+            let height = NSStatusBar.system.thickness - 2
+            image.size = NSSize(width: height / image.size.height * image.size.width, height: height)
+
+            if style.supportsEffect {
+                switch effect {
+                case .original:
+                    image.isTemplate = false
+                case .whiteShaded:
+                    image.isTemplate = true
+                    image = image.imageWithTint(color: NSColor(red: 1, green: 1, blue: 1, alpha: 0.8))
+                case .blackShaded:
+                    image.isTemplate = true
+                    image = image.imageWithTint(color: NSColor(red: 0, green: 0, blue: 0, alpha: 0.8))
+                case .automatic:
+                    image.isTemplate = true
+                }
+            }
+            return image
+        }
+
+        currentFrame = 0
+        currentInterval = -1
+        if let first = frames.first {
+            onFrame?(first)
+        }
+    }
+
+    func updateSpeed(usage: Double) {
+        guard frames.count > 1 else {
+            stop()
+            return
+        }
+
+        let load = max(1.0, min(100.0, usage / Double(frames.count)))
+        let interval = max(Self.minimumInterval, 0.25 / load * Double(style.speedCoefficient))
+
+        guard currentInterval <= 0 || abs(interval - currentInterval) > currentInterval * Self.speedTolerance else {
+            return
+        }
+
+        timer?.invalidate()
+        let timer = Timer(timeInterval: interval, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { self?.advance() }
+        }
+
+        timer.fireDate = max(lastFrameDate.addingTimeInterval(interval), Date())
+
+        RunLoop.main.add(timer, forMode: .common)
+        self.timer = timer
+        currentInterval = interval
+    }
+
+    func stop() {
+        timer?.invalidate()
+        timer = nil
+        currentInterval = -1
+    }
+
+    private func advance() {
+        if frames.isEmpty || frames.count == 1 { return }
+
+        lastFrameDate = Date()
+        currentFrame += preferences.invertsRotation ? -1 : 1
+        if currentFrame >= frames.count {
+            currentFrame = 0
+        } else if currentFrame < 0 {
+            currentFrame = frames.count - 1
+        }
+
+        onFrame?(frames[currentFrame])
+    }
+}
+
+extension NSImage {
+    func imageWithTint(color: NSColor) -> NSImage {
+        guard let tintedImage = self.copy() as? NSImage else { return self }
+        tintedImage.lockFocus()
+
+        color.set()
+        NSRect(origin: .zero, size: tintedImage.size).fill(using: .sourceAtop)
+
+        tintedImage.unlockFocus()
+        return tintedImage
+    }
+}
 
 @MainActor
 protocol AppMenuControllerDelegate: AnyObject {
@@ -42,7 +147,6 @@ final class AppMenuController: NSObject {
     private var smoothScrollItem: NSMenuItem?
 
     private let updateIntervals: [Double] = [0.5, 1.0, 1.5, 2.0]
-    private let adjustmentSteps: [Int] = [8, 16, 24, 32]
 
     func rebuild() {
         let menu = NSMenu()
@@ -71,7 +175,7 @@ final class AppMenuController: NSObject {
         displaysItem = displays
 
         let steps = item(localizedString("Adjustment steps"), symbol: "display.and.screwdriver", action: nil)
-        steps.submenu = submenu(adjustmentSteps.map { (String($0), $0 == preferences.adjustmentSteps) },
+        steps.submenu = submenu(Preferences.adjustmentStepChoices.map { (String($0), $0 == preferences.adjustmentSteps) },
                                 action: #selector(changeAdjustmentSteps(sender:)))
         menu.addItem(steps)
 
@@ -334,5 +438,209 @@ final class AppMenuController: NSObject {
         } else {
             alert.window.close()
         }
+    }
+}
+
+@MainActor
+final class StatusItemController: NSObject {
+    private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+    private let popover = NSPopover()
+    private let animator = SpinnerAnimator()
+    private let menuController = AppMenuController()
+    private let metrics = MetricsService.shared
+    private let preferences = Preferences.shared
+
+    private let usageController = UsageViewController.freshController()
+
+    private var metricsObserver: UUID?
+    private var lastUsage: Double = 0
+    private var clickMonitors: [Any] = []
+
+    func start() {
+        if let button = statusItem.button {
+            button.target = self
+            button.action = #selector(handleClick)
+            button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+            button.imagePosition = .imageLeading
+            button.font = NSFont.monospacedSystemFont(ofSize: 11, weight: .medium)
+        }
+
+        popover.contentViewController = usageController
+
+        animator.onFrame = { [weak self] image in
+            self?.statusItem.button?.image = image
+        }
+
+        menuController.delegate = self
+        menuController.rebuild()
+
+        DisplayManager.shared.onDisplaysChanged = { [weak self] displays in
+            self?.menuController.updateDisplays(displays)
+        }
+        DisplayManager.shared.start()
+
+        observeWorkspace()
+
+        reloadSpinner()
+        resume()
+    }
+
+    func stop() {
+        pause()
+        stopClickMonitoring()
+    }
+
+    @objc private func resume() {
+        let interval = preferences.updateInterval
+        var newToken: UUID?
+        if metricsObserver == nil {
+            let token = UUID()
+            metricsObserver = token
+            newToken = token
+        }
+
+        Task { [weak self] in
+            guard let self else { return }
+
+            if let newToken {
+                await metrics.addObserver(newToken) { [weak self] snapshot in
+                    self?.apply(snapshot)
+                }
+            }
+            await metrics.start(interval: interval)
+        }
+
+        DisplayManager.shared.setNeedsRefresh()
+    }
+
+    @objc private func pause() {
+        closePopover()
+        animator.stop()
+        Task { await metrics.stop() }
+    }
+
+    private func apply(_ snapshot: MetricsSnapshot) {
+        lastUsage = max(snapshot.cpuUsage, snapshot.gpuUsage)
+
+        if preferences.showsCPUInMenuBar {
+            statusItem.button?.title = String(format: "%2d%%", Int(lastUsage))
+        } else if statusItem.button?.title != "" {
+            statusItem.button?.title = ""
+        }
+
+        animator.updateSpeed(usage: lastUsage)
+    }
+
+    private func reloadSpinner() {
+        let style = SpinnerCatalog.style(validating: preferences.spinnerName)
+        let effect = SpinnerEffect(rawValue: preferences.spinnerEffect) ?? .original
+        animator.load(style: style, effect: effect)
+        animator.updateSpeed(usage: lastUsage)
+    }
+
+    @objc private func handleClick() {
+        guard let event = NSApp.currentEvent else { return }
+
+        if event.type == .leftMouseUp {
+            if popover.isShown {
+                closePopover()
+            } else {
+                showPopover()
+            }
+        } else {
+            let menu = menuController.menu
+            menu.delegate = self
+            statusItem.menu = menu
+            statusItem.button?.performClick(nil)
+        }
+    }
+
+    private func showPopover() {
+        guard let button = statusItem.button else { return }
+        popover.animates = preferences.usesPopUpAnimation
+        button.window?.layoutIfNeeded()
+        popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+        startClickMonitoring()
+    }
+
+    func closePopover() {
+        usageController.closeDetail()
+        if popover.isShown {
+            popover.performClose(nil)
+        }
+        stopClickMonitoring()
+    }
+
+    private func startClickMonitoring() {
+        guard clickMonitors.isEmpty else { return }
+        let clicks: NSEvent.EventTypeMask = [.leftMouseDown, .rightMouseDown]
+
+        let global = NSEvent.addGlobalMonitorForEvents(matching: clicks, handler: { [weak self] event in
+            self?.dismiss(for: event)
+        })
+        let local = NSEvent.addLocalMonitorForEvents(matching: clicks, handler: { [weak self] event in
+            self?.dismiss(for: event)
+            return event
+        })
+        clickMonitors = [global, local].compactMap { $0 }
+    }
+
+    private func stopClickMonitoring() {
+        clickMonitors.forEach(NSEvent.removeMonitor)
+        clickMonitors.removeAll()
+    }
+
+    private func dismiss(for event: NSEvent) {
+        guard popover.isShown else { return }
+        guard let window = event.window else {
+            closePopover()
+            return
+        }
+
+        if window === statusItem.button?.window { return }
+        if window === usageController.detailWindow { return }
+
+        if window === usageController.view.window {
+            usageController.dismissDetail(clickedAt: event.locationInWindow)
+            return
+        }
+        closePopover()
+    }
+
+    private func observeWorkspace() {
+        let center = NSWorkspace.shared.notificationCenter
+        center.addObserver(self, selector: #selector(resume), name: NSWorkspace.didWakeNotification, object: nil)
+        center.addObserver(self, selector: #selector(resume), name: NSWorkspace.screensDidWakeNotification, object: nil)
+        center.addObserver(self, selector: #selector(pause), name: NSWorkspace.willSleepNotification, object: nil)
+        center.addObserver(self, selector: #selector(pause), name: NSWorkspace.screensDidSleepNotification, object: nil)
+    }
+}
+
+extension StatusItemController: NSMenuDelegate {
+    func menuWillOpen(_ menu: NSMenu) {
+        menuController.refreshDeviceItems()
+    }
+
+    func menuDidClose(_ menu: NSMenu) {
+        statusItem.menu = nil
+    }
+}
+
+extension StatusItemController: AppMenuControllerDelegate {
+    func appMenuDidChangeSpinnerAppearance(_ controller: AppMenuController) {
+        reloadSpinner()
+    }
+
+    func appMenuDidChangeUpdateInterval(_ controller: AppMenuController) {
+        let interval = preferences.updateInterval
+        Task { await metrics.start(interval: interval) }
+    }
+
+    func appMenuDidRequestDisplayRefresh(_ controller: AppMenuController) {
+        DisplayManager.shared.setNeedsRefresh()
+    }
+
+    func appMenuDidRequestQuit(_ controller: AppMenuController) {
+        NSApp.terminate(nil)
     }
 }

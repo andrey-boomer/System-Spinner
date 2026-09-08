@@ -7,7 +7,7 @@ class DDC: NSObject {
     static let MAX_MATCH_SCORE: Int = 20
     static let ARM64_DDC_7BIT_ADDRESS: UInt8 = 0x37
     static let ARM64_DDC_DATA_ADDRESS: UInt8 = 0x51
-    
+
     struct IORegService: @unchecked Sendable {
         var edidUUID: String = ""
         var productName: String = ""
@@ -16,13 +16,13 @@ class DDC: NSObject {
         var service: IOAVService?
         var serviceLocation: Int = 0
     }
-    
+
     struct ServiceMatch: @unchecked Sendable {
         var displayID: CGDirectDisplayID = 0
         var service: IOAVService?
         var serviceLocation: Int = 0
     }
-    
+
     static func getServiceMatches(displayIDs: [CGDirectDisplayID]) -> [ServiceMatch] {
         let ioregServicesForMatching = self.getIoregServicesForMatching()
         var matchedDisplayServices: [ServiceMatch] = []
@@ -50,9 +50,7 @@ class DDC: NSObject {
         }
         return matchedDisplayServices
     }
-    
-    // Timings inherited from MonitorControl. They were tunable per call there;
-    // here every caller took the defaults, so they are fixed.
+
     private static let writeSleepTime: UInt32 = 10000
     private static let numOfWriteCycles = 2
     private static let numOfRetryAttempts = 4
@@ -62,14 +60,14 @@ class DDC: NSObject {
         var send: [UInt8] = [command, UInt8(value >> 8), UInt8(value & 255)]
         return Self.performDDCCommunication(service: service, send: &send)
     }
-    
+
     static func performDDCCommunication(service: IOAVService?, send: inout [UInt8]) -> Bool {
         let dataAddress = ARM64_DDC_DATA_ADDRESS
         var success = false
         guard service != nil else {
             return success
         }
-        var packet: [UInt8] = [UInt8(0x80 | (send.count + 1)), UInt8(send.count)] + send + [0] // Note: the last byte is the place of the checksum, see next line!
+        var packet: [UInt8] = [UInt8(0x80 | (send.count + 1)), UInt8(send.count)] + send + [0]
         packet[packet.count - 1] = self.checksum(chk: send.count == 1 ? ARM64_DDC_7BIT_ADDRESS << 1 : ARM64_DDC_7BIT_ADDRESS << 1 ^ dataAddress, data: &packet, start: 0, end: packet.count - 2)
         for _ in 1 ... Self.numOfRetryAttempts + 1 {
             for _ in 1 ... Self.numOfWriteCycles {
@@ -83,7 +81,7 @@ class DDC: NSObject {
         }
         return success
     }
-    
+
     static func checksum(chk: UInt8, data: inout [UInt8], start: Int, end: Int) -> UInt8 {
         var chkd: UInt8 = chk
         for i in start ... end {
@@ -91,7 +89,7 @@ class DDC: NSObject {
         }
         return chkd
     }
-    
+
     static func ioregMatchScore(displayID: CGDirectDisplayID, ioregEdidUUID: String, ioDisplayLocation: String = "", ioregProductName: String = "", ioregSerialNumber: Int64 = 0, serviceLocation _: Int = 0) -> Int {
         var matchScore = 0
         if let dictionary = CoreDisplay_DisplayCreateInfoDictionary(displayID)?.takeRetainedValue() as NSDictionary? {
@@ -101,15 +99,15 @@ class DDC: NSObject {
                     var loc: Int
                 }
                 let edidUUIDSearchKeys: [KeyLoc] = [
-                    // Vendor ID
+
                     KeyLoc(key: String(format: "%04x", UInt16(max(0, min(kDisplayVendorID, 256 * 256 - 1)))).uppercased(), loc: 0),
-                    // Product ID
+
                     KeyLoc(key: String(format: "%02x", UInt8((UInt16(max(0, min(kDisplayProductID, 256 * 256 - 1))) >> (0 * 8)) & 0xFF)).uppercased()
                            + String(format: "%02x", UInt8((UInt16(max(0, min(kDisplayProductID, 256 * 256 - 1))) >> (1 * 8)) & 0xFF)).uppercased(), loc: 4),
-                    // Manufacture date
+
                     KeyLoc(key: String(format: "%02x", UInt8(max(0, min(kDisplayWeekOfManufacture, 256 - 1)))).uppercased()
                            + String(format: "%02x", UInt8(max(0, min(kDisplayYearOfManufacture - 1990, 256 - 1)))).uppercased(), loc: 19),
-                    // Image size
+
                     KeyLoc(key: String(format: "%02x", UInt8(max(0, min(kDisplayHorizontalImageSize / 10, 256 - 1)))).uppercased()
                            + String(format: "%02x", UInt8(max(0, min(kDisplayVerticalImageSize / 10, 256 - 1)))).uppercased(), loc: 30),
                 ]
@@ -129,7 +127,7 @@ class DDC: NSObject {
         }
         return matchScore
     }
-    
+
     static func ioregIterateToNextObjectOfInterest(interests: [String], iterator: inout io_iterator_t) -> (name: String, entry: io_service_t)? {
         let name = UnsafeMutablePointer<CChar>.allocate(capacity: MemoryLayout<io_name_t>.size)
         defer {
@@ -151,7 +149,7 @@ class DDC: NSObject {
             IOObjectRelease(entry)
         }
     }
-    
+
     static func getIORegServiceAppleCDC2Properties(entry: io_service_t) -> IORegService {
         var ioregService = IORegService()
         if let unmanagedEdidUUID = IORegistryEntryCreateCFProperty(entry, "EDID UUID" as CFString, kCFAllocatorDefault, IOOptionBits(kIORegistryIterateRecursively)), let edidUUID = unmanagedEdidUUID.takeRetainedValue() as? String {
@@ -175,7 +173,7 @@ class DDC: NSObject {
         }
         return ioregService
     }
-    
+
     static func setIORegServiceDCPAVServiceProxy(entry: io_service_t, ioregService: inout IORegService) {
         if let unmanagedLocation = IORegistryEntryCreateCFProperty(entry, "Location" as CFString, kCFAllocatorDefault, IOOptionBits(kIORegistryIterateRecursively)), let location = unmanagedLocation.takeRetainedValue() as? String {
             if location == "External" {
@@ -183,7 +181,7 @@ class DDC: NSObject {
             }
         }
     }
-    
+
     static func getIoregServicesForMatching() -> [IORegService] {
         var serviceLocation = 0
         var ioregServicesForMatching: [IORegService] = []
@@ -219,5 +217,5 @@ class DDC: NSObject {
         }
         return ioregServicesForMatching
     }
-    
+
 }

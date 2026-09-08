@@ -51,7 +51,6 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		7F0D025B2D1EADEF0029C507 /* Controllers */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Controllers; sourceTree = "<group>"; };
 		7F6D12232D1D868100C44FAC /* Pictures */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (7F6D12242D1D868C00C44FAC /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = Pictures; sourceTree = "<group>"; };
 		7FAA10012E77000100AB0001 /* Library */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Library; sourceTree = "<group>"; };
 		7FBB10032E88000100BB0003 /* System Spinner Tests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "System Spinner Tests"; sourceTree = "<group>"; };
@@ -99,7 +98,6 @@
 				7F904EE62E7AA04500450D04 /* AppIcon.icon */,
 				7F6D12232D1D868100C44FAC /* Pictures */,
 				7FAA10012E77000100AB0001 /* Library */,
-				7F0D025B2D1EADEF0029C507 /* Controllers */,
 				7FBB10032E88000100BB0003 /* System Spinner Tests */,
 				7F0D026D2D1ECA450029C507 /* Frameworks */,
 				7FB908A82B67B9A400E9EE24 /* Products */,
@@ -131,7 +129,6 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				7F0D025B2D1EADEF0029C507 /* Controllers */,
 				7F6D12232D1D868100C44FAC /* Pictures */,
 				7FAA10012E77000100AB0001 /* Library */,
 			);
@@ -351,10 +348,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = D2GKV4ZUT5;
 				ENABLE_HARDENED_RUNTIME = NO;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Controllers",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "System Spinner";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
@@ -367,7 +361,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 5.5.3;
+				MARKETING_VERSION = 5.5.4;
 				PRODUCT_BUNDLE_IDENTIFIER = "System-Spinner";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -395,10 +389,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = D2GKV4ZUT5;
 				ENABLE_HARDENED_RUNTIME = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Controllers",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "System Spinner";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
@@ -411,7 +402,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 5.5.3;
+				MARKETING_VERSION = 5.5.4;
 				PRODUCT_BUNDLE_IDENTIFIER = "System-Spinner";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

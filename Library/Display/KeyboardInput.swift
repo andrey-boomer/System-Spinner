@@ -30,7 +30,9 @@ final class MediaKeyMonitor {
     private static let brightnessDownKeyCode: Int64 = 145
     private static let f5KeyCode: Int64 = 176
     private static let f6KeyCode: Int64 = 178
-    private static let reservingFlags: CGEventFlags = [.maskCommand, .maskControl, .maskAlternate, .maskShift]
+
+    private static let reservingFlags: CGEventFlags = [.maskCommand, .maskControl, .maskShift]
+    private static let fineAdjustmentFlag: CGEventFlags = .maskAlternate
 
     @discardableResult
     func start() -> Bool {
@@ -144,7 +146,7 @@ final class MediaKeyMonitor {
             return Unmanaged.passUnretained(event)
         }
 
-        return applyResult(handleMediaKey(mediaKey), event: event)
+        return applyResult(handleMediaKey(mediaKey, fine: Self.isFineAdjustment(event)), event: event)
     }
 
     private func handleSystemDefinedMediaKey(_ event: CGEvent) -> Unmanaged<CGEvent>? {
@@ -167,7 +169,7 @@ final class MediaKeyMonitor {
             return Unmanaged.passUnretained(event)
         }
 
-        return applyResult(handleMediaKey(mk), event: event)
+        return applyResult(handleMediaKey(mk, fine: Self.isFineAdjustment(event)), event: event)
     }
 
     private func applyResult(_ result: MediaKeyHandlingResult, event: CGEvent) -> Unmanaged<CGEvent>? {
@@ -179,21 +181,25 @@ final class MediaKeyMonitor {
         }
     }
 
-    private func handleMediaKey(_ key: MediaKey) -> MediaKeyHandlingResult {
+    private static func isFineAdjustment(_ event: CGEvent) -> Bool {
+        !event.flags.isDisjoint(with: fineAdjustmentFlag)
+    }
+
+    private func handleMediaKey(_ key: MediaKey, fine: Bool) -> MediaKeyHandlingResult {
         switch key {
             case .soundUp:
-                return DisplayManager.shared.setVolume(isUp: true)
+                return DisplayManager.shared.setVolume(isUp: true, fine: fine)
             case .soundDown:
-                return DisplayManager.shared.setVolume(isUp: false)
+                return DisplayManager.shared.setVolume(isUp: false, fine: fine)
             case .mute:
                 return DisplayManager.shared.toggleMute()
             case .brightnessUp:
-                return DisplayManager.shared.setBrightness(isUp: true)
+                return DisplayManager.shared.setBrightness(isUp: true, fine: fine)
             case .brightnessDown:
-                return DisplayManager.shared.setBrightness(isUp: false)
+                return DisplayManager.shared.setBrightness(isUp: false, fine: fine)
             case .illuminationUp, .illuminationDown:
                 guard Preferences.shared.usesKeyboardBacklightKeys else { return .passThrough }
-                return KeyboardBacklight.shared.adjust(isUp: key == .illuminationUp)
+                return KeyboardBacklight.shared.adjust(isUp: key == .illuminationUp, fine: fine)
         }
     }
 }

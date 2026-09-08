@@ -4,43 +4,42 @@
 
 import AppKit
 import ApplicationServices
-import QuartzCore
-import Foundation
 import IOKit.hid
+import QuartzCore
 
 @MainActor
 final class MouseInput {
     private static let appleVendorIDs = [0x05AC, 0x004C]
     private static let logitechVendorID = 0x046D
-    
+
     private nonisolated static func getAllMice() -> Set<IOHIDDevice> {
         let manager = IOHIDManagerCreate(kCFAllocatorDefault, IOOptionBits(kIOHIDOptionsTypeNone))
-        
+
         let matching = [
             [kIOHIDDeviceUsagePageKey: kHIDPage_GenericDesktop, kIOHIDDeviceUsageKey: kHIDUsage_GD_Mouse],
             [kIOHIDDeviceUsagePageKey: kHIDPage_GenericDesktop, kIOHIDDeviceUsageKey: kHIDUsage_GD_Pointer],
         ]
         IOHIDManagerSetDeviceMatchingMultiple(manager, matching as CFArray)
-        
+
         return IOHIDManagerCopyDevices(manager) as? Set<IOHIDDevice> ?? []
     }
-    
+
     private nonisolated static func isBuiltIn(_ device: IOHIDDevice) -> Bool {
         guard let value = IOHIDDeviceGetProperty(device, kIOHIDBuiltInKey as CFString) else { return false }
         return (value as? Bool) ?? false
     }
-    
+
     private nonisolated static func getVendorID(_ device: IOHIDDevice) -> Int? {
         return IOHIDDeviceGetProperty(device, kIOHIDVendorIDKey as CFString) as? Int
     }
-    
+
     private nonisolated static func hasMouseWithVendor(_ vendorID: Int) -> Bool {
         getAllMice().contains { device in
             guard let vendor = getVendorID(device) else { return false }
             return vendor == vendorID
         }
     }
-    
+
     static var hasThirdPartyMouse: Bool {
         getAllMice().contains { device in
             if isBuiltIn(device) { return false }
@@ -48,7 +47,7 @@ final class MouseInput {
             return !appleVendorIDs.contains(vendor)
         }
     }
-    
+
     static var hasLogitechMouse: Bool {
         hasMouseWithVendor(logitechVendorID)
     }
@@ -97,18 +96,18 @@ final class MouseInput {
     private static let reservedFlags: CGEventFlags = [.maskCommand, .maskControl, .maskAlternate, .maskShift]
     private static let scrollReservedFlags: CGEventFlags = [.maskCommand, .maskControl, .maskAlternate]
     private static let deviceCheckLifetime: CFTimeInterval = 2
-  
+
     private struct ResultBox: @unchecked Sendable {
         let value: Unmanaged<CGEvent>?
     }
-    
+
     private struct EventBox: @unchecked Sendable {
         let event: CGEvent
         let refcon: UnsafeMutableRawPointer
     }
-    
+
     private enum Stage { case idle, began, tracking, coastBegan, coasting }
-    
+
     private var eventTap: CFMachPort?
     private var eventTapSource: CFRunLoopSource?
     private var displayLink: CADisplayLink?
@@ -134,7 +133,7 @@ final class MouseInput {
             (1 << CGEventType.otherMouseUp.rawValue) |
             (1 << CGEventType.scrollWheel.rawValue)
         )
-        
+
         let refcon = Unmanaged.passUnretained(self).toOpaque()
 
         guard let tap = CGEvent.tapCreate(
@@ -202,7 +201,7 @@ final class MouseInput {
         guard let refcon else {
             return Unmanaged.passUnretained(event)
         }
-        
+
         let box = EventBox(event: event, refcon: refcon)
 
         let result = MainActor.assumeIsolated { () -> ResultBox in
@@ -222,16 +221,16 @@ final class MouseInput {
     private func handle(_ event: CGEvent, type: CGEventType) -> Unmanaged<CGEvent>? {
         switch type {
         case .otherMouseDown, .otherMouseUp:
-            // Обрабатываем кнопки мыши только для Logitech
+
             guard hasLogitechMouse() else {
                 return Unmanaged.passUnretained(event)
             }
             guard !self.handleButtons(event, type: type) else { return nil }
             return Unmanaged.passUnretained(event)
-            
+
         case .scrollWheel:
             return self.handleScroll(event)
-            
+
         default:
             return Unmanaged.passUnretained(event)
         }
@@ -375,7 +374,7 @@ final class MouseInput {
         }
         return true
     }
-    
+
     private func pressKey(_ keyCode: CGKeyCode) async {
         let source = CGEventSource(stateID: .hidSystemState)
 

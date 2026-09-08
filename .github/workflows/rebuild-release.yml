@@ -4,6 +4,8 @@ name: Rebuild release dmg
 # state of the branch instead of the code the tag points at, and replaces the
 # asset in place. The release text is left alone — only the link to the list
 # of changes is repointed at the commit that was actually built.
+# Tests come from the Test workflow: failing tests stop the job, so a broken
+# build never replaces a good dmg.
 on:
   workflow_dispatch:
     inputs:
@@ -16,7 +18,11 @@ permissions:
   contents: write
 
 jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+
   rebuild:
+    needs: test
     runs-on: macos-latest
 
     steps:
@@ -52,16 +58,6 @@ jobs:
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "asset=$asset" >> "$GITHUB_OUTPUT"
           echo "Rebuilding $asset in release $tag from ${GITHUB_SHA:0:7}"
-
-      # Failing tests stop the job, so a broken build never replaces a good dmg.
-      - name: Test
-        run: |
-          xcodebuild -project "System Spinner.xcodeproj" \
-                     -scheme "System Spinner" \
-                     -configuration Debug \
-                     -derivedDataPath build-tests \
-                     CODE_SIGNING_ALLOWED=NO \
-                     test
 
       - name: Build and export the app
         run: |

@@ -1,0 +1,36 @@
+name: Test
+
+# Runs for every push, on any branch. The release workflow calls this same file,
+# so what guards a release is the suite that runs day to day.
+on:
+  push:
+  workflow_call:
+  workflow_dispatch:
+
+# A newer push to the same branch makes the previous run pointless. The group
+# carries the calling workflow, so a run started by Release is not cancelled by
+# the plain Test run of the same commit.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build environment
+        run: |
+          xcodebuild -version
+          xcodebuild -showsdks | grep macosx || true
+
+      - name: Test
+        run: |
+          xcodebuild -project "System Spinner.xcodeproj" \
+                     -scheme "System Spinner" \
+                     -configuration Debug \
+                     -derivedDataPath build-tests \
+                     CODE_SIGNING_ALLOWED=NO \
+                     test

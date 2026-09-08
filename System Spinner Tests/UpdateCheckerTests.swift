@@ -6,11 +6,12 @@ import Testing
 
 @Suite("Version numbers")
 struct UpdateCheckerTests {
-    @Test("Digits are collected into a comparable number", arguments: [
-        ("4.7.0", 470),
-        ("5.0.0", 500),
-        ("v4.7.0", 470),
-        ("Version 4.7.0", 470),
+    @Test("Components are weighted by their position", arguments: [
+        ("4.7.0", 4_007_000),
+        ("5.0.0", 5_000_000),
+        ("5.6", 5_006_000),
+        ("v4.7.0", 4_007_000),
+        ("Version 4.7.0", 4_007_000),
     ])
     func parsing(tag: String, expected: Int) {
         #expect(UpdateChecker.versionNumber(tag) == expected)
@@ -28,10 +29,21 @@ struct UpdateCheckerTests {
         #expect(UpdateChecker.versionNumber("4.7.0") == UpdateChecker.versionNumber("4.7.0"))
     }
 
-    @Test("Known limitation: digits alone cannot tell these apart")
-    func knownCollision() {
-        // Comparing by concatenated digits treats these as equal. It holds for
-        // the numbering in use, but the test records the boundary.
-        #expect(UpdateChecker.versionNumber("4.10.0") == UpdateChecker.versionNumber("41.0.0"))
+    @Test("A two-component version outranks the three-component one it follows")
+    func twoComponentNumbering() {
+        #expect(UpdateChecker.versionNumber("5.6") > UpdateChecker.versionNumber("5.5.3"))
+        #expect(UpdateChecker.versionNumber("5.6.1") > UpdateChecker.versionNumber("5.6"))
+        #expect(UpdateChecker.versionNumber("6.0") > UpdateChecker.versionNumber("5.6"))
+    }
+
+    @Test("A component past nine keeps its place")
+    func doubleDigitComponents() {
+        #expect(UpdateChecker.versionNumber("4.10.0") > UpdateChecker.versionNumber("4.7.0"))
+        #expect(UpdateChecker.versionNumber("41.0.0") > UpdateChecker.versionNumber("4.10.0"))
+    }
+
+    @Test("Anything past the third component is ignored")
+    func extraComponents() {
+        #expect(UpdateChecker.versionNumber("5.6.1.4") == UpdateChecker.versionNumber("5.6.1"))
     }
 }

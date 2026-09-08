@@ -90,6 +90,12 @@ final class UpdateChecker {
     }
 
     nonisolated static func versionNumber(_ value: String) -> Int {
-        Int(value.filter("0123456789".contains)) ?? 0
+        let scale = [1_000_000, 1_000, 1]
+        let components = value.split(whereSeparator: { !$0.isNumber }).prefix(scale.count)
+        guard !components.isEmpty else { return 0 }
+
+        return zip(components, scale).reduce(0) { total, pair in
+            total + (Int(pair.0) ?? 0) * pair.1
+        }
     }
 }

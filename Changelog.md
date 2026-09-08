@@ -1,6 +1,12 @@
 # Changelog
 
 
+## 5.5.4
+
+- Use ALT key for fine controll in OSD
+- Check version ready for 2 digit versions
+- Update code classes
+
 ## 5.5.3
 
 - Fix CGKeyCode
