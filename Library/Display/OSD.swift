@@ -233,6 +233,10 @@ struct OSDIndicatorView: View {
         colorScheme == .dark ? .white : .black
     }
 
+    private var accentTint: Color {
+        Preferences.shared.usesSystemChartColor ? Color(nsColor: AccentPalette.normal) : foregroundTint
+    }
+
     var body: some View {
         let content = HStack(spacing: 16) {
             icon
@@ -254,7 +258,7 @@ struct OSDIndicatorView: View {
         let image = Image(systemName: value.iconName)
             .font(.system(size: 24, weight: .medium))
             .frame(width: 28)
-            .foregroundStyle(foregroundTint.opacity(0.8))
+            .foregroundStyle(accentTint.opacity(0.8))
 
         if Preferences.shared.usesPopUpAnimation {
             image.contentTransition(.symbolEffect(.replace))
@@ -269,7 +273,7 @@ struct OSDIndicatorView: View {
                 Capsule().fill(foregroundTint.opacity(0.25))
                 if value.value > 0 {
                     Capsule()
-                        .fill(foregroundTint)
+                        .fill(accentTint)
                         .frame(width: geometry.size.width * CGFloat(value.value / 100))
                 }
             }

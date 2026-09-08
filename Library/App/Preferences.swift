@@ -142,6 +142,9 @@ final class Preferences: @unchecked Sendable {
     @Stored("showExternalAddress", true)
     var showsExternalAddress: Bool
 
+    @Stored("systemChartColor", true)
+    var usesSystemChartColor: Bool
+
     @Stored("keyboardBacklightKeys", false)
     var usesKeyboardBacklightKeys: Bool
 

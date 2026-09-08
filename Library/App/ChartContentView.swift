@@ -43,6 +43,8 @@ struct ProcessRow: Identifiable {
 struct ChartContentView: View {
     var chartItems: ChartDataModel
 
+    private var accent: Color { Color(nsColor: AccentPalette.normal) }
+
     var body: some View {
         VStack(alignment: .leading) {
             Text(chartItems.title)
@@ -56,8 +58,8 @@ struct ChartContentView: View {
                 .foregroundStyle(
                     LinearGradient(
                         colors: [
-                            .blue.opacity(1),
-                            .blue.opacity(0.4)
+                            accent.opacity(1),
+                            accent.opacity(0.4)
                         ],
                         startPoint: .top,
                         endPoint: .bottom

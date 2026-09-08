@@ -109,6 +109,10 @@ class UsageViewController: NSViewController {
             level?.needsDisplay = true
         }
 
+        for button in [cpuChartPopupButton, memChartPopupButton] {
+            button?.contentTintColor = AccentPalette.iconTint
+        }
+
         popupChart.animates = Preferences.shared.usesPopUpAnimation
         view.window?.makeKey()
     }

@@ -5,6 +5,7 @@
 
 - Use ALT key for fine controll in OSD
 - Check version ready for 2 digit versions
+- You can use system accent color
 - Update code classes
 
 ## 5.5.3

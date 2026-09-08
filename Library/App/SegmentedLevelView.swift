@@ -3,6 +3,26 @@
 
 import Cocoa
 
+enum AccentPalette {
+    static var normal: NSColor {
+        Preferences.shared.usesSystemChartColor ? .controlAccentColor : .labelColor
+    }
+
+    static var critical: NSColor {
+        Preferences.shared.usesSystemChartColor ? .controlAccentColor : .systemRed
+    }
+
+    static var iconTint: NSColor? {
+        Preferences.shared.usesSystemChartColor ? .controlAccentColor : nil
+    }
+
+    static func symbol(_ name: String, describedBy description: String) -> NSImage? {
+        let image = NSImage(systemSymbolName: name, accessibilityDescription: description)
+        guard let tint = iconTint else { return image }
+        return image?.withSymbolConfiguration(NSImage.SymbolConfiguration(paletteColors: [tint]))
+    }
+}
+
 @MainActor
 final class SegmentedLevelView: NSView {
     var value: Double = 0 {
@@ -33,8 +53,8 @@ final class SegmentedLevelView: NSView {
         case normal, critical
         var color: NSColor {
             switch self {
-            case .normal: return .labelColor
-            case .critical: return .systemRed
+            case .normal: return AccentPalette.normal
+            case .critical: return AccentPalette.critical
             }
         }
     }
@@ -59,7 +79,16 @@ final class SegmentedLevelView: NSView {
             setContentHuggingPriority(.init(1), for: .horizontal)
             setContentCompressionResistancePriority(.init(1), for: .horizontal)
             setContentHuggingPriority(.defaultHigh, for: .vertical)
+
+            NotificationCenter.default.addObserver(self,
+                                                  selector: #selector(systemColorsDidChange),
+                                                  name: NSColor.systemColorsDidChangeNotification,
+                                                  object: nil)
         }
+    }
+
+    @objc private func systemColorsDidChange() {
+        needsDisplay = true
     }
 
     override var isFlipped: Bool { true }

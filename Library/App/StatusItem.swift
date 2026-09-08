@@ -208,6 +208,11 @@ final class AppMenuController: NSObject {
                           action: #selector(toggleExternalAddress),
                           state: preferences.showsExternalAddress))
 
+        menu.addItem(item(localizedString("System chart color"),
+                          symbol: "paintpalette",
+                          action: #selector(toggleSystemChartColor),
+                          state: preferences.usesSystemChartColor))
+
         let smoothScroll = item(localizedString("Smooth mouse scroll"),
                                 symbol: "computermouse",
                                 action: #selector(toggleSmoothScroll),
@@ -262,7 +267,7 @@ final class AppMenuController: NSObject {
                                    action: display.isBuiltIn() ? nil : #selector(refreshDisplays),
                                    keyEquivalent: "")
             entry.target = self
-            entry.image = NSImage(systemSymbolName: "display", accessibilityDescription: display.name)
+            entry.image = AccentPalette.symbol("display", describedBy: display.name)
             submenu.addItem(entry)
         }
 
@@ -282,7 +287,7 @@ final class AppMenuController: NSObject {
     private func item(_ title: String, symbol: String, action: Selector?, state: Bool = false) -> NSMenuItem {
         let item = NSMenuItem(title: title, action: action, keyEquivalent: "")
         item.target = self
-        item.image = NSImage(systemSymbolName: symbol, accessibilityDescription: title)
+        item.image = AccentPalette.symbol(symbol, describedBy: title)
         item.state = state ? .on : .off
         return item
     }
@@ -359,6 +364,12 @@ final class AppMenuController: NSObject {
     @objc private func toggleExternalAddress(sender: NSMenuItem) {
         preferences.showsExternalAddress.toggle()
         sender.state = preferences.showsExternalAddress ? .on : .off
+    }
+
+    @objc private func toggleSystemChartColor(sender: NSMenuItem) {
+        preferences.usesSystemChartColor.toggle()
+        sender.state = preferences.usesSystemChartColor ? .on : .off
+        rebuild()
     }
 
     @objc private func toggleSmoothScroll(sender: NSMenuItem) {
@@ -607,7 +618,16 @@ final class StatusItemController: NSObject {
         closePopover()
     }
 
+    @objc private func reloadMenu() {
+        menuController.rebuild()
+    }
+
     private func observeWorkspace() {
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(reloadMenu),
+                                               name: NSColor.systemColorsDidChangeNotification,
+                                               object: nil)
+
         let center = NSWorkspace.shared.notificationCenter
         center.addObserver(self, selector: #selector(resume), name: NSWorkspace.didWakeNotification, object: nil)
         center.addObserver(self, selector: #selector(resume), name: NSWorkspace.screensDidWakeNotification, object: nil)
