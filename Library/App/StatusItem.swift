@@ -354,6 +354,7 @@ final class AppMenuController: NSObject {
         preferences.usesSystemLanguage.toggle()
         rebuild()
         delegate?.appMenuDidRequestDisplayRefresh(self)
+        delegate?.appMenuDidChangeSpinnerAppearance(self)
     }
 
     @objc private func togglePopUpAnimation(sender: NSMenuItem) {
@@ -370,6 +371,7 @@ final class AppMenuController: NSObject {
         preferences.usesSystemChartColor.toggle()
         sender.state = preferences.usesSystemChartColor ? .on : .off
         rebuild()
+        delegate?.appMenuDidChangeSpinnerAppearance(self)
     }
 
     @objc private func toggleSmoothScroll(sender: NSMenuItem) {
